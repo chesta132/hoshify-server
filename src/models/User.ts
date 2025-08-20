@@ -47,6 +47,9 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
+UserSchema.set("toObject", { virtuals: true });
+UserSchema.set("toJSON", { virtuals: true });
+
 UserSchema.virtual("todos", {
   ref: "Todo",
   localField: "_id",

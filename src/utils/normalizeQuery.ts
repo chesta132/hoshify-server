@@ -1,4 +1,4 @@
-import mongoose, { Document, isValidObjectId } from "mongoose";
+import mongoose, { Document } from "mongoose";
 import { omit } from "./manipulate";
 import { SanitizedData } from "../types/types";
 import { IUser } from "../models/User";
@@ -12,7 +12,7 @@ export const traverseAndSanitize = (data: any, mongo = true): any => {
     return data;
   }
 
-  if (isValidObjectId(data)) {
+  if (data instanceof mongoose.Types.ObjectId) {
     return data.toString();
   }
 
