@@ -1,24 +1,23 @@
 import { Request, Response } from "express";
 import handleError from "../../utils/handleError";
 import { userProject } from "../../utils/normalizeQuery";
-import { ErrorRes, Res } from "../../class/Response";
-import { resIsVerified, resMissingFields, resNotFound } from "../../utils/response";
 import { decrypt } from "../../utils/crypto";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
 
-export const verifyEmail = async (req: Request, res: Response) => {
+export const verifyEmail = async (req: Request, { res }: Response) => {
   const resInvalidToken = () =>
-    ErrorRes({
-      message: "Invalid or expired Verification otp. Please create a new verification email request.",
-      code: "CLIENT_FIELD",
-      field: "otp",
-    });
+    res
+      .tempClientField({
+        message: "Invalid or expired Verification otp. Please create a new verification email request.",
+        field: "otp",
+      })
+      .error();
 
   try {
     const { otp } = req.body;
     if (!otp) {
-      resMissingFields(res, "OTP");
+      res.tempMissingFields("OTP").respond();
       return;
     }
 
@@ -30,7 +29,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
       return;
     }
     if (user.verified) {
-      resIsVerified(res);
+      res.tempIsVerified().respond();
       return;
     }
 
@@ -42,11 +41,11 @@ export const verifyEmail = async (req: Request, res: Response) => {
 
     const updatedUser = await User.updateByIdAndSanitize(user.id, { verified: true }, { project: userProject() });
     if (!updatedUser) {
-      resNotFound(res, "user");
+      res.tempNotFound("user");
       return;
     }
     await Verify.deleteMany({ value: otp, type: "VERIFY_EMAIL", userId: user.id });
-    Res(res, updatedUser).response();
+    res.body({ success: updatedUser }).ok();
     return;
   } catch (err) {
     handleError(err, res);

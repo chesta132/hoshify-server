@@ -1,25 +1,23 @@
 import { Response, Request, NextFunction } from "express";
 import handleError from "../utils/handleError";
 import { verifyAccessToken, verifyRefreshToken } from "../utils/token";
-import { resInvalidToken, resNotFound, resNotVerified } from "../utils/response";
 import { Revoked } from "../models/Revoked";
 import { User } from "../models/User";
-import { Res } from "../class/Response";
 
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
     // refresh token validation
     const refreshToken = req.cookies?.refreshToken;
     const refreshPayload = verifyRefreshToken(refreshToken);
 
     if (!refreshPayload) {
-      resInvalidToken(res);
+      res.tempInvalidToken().respond();
       return;
     }
 
     const blacklistedToken = await Revoked.findOne({ value: refreshToken });
     if (blacklistedToken) {
-      resInvalidToken(res);
+      res.tempInvalidToken().respond();
       return;
     }
 
@@ -31,12 +29,12 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       // Check if refresh token exists in database
       const user = await User.findById(refreshPayload.userId);
       if (!user) {
-        resInvalidToken(res);
+        res.tempInvalidToken().respond();
         return;
       }
 
       // Set new access token in cookie
-      Res(res, undefined, { cookie: { user, template: "ACCESS" } }).sendCookie();
+      res.sendCookie({ template: "ACCESS", user });
 
       req.user = user;
       return next();
@@ -44,13 +42,13 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
     const user = await User.findById(payload.userId);
     if (!user) {
-      resNotFound(res, "user", "please back to dashboard or sign in page");
+      res.tempNotFound("user", "please back to dashboard or sign in page").respond();
       return;
     }
 
     // refresh token if payload is expires
     if (new Date(refreshPayload.expires) <= new Date()) {
-      Res(res, user, { cookie: { template: "REFRESH_ACCESS", rememberMe: true } }).sendCookie();
+      res.sendCookie({ template: "REFRESH_ACCESS", rememberMe: true, user });
     }
 
     req.user = user;
@@ -60,7 +58,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const requireVerified = (req: Request, res: Response, next: NextFunction) => {
+export const requireVerified = (req: Request, { res }: Response, next: NextFunction) => {
   if (req.user?.verified) next();
-  else resNotVerified(res);
+  else res.tempNotVerified().respond();
 };

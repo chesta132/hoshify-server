@@ -33,11 +33,8 @@ export class Database<T extends Document> {
         if (prop in target) {
           return Reflect.get(target, prop, receiver);
         }
-        const value = Reflect.get(model, prop, receiver);
-        if (typeof value === "function") {
-          return value.bind(model);
-        }
-        return value;
+        const value = (model as any)[prop as any];
+        return typeof value === "function" ? value.bind(model) : value;
       },
     });
   }

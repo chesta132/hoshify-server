@@ -1,7 +1,6 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
 import { CLIENT_URL } from "../../app";
-import { resInvalidOTP, resNotFound } from "../../utils/response";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
 import { Note } from "../../models/Note";
@@ -12,7 +11,7 @@ import { WidgetConfig } from "../../models/WidgetConfig";
 import { Transaction } from "../../models/Transaction";
 import { clearCookies } from "../auth/signout";
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, { res }: Response) => {
   try {
     const userId = req.user!.id;
     const { token } = req.body;
@@ -20,13 +19,13 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     const user = await User.findByIdAndSanitize(userId, { populate: userIncludes });
     if (!user) {
-      resNotFound(res, "user");
+      res.tempNotFound("user").respond();
       return;
     }
     if (token) {
       const otp = await Verify.findOne({ value: token, type: "DELETE_ACCOUNT_OTP", userId: user.id });
       if (!otp && user.verified) {
-        resInvalidOTP(res);
+        res.tempInvalidOTP().respond();
         return;
       }
     }

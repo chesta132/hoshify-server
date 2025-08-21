@@ -9,8 +9,9 @@ import cookieParser from "cookie-parser";
 import router from "./routes";
 import { connectDB } from "./services/connectDB";
 import passport from "passport";
-import "./services/passport"
-import "./utils/extends"
+import "./services/passport";
+import "./utils/extends";
+import { resMiddleware } from "./middlewares/res";
 
 export const CLIENT_URL = process.env.CLIENT_URL_DEV;
 export const NODE_ENV = process.env.NODE_ENV;
@@ -45,6 +46,7 @@ app.use(
   })
 );
 app.use(passport.initialize());
+app.use(resMiddleware);
 
 app.use("/api", router);
 
@@ -53,5 +55,5 @@ const HOST = process.env.HOST || "0.0.0.0";
 
 app.listen(PORT, HOST, () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`Accessible on network via http:${HOST}:${PORT} (or your actual network IP)`);
+  console.log(`Accessible on network via http://${HOST}:${PORT} (or your actual network IP)`);
 });

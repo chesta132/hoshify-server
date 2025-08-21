@@ -48,6 +48,7 @@ export const traverseCreateId = (data: any, mongo = true): any => {
   }
 
   if (data?._id) return { id: data._id, ...data };
+  return data;
 };
 
 export const normalizeQuery = <T extends Document | Document[]>(queryData: T) => {

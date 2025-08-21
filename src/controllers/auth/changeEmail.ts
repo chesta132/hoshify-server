@@ -1,29 +1,29 @@
 import { Request, Response } from "express";
 import handleError from "../../utils/handleError";
 import { userProject } from "../../utils/normalizeQuery";
-import { resInvalidOTP, resMissingFields, resNotBinded, resNotFound } from "../../utils/response";
-import { ErrorRes, Res } from "../../class/Response";
 import { sendCredentialChanges } from "../../utils/email";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
 
-export const changeEmail = async (req: Request, res: Response) => {
+export const changeEmail = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { newEmail, otp } = req.body;
     if (!newEmail || !otp) {
-      return resMissingFields(res, "new email, otp");
+      res.tempMissingFields("new email, otp").error();
+      return;
     }
 
     if (!user.email) {
-      return resNotBinded(res);
+      res.tempNotBound().error();
+      return;
     }
     if (user.email === newEmail) {
-      ErrorRes({ message: "New email and old email can not same", code: "CLIENT_FIELD", field: "newEmail" }).response(res);
+      res.tempClientField({ message: "New email and old email can not same", field: "newEmail" }).error();
       return;
     }
     if (await User.find({ email: newEmail })) {
-      ErrorRes({ message: "Email is already in use", code: "CLIENT_FIELD", field: "newEmail" }).response(res);
+      res.tempClientField({ message: "Email is already in use", field: "newEmail" }).error();
       return;
     }
 
@@ -38,7 +38,7 @@ export const changeEmail = async (req: Request, res: Response) => {
         { project: userProject() }
       );
       if (!updatedUser) {
-        resNotFound(res, "user");
+        res.tempNotFound("user").error();
         return;
       }
       await Verify.deleteOne({ value: otp, type: "CHANGE_EMAIL_OTP", userId: user.id });
@@ -48,20 +48,20 @@ export const changeEmail = async (req: Request, res: Response) => {
     if (!user.verified) {
       const updatedUser = await updateEmail();
       await sendCredentialChanges(user.email, user.fullName, "email");
-      Res(res, updatedUser, { notif: "Local email successfully updated" }).response();
+      res.body({ success: updatedUser }).notif("Local email successfully updated").ok();
       return;
     }
 
     const VerifyOtp = await Verify.findOne({ value: otp, type: "CHANGE_EMAIL_OTP", userId: user.id });
     if (!VerifyOtp) {
-      resInvalidOTP(res);
+      res.tempInvalidOTP().error();
       return;
     }
 
     const updatedUser = await updateEmail();
     await sendCredentialChanges(user.email, user.fullName, "email");
 
-    Res(res, updatedUser, { notif: "Local email successfully updated" }).response();
+    res.body({ success: updatedUser }).notif("Local email successfully updated").ok();
   } catch (err) {
     handleError(err, res);
   }

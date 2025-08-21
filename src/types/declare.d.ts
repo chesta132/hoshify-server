@@ -1,9 +1,14 @@
+import { Respond } from "../class/Response";
 import { IUser } from "../models/User";
 import { SanitizedData } from "./types";
+import jwt from "jsonwebtoken";
 
 declare global {
   namespace Express {
     interface User extends IUser {}
+    interface Response {
+      res: Respond;
+    }
   }
   interface Console {
     /**
@@ -23,7 +28,10 @@ declare module "mongoose" {
   }
 }
 
-declare module "node:console" {
-  global {
+declare module "jsonwebtoken" {
+  interface JwtPayload {
+    userId: string;
+    expires: Date;
+    verified: boolean;
   }
 }

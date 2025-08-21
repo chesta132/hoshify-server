@@ -10,7 +10,7 @@ export const clearCookies = (res: Response) => {
   res.clearCookie("refreshToken");
 };
 
-export const signout = async (req: Request, res: Response) => {
+export const signout = async (req: Request, { res }: Response) => {
   const redirect = () => res.redirect(`${CLIENT_URL}/signin`);
   try {
     const user = req.user!;

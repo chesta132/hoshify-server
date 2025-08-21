@@ -2,20 +2,18 @@ import { Request, Response } from "express";
 import handleError from "../../utils/handleError";
 import { userProject } from "../../utils/normalizeQuery";
 import bcrypt from "bcrypt";
-import { resIsBinded, resMissingFields } from "../../utils/response";
 import { User } from "../../models/User";
-import { Res } from "../../class/Response";
 
-export const bindLocal = async (req: Request, res: Response) => {
+export const bindLocal = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { email, password } = req.body;
     if (!email || !password) {
-      resMissingFields(res, "Email, password");
+      res.tempMissingFields("email, password").error();
       return;
     }
     if (user.email) {
-      resIsBinded(res);
+      res.tempIsBound().error();
       return;
     }
 
@@ -28,8 +26,7 @@ export const bindLocal = async (req: Request, res: Response) => {
       },
       { project: userProject() }
     );
-    const respond = Res(res, updatedUser, { notif: "Successfully link to local account" });
-    respond.response();
+    res.notif("Successfully link to local account").body({ success: updatedUser }).ok();
   } catch (err) {
     handleError(err, res);
   }

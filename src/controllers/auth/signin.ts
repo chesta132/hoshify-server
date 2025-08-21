@@ -1,11 +1,11 @@
 import { Response, Request, NextFunction } from "express";
 import passport from "passport";
-import { ErrorRes, ErrorResponseType, Res } from "../../class/Response";
+import { ErrorResponseType } from "../../class/Response";
 import handleError from "../../utils/handleError";
 import { normalizeUserQuery } from "../../utils/normalizeQuery";
 import { IUser } from "../../models/User";
 
-export const signin = async (req: Request, res: Response, next: NextFunction) => {
+export const signin = async (req: Request, { res }: Response, next: NextFunction) => {
   passport.authenticate(
     "local",
     { failureRedirect: "/signin", failureFlash: true, session: false },
@@ -15,7 +15,7 @@ export const signin = async (req: Request, res: Response, next: NextFunction) =>
       }
       if (!user && info) {
         const { code, message, field, title } = info;
-        ErrorRes({ code, message, field, title }).response(res);
+        res.body({ error: { code, message, field, title } }).error();
         return;
       }
 
@@ -26,9 +26,7 @@ export const signin = async (req: Request, res: Response, next: NextFunction) =>
         }
         const rememberMe: boolean = req.body.rememberMe;
 
-        Res(res, normalized, { cookie: { template: "REFRESH_ACCESS", rememberMe } })
-          .sendCookie()
-          .response();
+        res.body({ success: normalized }).sendCookie({ template: "REFRESH_ACCESS", rememberMe }).ok();
       });
     }
   )(req, res, next);

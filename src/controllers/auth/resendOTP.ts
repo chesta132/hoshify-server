@@ -1,23 +1,21 @@
 import { Request, Response } from "express";
 import handleError from "../../utils/handleError";
 import { generateOTP, sendOTPEmail } from "../../utils/email";
-import { resTooMuchRequest } from "../../utils/response";
 import { oneMin } from "../../utils/token";
-import { ErrorRes, Res } from "../../class/Response";
 import { IVerify, Verify } from "../../models/Verify";
 import { User } from "../../models/User";
 import { userProject } from "../../utils/normalizeQuery";
 
 type TypeOTP = "CHANGE_EMAIL" | "CHANGE_PASSWORD" | "DELETE_ACCOUNT";
 
-export const resendOTP = async (req: Request, res: Response) => {
+export const resendOTP = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { type }: { type?: TypeOTP } = req.body;
     const otp = generateOTP();
 
     if (typeof user.timeToAllowSendEmail === "object" && (user.timeToAllowSendEmail as Date) > new Date()) {
-      resTooMuchRequest(res, "please request to send mail again later");
+      res.tempLimitSendEmail().respond();
       return;
     }
 
@@ -29,7 +27,7 @@ export const resendOTP = async (req: Request, res: Response) => {
         { timeToAllowSendEmail: new Date(Date.now() + 1000 * 60 * 2) },
         { project: userProject() }
       );
-      Res(res, updatedUser).created();
+      res.body({ success: updatedUser }).created();
     };
 
     switch (type) {
@@ -43,7 +41,7 @@ export const resendOTP = async (req: Request, res: Response) => {
         await createAndSend("DELETE_ACCOUNT_OTP");
     }
 
-    ErrorRes({ message: "Invalid type please select a valid type", code: "CLIENT_FIELD", field: "otp" }).response(res);
+    res.tempClientField({ message: "Invalid type please select a valid type", field: "otp" }).error();
   } catch (err) {
     handleError(err, res);
   }

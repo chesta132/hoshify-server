@@ -1,5 +1,6 @@
 import { Document, ObjectId } from "mongoose";
 import { codeErrorAuth, codeErrorClient, codeErrorField, codeErrorServer, CodeErrorValues } from "../class/Response";
+import { Response } from "express";
 
 export type Fields = "password" | "newPassword" | "username" | "email" | "newEmail" | "otp" | "newFullName";
 

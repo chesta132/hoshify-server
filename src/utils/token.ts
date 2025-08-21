@@ -27,31 +27,25 @@ export const resRefreshTokenSessionOnly: CookieOptions = {
   sameSite: "strict",
 };
 
-export interface JWTPayload {
-  userId: string;
-  expires: Date;
-  verified: boolean;
-}
-
-export const createAccessToken = (payload: JWTPayload, expiresIn?: StringValue | number | null) => {
+export const createAccessToken = (payload: jwt.JwtPayload, expiresIn?: StringValue | number | null) => {
   return jwt.sign(payload, process.env.JWT_ACCESS_SECRET!, expiresIn !== null ? { expiresIn: "5m" } : {});
 };
 
-export const createRefreshToken = (payload: JWTPayload, expiresIn?: StringValue | number | null) => {
+export const createRefreshToken = (payload: jwt.JwtPayload, expiresIn?: StringValue | number | null) => {
   return jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, expiresIn !== null ? { expiresIn: "2w" } : {});
 };
 
-export const verifyAccessToken = (token: string): JWTPayload | null => {
+export const verifyAccessToken = (token: string) => {
   try {
-    return jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as JWTPayload;
+    return jwt.verify(token, process.env.JWT_ACCESS_SECRET!) as jwt.JwtPayload;
   } catch (error) {
     return null;
   }
 };
 
-export const verifyRefreshToken = (token: string): JWTPayload | null => {
+export const verifyRefreshToken = (token: string) => {
   try {
-    return jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as JWTPayload;
+    return jwt.verify(token, process.env.JWT_REFRESH_SECRET!) as jwt.JwtPayload;
   } catch (error) {
     return null;
   }
