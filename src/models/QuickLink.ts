@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
-import { virtualId } from "../utils/manipulate";
-import { SchemaOptions } from "./User";
+import { virtualSchema } from "../utils/manipulate";
+import { schemaOptions } from "./User";
 
 export interface IQuickLink {
   _id: ObjectId;
@@ -18,10 +18,10 @@ const QuickLinkSchema = new Schema(
     position: { type: Number, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },
-  SchemaOptions
+  schemaOptions
 );
 
-virtualId(QuickLinkSchema);
+virtualSchema(QuickLinkSchema);
 
 const QuickLinkRaw = model<IQuickLink>("QuickLink", QuickLinkSchema);
 

@@ -3,12 +3,29 @@ import { omit } from "./manipulate";
 import { NormalizedData } from "../types/types";
 import { IUser } from "../models/User";
 
+const shouldProcessMongo = (data: any): boolean => {
+  return data?._id || Array.isArray(data);
+};
+
+const isPrimitive = (data: any): boolean => {
+  return data === null || typeof data !== "object" || data instanceof Date;
+};
+
+const objecting = (data: any) => {
+  if (data.lean) {
+    return data.lean();
+  } else if (data.toObject) {
+    return data.toObject();
+  }
+  return data;
+};
+
 export const traverseAndNormalize = (data: any, mongo = true): any => {
-  if (mongo && !data?._id && !Array.isArray(data)) {
+  if (mongo && !shouldProcessMongo(data)) {
     return data;
   }
 
-  if (!mongo && (data === null || typeof data !== "object" || data instanceof Date)) {
+  if (!mongo && isPrimitive(data)) {
     return data;
   }
 
@@ -17,13 +34,13 @@ export const traverseAndNormalize = (data: any, mongo = true): any => {
   }
 
   if (Array.isArray(data)) {
-    return data.map((item) => traverseAndNormalize(item));
+    return data.map((item) => traverseAndNormalize(item, mongo));
   }
 
   const normalizedObject: { [key: string]: any } = {};
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
-      normalizedObject[key] = traverseAndNormalize(data[key]);
+      normalizedObject[key] = traverseAndNormalize(data[key], mongo);
     }
   }
 
@@ -31,54 +48,52 @@ export const traverseAndNormalize = (data: any, mongo = true): any => {
 };
 
 export const traverseHandleIdAndV = (data: any, mongo = true): any => {
-  if (mongo && !data?._id && !Array.isArray(data)) {
+  if (mongo && !shouldProcessMongo(data)) {
     return data;
   }
 
-  if (!mongo && (data === null || typeof data !== "object" || data instanceof Date)) {
+  if (!mongo && isPrimitive(data)) {
     return data;
   }
 
   if (Array.isArray(data)) {
-    return data.map((item) => traverseHandleIdAndV(item));
+    return data.map((item) => traverseHandleIdAndV(item, mongo));
   }
 
-  for (const key in data) {
-    data[key] = traverseHandleIdAndV(data[key]);
+  const processedData = { ...data };
+  for (const key in processedData) {
+    if (processedData.hasOwnProperty(key)) {
+      processedData[key] = traverseHandleIdAndV(processedData[key], mongo);
+    }
   }
-  data = omit(data, ["__v", "_id"]);
 
-  if (data?._id) return { id: data._id, ...data };
-  return data;
+  const cleanedData = omit(processedData, ["__v", "_id"]);
+
+  if (processedData._id) {
+    return { id: processedData._id, ...cleanedData };
+  }
+
+  return cleanedData;
 };
 
 export const normalizeQuery = <T extends Record<string, any> | Record<string, any>[]>(queryData: T) => {
   if (Array.isArray(queryData)) {
-    const normalizedData = queryData.map((queryDT) => {
-      let data = queryDT;
-      if (queryDT.lean) {
-        data = queryDT.lean();
-      } else if (queryDT.toObject) {
-        data = queryDT.toObject();
-      }
+    const normalizedData = queryData.map((data) => {
+      objecting(data);
       return traverseHandleIdAndV(traverseAndNormalize(data));
     });
     return normalizedData as NormalizedData<T>[];
   }
 
   let data = queryData;
-  if (queryData.lean) {
-    data = queryData.lean();
-  } else if (queryData.toObject) {
-    data = queryData.toObject();
-  }
+  objecting(data);
   const normalizedData = traverseHandleIdAndV(traverseAndNormalize(data));
   return normalizedData as NormalizedData<T>;
 };
 
 export const normalizeUserQuery = <T extends Partial<IUser> | NormalizedData<IUser>>(queryData: T, options?: { isGuest?: boolean }) => {
   let data = omit(queryData, ["password", "googleId"]);
-  if (queryData._id instanceof mongoose.Types.ObjectId) {
+  if ((queryData as Partial<IUser>)._id instanceof mongoose.Types.ObjectId) {
     data = normalizeQuery(data as Record<string, any>) as Omit<T, "password" | "googleId">;
   }
   if (options?.isGuest) {
@@ -87,7 +102,7 @@ export const normalizeUserQuery = <T extends Partial<IUser> | NormalizedData<IUs
     delete data.verified;
     delete data.createdAt;
   }
-  return data as unknown as NormalizedData<T>;
+  return data as unknown as NormalizedData<Omit<T, "password" | "googleId">>;
 };
 
 export const userProject = (isGuest?: boolean) => {

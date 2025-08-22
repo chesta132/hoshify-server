@@ -39,8 +39,10 @@ export const omit = <T extends Record<string, any>, Z extends (keyof T)[]>(data:
  *
  * @param schema - Schema to initiate.
  */
-export const virtualId = (schema: Schema) => {
+export const virtualSchema = (schema: Schema) => {
   schema.virtual("id").get(function () {
     return (this._id as string).toString();
   });
+  schema.set("toObject", { virtuals: true });
+  schema.set("toJSON", { virtuals: true });
 };

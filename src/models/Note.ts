@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
-import { virtualId } from "../utils/manipulate";
-import { SchemaOptions } from "./User";
+import { virtualSchema } from "../utils/manipulate";
+import { schemaOptions } from "./User";
 
 export interface INote {
   _id: ObjectId;
@@ -20,10 +20,10 @@ const NoteSchema = new Schema(
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
   },
-  SchemaOptions
+  schemaOptions
 );
 
-virtualId(NoteSchema);
+virtualSchema(NoteSchema);
 
 const NoteRaw = model<INote>("Note", NoteSchema);
 

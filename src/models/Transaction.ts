@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
-import { virtualId } from "../utils/manipulate";
-import { SchemaOptions } from "./User";
+import { virtualSchema } from "../utils/manipulate";
+import { schemaOptions } from "./User";
 
 const TransactionType = ["INCOME", "OUTCOME"] as const;
 
@@ -28,10 +28,10 @@ const TransactionSchema = new Schema(
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
   },
-  SchemaOptions
+  schemaOptions
 );
 
-virtualId(TransactionSchema);
+virtualSchema(TransactionSchema);
 
 const TransactionRaw = model<ITransaction>("Transaction", TransactionSchema);
 

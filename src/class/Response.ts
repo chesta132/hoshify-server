@@ -93,7 +93,7 @@ export type ResType<SuccessReady extends boolean = true, ErrorReady extends bool
   ? () => () => Respond<unknown, false, false>
   : never;
 
-type CookieUserBase = { _id: string | unknown; verified: boolean };
+type CookieUserBase = { id: string | unknown; verified: boolean };
 type CookieUser<T> = T extends CookieUserBase ? { user?: CookieUserBase } : { user: CookieUserBase };
 
 type CookieType<T = undefined> = EitherWithKeys<
@@ -252,7 +252,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
       if (!this._body) return this;
       user = this._body as unknown as CookieUserBase;
     }
-    const { _id: userId, verified } = user as { _id: string; verified: boolean };
+    let { id: userId, verified } = user as { id: string; verified: boolean };
     this._accessToken = createAccessToken({ userId, verified, expires: new Date(Date.now() + fiveMin) });
     this._refreshToken = createRefreshToken(
       { userId, verified, expires: new Date(Date.now() + oneWeeks * 1.5) },

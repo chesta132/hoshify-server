@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
-import { virtualId } from "../utils/manipulate";
-import { SchemaOptions } from "./User";
+import { virtualSchema } from "../utils/manipulate";
+import { schemaOptions } from "./User";
 
 const TodoStatus = ["PENDING", "ACTIVE", "COMPLETED", "CANCELED"] as const;
 
@@ -26,10 +26,10 @@ const TodoSchema = new Schema(
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
   },
-  SchemaOptions
+  schemaOptions
 );
 
-virtualId(TodoSchema);
+virtualSchema(TodoSchema);
 
 const TodoRaw = model<ITodo>("Todo", TodoSchema);
 

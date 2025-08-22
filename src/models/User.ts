@@ -1,6 +1,6 @@
-import { Schema, SchemaOptions as MongooseSchemaOptions, model, ObjectId } from "mongoose";
+import { Schema, SchemaOptions, model, ObjectId } from "mongoose";
 import { Database } from "../class/Database";
-import { virtualId } from "../utils/manipulate";
+import { virtualSchema } from "../utils/manipulate";
 import { ITodo } from "./Todo";
 import { INote } from "./Note";
 import { ITransaction } from "./Transaction";
@@ -28,7 +28,7 @@ export interface IUser {
   widgetConfigs?: IWidgetConfig;
 }
 
-export const SchemaOptions: MongooseSchemaOptions = {
+export const schemaOptions: SchemaOptions = {
   timestamps: true,
   toJSON: {
     virtuals: true,
@@ -68,17 +68,24 @@ const UserSchema = new Schema(
     timeToAllowSendEmail: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
   },
-  SchemaOptions
+  schemaOptions
 );
 
-UserSchema.set("toObject", { virtuals: true });
-UserSchema.set("toJSON", { virtuals: true });
+virtualSchema(UserSchema);
 
-virtualId(UserSchema);
-
-const virtualRef = (...ref: string[]) => {
+const virtualRef = (...ref: (string | [string, string])[]) => {
   for (const r of ref) {
-    UserSchema.virtual(r.toLowerCase() + "s", {
+    if (Array.isArray(r)) {
+      const [name, ref] = r;
+      UserSchema.virtual(name, {
+        ref,
+        localField: "_id",
+        foreignField: "userId",
+      });
+      continue;
+    }
+    const name = r[0].toLowerCase() + r.slice(1) + "s";
+    UserSchema.virtual(name, {
       ref: r,
       localField: "_id",
       foreignField: "userId",
@@ -86,7 +93,7 @@ const virtualRef = (...ref: string[]) => {
   }
 };
 
-virtualRef("Todo", "Note", "Transaction", "Schedule", "QuickLink", "WidgetConfig");
+virtualRef("Todo", "Note", "Transaction", "Schedule", ["links", "QuickLink"], ["widgets", "WidgetConfig"]);
 
 const UserRaw = model<IUser>("User", UserSchema);
 

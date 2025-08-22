@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
-import { virtualId } from "../utils/manipulate";
-import { SchemaOptions } from "./User";
+import { virtualSchema } from "../utils/manipulate";
+import { schemaOptions } from "./User";
 
 const VerifyType = ["CHANGE_EMAIL_OTP", "RESET_PASSWORD_OTP", "DELETE_ACCOUNT_OTP", "VERIFY_EMAIL"] as const;
 
@@ -20,10 +20,10 @@ const VerifySchema = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     deleteAt: { type: Date, required: true, index: { expireAfterSeconds: 0 } },
   },
-  SchemaOptions
+  schemaOptions
 );
 
-virtualId(VerifySchema);
+virtualSchema(VerifySchema);
 
 const VerifyRaw = model<IVerify>("Verify", VerifySchema);
 

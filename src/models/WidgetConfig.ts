@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
-import { virtualId } from "../utils/manipulate";
-import { SchemaOptions } from "./User";
+import { virtualSchema } from "../utils/manipulate";
+import { schemaOptions } from "./User";
 const WidgetTypes = ["WEATHER", "CHART", "MONEY_OVERVIEW", "SCHEDULE", "QUICK_LINKS", "TODO_3_DAY"] as const;
 
 export interface IWidgetConfig {
@@ -21,10 +21,10 @@ const WidgetConfigSchema = new Schema(
     settings: { type: Schema.Types.Mixed, default: {} },
     color: { type: String, default: "9B5DE5" },
   },
-  SchemaOptions
+  schemaOptions
 );
 
-virtualId(WidgetConfigSchema);
+virtualSchema(WidgetConfigSchema);
 
 const WidgetConfigRaw = model<IWidgetConfig>("WidgetConfig", WidgetConfigSchema);
 

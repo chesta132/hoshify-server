@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
-import { virtualId } from "../utils/manipulate";
-import { SchemaOptions } from "./User";
+import { virtualSchema } from "../utils/manipulate";
+import { schemaOptions } from "./User";
 
 const Revoke = ["TOKEN", "OTP"] as const;
 
@@ -20,10 +20,10 @@ const RevokedSchema = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     deleteAt: { type: Date, required: true, index: { expireAfterSeconds: 0 } },
   },
-  SchemaOptions
+  schemaOptions
 );
 
-virtualId(RevokedSchema);
+virtualSchema(RevokedSchema);
 
 const RevokedRaw = model<IRevoked>("Revoked", RevokedSchema);
 

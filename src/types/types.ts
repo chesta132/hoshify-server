@@ -22,7 +22,7 @@ export type NormalizedData<T> = Omit<
     [K in keyof T]: T[K] extends ObjectId ? string : T[K];
   },
   keyof Document
-> & { id: string; _id: string };
+> & { id: string };
 
 export type EitherWithKeys<Keys extends object, Others extends object> =
   | (Keys & { [K in keyof Others]?: undefined })
