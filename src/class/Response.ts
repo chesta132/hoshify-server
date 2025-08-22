@@ -276,23 +276,21 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   sendCookie(cookie: RespondOptions<SuccessType>["cookie"]) {
     const { name, options, rememberMe, template, val } = cookie;
     if (rememberMe !== undefined) this._rememberMe = rememberMe;
-    const accT = this._accessToken;
-    const refT = this._refreshToken;
-    if (!accT || !refT) {
+    if (!this._accessToken || !this._refreshToken) {
       if (!this._body && !cookie.user) return this;
       else if (template) this.generateTokens(cookie);
     }
 
     switch (template) {
       case "ACCESS":
-        this._res.cookie("accessToken", accT, resAccessToken);
+        this._res.cookie("accessToken", this._accessToken, resAccessToken);
         break;
       case "REFRESH":
-        this._res.cookie("refreshToken", refT, this._rememberMe ? resRefreshToken : resRefreshTokenSessionOnly);
+        this._res.cookie("refreshToken", this._refreshToken, this._rememberMe ? resRefreshToken : resRefreshTokenSessionOnly);
         break;
       case "REFRESH_ACCESS":
-        this._res.cookie("accessToken", accT, resAccessToken);
-        this._res.cookie("refreshToken", refT, this._rememberMe ? resRefreshToken : resRefreshTokenSessionOnly);
+        this._res.cookie("accessToken", this._accessToken, resAccessToken);
+        this._res.cookie("refreshToken", this._refreshToken, this._rememberMe ? resRefreshToken : resRefreshTokenSessionOnly);
         break;
       default:
         this._res.cookie(name, val, options);
