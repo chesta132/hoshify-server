@@ -1,6 +1,6 @@
 import { Response } from "express";
 
-export default function handleError(error: unknown, { res }: Response) {
+export default function handleError(error: unknown, res: Response["res"]) {
   const err = error as Error;
   const createdError = new Error();
   const callerLine = createdError.stack?.split("\n")[2];

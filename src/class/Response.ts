@@ -87,8 +87,16 @@ export interface DataToResponse<T> {
   data: T;
 }
 
-type CookieUser = { _id: string | unknown; verified: boolean };
-type CookieType = EitherWithKeys<
+export type ResType<SuccessReady extends boolean = true, ErrorReady extends boolean = true> = SuccessReady extends true
+  ? () => Respond<unknown, false, false>
+  : ErrorReady extends true
+  ? () => () => Respond<unknown, false, false>
+  : never;
+
+type CookieUserBase = { _id: string | unknown; verified: boolean };
+type CookieUser<T> = T extends CookieUserBase ? { user?: CookieUserBase } : { user: CookieUserBase };
+
+type CookieType<T = undefined> = EitherWithKeys<
   {
     template: "REFRESH" | "ACCESS" | "REFRESH_ACCESS";
   },
@@ -97,10 +105,10 @@ type CookieType = EitherWithKeys<
     val: string;
     options: CookieOptions;
   }
-> & { user?: CookieUser; rememberMe?: boolean };
+> & { rememberMe?: boolean } & CookieUser<T>;
 
-interface RespondOptions {
-  cookie: CookieType;
+interface RespondOptions<T = undefined> {
+  cookie: CookieType<T>;
   paginateMeta: { limit: number; offset: number };
   notif: string;
 }
@@ -111,13 +119,14 @@ const defaultBody = <T>(): DataToResponse<T> => ({ data: {} as T, meta: { status
  * Wrapper for Express Response object with method chaining.
  * Provides utilities for standardized success/error responses and extra features.
  */
-export class Respond<SuccessType = unknown> {
+export class Respond<SuccessType = unknown, SuccessReady extends boolean = false, ErrorReady extends boolean = false> {
   private _jsonBody: DataToResponse<typeof this._body | typeof this._errorBody> = defaultBody();
   private _body?: SuccessType | SuccessType[];
   private _errorBody?: ErrorResponseType;
   private _accessToken?: string;
   private _refreshToken?: string;
   private _res: Response;
+  private _rememberMe?: boolean;
 
   /**
    * Initialize Respond with the original Response.
@@ -136,29 +145,19 @@ export class Respond<SuccessType = unknown> {
     });
   }
 
-  // private buildJsonBody(callback: () => this | void, reset = true, success = true) {
-  //   this._jsonBody.meta.status = success ? "SUCCESS" : "ERROR";
-  //   this._jsonBody.data = success ? this._body : this._errorBody;
-  //   callback();
-  //   if (reset) {
-  //     this._body = undefined;
-  //     this._errorBody = undefined;
-  //     this._jsonBody = defaultBody();
-  //   }
-  //   return this;
-  // }
-
   private reset() {
     this._body = undefined;
     this._errorBody = undefined;
     this._jsonBody = defaultBody();
     this._accessToken = undefined;
     this._refreshToken = undefined;
+    return this as Respond<unknown, false>;
   }
 
-  private finalize(success: boolean) {
+  private finalize<S extends boolean>(success: S) {
     this._jsonBody.meta.status = success ? "SUCCESS" : "ERROR";
     this._jsonBody.data = success ? this._body : this._errorBody;
+    return this as unknown as S extends true ? Respond<SuccessType, true> : Respond<ErrorResponseType, true>;
   }
 
   /**
@@ -177,10 +176,14 @@ export class Respond<SuccessType = unknown> {
    * @param error Data for error response
    * @returns this
    */
-  body({ success, error }: OneFieldOnly<{ success: SuccessType; error: ErrorResponseType }>) {
+  body<T extends OneFieldOnly<{ success: SuccessType; error: ErrorResponseType }>>({ success, error }: T) {
     if (success) this._body = success;
     if (error) this._errorBody = error;
-    return this;
+    return this as unknown as T extends { success: infer S }
+      ? [S] extends [never]
+        ? Respond<unknown, false, true>
+        : Respond<S, true, false>
+      : Respond<unknown, false, true>;
   }
 
   /**
@@ -235,23 +238,26 @@ export class Respond<SuccessType = unknown> {
    * @example
    * ```ts
    * res.body({ success: user })
-   *    .generateTokens({ user, rememberMe: true })
-   *    .sendCookie({ template: "REFRESH_ACCESS", rememberMe: true })
-   *    .ok();
+   *    .generateTokens({ user2, rememberMe: true })
+   *    .sendCookie({ template: "REFRESH_ACCESS" });
    * ```
    *
    * @param cookie User data and options
    * @returns this
    */
-  generateTokens(cookie: RespondOptions["cookie"]) {
+  generateTokens(cookie: RespondOptions<SuccessType>["cookie"]) {
     let { user, rememberMe } = cookie;
+    if (rememberMe !== undefined) this._rememberMe = rememberMe;
     if (!user) {
       if (!this._body) return this;
-      user = this._body as unknown as CookieUser;
+      user = this._body as unknown as CookieUserBase;
     }
     const { _id: userId, verified } = user as { _id: string; verified: boolean };
     this._accessToken = createAccessToken({ userId, verified, expires: new Date(Date.now() + fiveMin) });
-    this._refreshToken = createRefreshToken({ userId, verified, expires: new Date(Date.now() + oneWeeks * 1.5) }, rememberMe ? undefined : null);
+    this._refreshToken = createRefreshToken(
+      { userId, verified, expires: new Date(Date.now() + oneWeeks * 1.5) },
+      this._rememberMe ? undefined : null
+    );
     return this;
   }
 
@@ -260,14 +266,16 @@ export class Respond<SuccessType = unknown> {
    *
    * @example
    * ```ts
-   * res.sendCookie({ template: "ACCESS", user, rememberMe: false }).ok();
+   * res.sendCookie({ template: "ACCESS", user, rememberMe: false });
+   * res.body({ success: user }).sendCookie({ template: "ACCESS", rememberMe: false }).ok();
    * ```
    *
    * @param cookie Cookie configuration
    * @returns this
    */
-  sendCookie(cookie: RespondOptions["cookie"]) {
+  sendCookie(cookie: RespondOptions<SuccessType>["cookie"]) {
     const { name, options, rememberMe, template, val } = cookie;
+    if (rememberMe !== undefined) this._rememberMe = rememberMe;
     const accT = this._accessToken;
     const refT = this._refreshToken;
     if (!accT || !refT) {
@@ -280,11 +288,11 @@ export class Respond<SuccessType = unknown> {
         this._res.cookie("accessToken", accT, resAccessToken);
         break;
       case "REFRESH":
-        this._res.cookie("refreshToken", refT, rememberMe ? resRefreshToken : resRefreshTokenSessionOnly);
+        this._res.cookie("refreshToken", refT, this._rememberMe ? resRefreshToken : resRefreshTokenSessionOnly);
         break;
       case "REFRESH_ACCESS":
         this._res.cookie("accessToken", accT, resAccessToken);
-        this._res.cookie("refreshToken", refT, rememberMe ? resRefreshToken : resRefreshTokenSessionOnly);
+        this._res.cookie("refreshToken", refT, this._rememberMe ? resRefreshToken : resRefreshTokenSessionOnly);
         break;
       default:
         this._res.cookie(name, val, options);
@@ -300,11 +308,12 @@ export class Respond<SuccessType = unknown> {
    * @example
    * ```ts
    * res.notif("User has been updated").body({ success: updatedUser }).respond();
+   * res.body({ error: formattedError }).respond();
    * ```
    *
    * @returns this
    */
-  respond() {
+  respond: ResType<SuccessReady, ErrorReady> = (() => {
     this.finalize(true);
     if (this._body) {
       this.ok();
@@ -312,8 +321,8 @@ export class Respond<SuccessType = unknown> {
       this.error();
     }
     this.reset();
-    return this;
-  }
+    return this as unknown as ResType<SuccessReady, false>;
+  }) as any;
 
   /**
    * Send a standard 200 OK response.
@@ -325,14 +334,14 @@ export class Respond<SuccessType = unknown> {
    *
    * @returns this
    */
-  ok() {
+  ok: ResType<SuccessReady, false> = (() => {
     this.finalize(true);
     if (this._body) {
       this._res.status(200).json(this._jsonBody);
     }
     this.reset();
     return this;
-  }
+  }) as any;
 
   /**
    * Send a standard 204 No Content response.
@@ -344,12 +353,12 @@ export class Respond<SuccessType = unknown> {
    *
    * @returns this
    */
-  noContent() {
+  noContent: ResType<SuccessReady, false> = (() => {
     this.finalize(true);
     this._res.status(204).json(this._jsonBody);
     this.reset();
     return this;
-  }
+  }) as any;
 
   /**
    * Send a standard 201 Created response.
@@ -361,14 +370,14 @@ export class Respond<SuccessType = unknown> {
    *
    * @returns this
    */
-  created() {
+  created: ResType<SuccessReady, false> = (() => {
     this.finalize(true);
     if (this._body) {
       this._res.status(201).json(this._jsonBody);
     }
     this.reset();
     return this;
-  }
+  }) as any;
 
   /**
    * Send an error response using ErrorResponseType.
@@ -382,7 +391,7 @@ export class Respond<SuccessType = unknown> {
    *
    * @returns this
    */
-  error() {
+  error: ResType<false, ErrorReady> = (() => {
     this.finalize(false);
     const errorBody = this._errorBody;
     if (errorBody) {
@@ -391,7 +400,7 @@ export class Respond<SuccessType = unknown> {
     }
     this.reset();
     return this;
-  }
+  }) as any;
 
   /**
    * Respond with a missing fields error.
@@ -406,8 +415,8 @@ export class Respond<SuccessType = unknown> {
    * @returns this
    */
   tempMissingFields(fields: string, restErr?: RestError) {
-    this.body({ error: { ...restErr, title: "Missing Fields", message: `${fields.capital()} is required`, code: "MISSING_FIELDS" } });
-    return this;
+    const body = this.body({ error: { ...restErr, title: "Missing Fields", message: `${fields.capital()} is required`, code: "MISSING_FIELDS" } });
+    return body;
   }
 
   /**
@@ -422,8 +431,8 @@ export class Respond<SuccessType = unknown> {
    * @returns this
    */
   tempClientField(err: Omit<ErrorResponseType, "code">) {
-    this.body({ error: { code: "CLIENT_FIELD", ...err } });
-    return this;
+    const body = this.body({ error: { code: "CLIENT_FIELD", ...err } });
+    return body;
   }
 
   /**
@@ -435,10 +444,10 @@ export class Respond<SuccessType = unknown> {
    * ```
    *
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempInvalidOTP(restErr?: Omit<RestError, "field">) {
-    this.body({
+    const body = this.body({
       error: {
         ...restErr,
         title: "Invalid OTP",
@@ -447,7 +456,7 @@ export class Respond<SuccessType = unknown> {
         field: "otp",
       },
     });
-    return this;
+    return body;
   }
 
   /**
@@ -459,10 +468,10 @@ export class Respond<SuccessType = unknown> {
    * ```
    *
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempInvalidAuth(restErr?: RestError) {
-    this.body({
+    const body = this.body({
       error: {
         ...restErr,
         title: "Authentication needed",
@@ -470,7 +479,7 @@ export class Respond<SuccessType = unknown> {
         code: "INVALID_AUTH",
       },
     });
-    return this;
+    return body;
   }
 
   /**
@@ -482,10 +491,10 @@ export class Respond<SuccessType = unknown> {
    * ```
    *
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempInvalidToken(restErr?: RestError) {
-    this.body({
+    const body = this.body({
       error: {
         ...restErr,
         title: "Invalid Session",
@@ -493,7 +502,7 @@ export class Respond<SuccessType = unknown> {
         code: "INVALID_TOKEN",
       },
     });
-    return this;
+    return body;
   }
 
   /**
@@ -507,10 +516,10 @@ export class Respond<SuccessType = unknown> {
    * @param item Item name
    * @param desc Optional description
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempNotFound(item: string, desc?: string, restErr?: RestError) {
-    this.body({
+    const body = this.body({
       error: {
         ...restErr,
         title: "Not Found",
@@ -518,7 +527,7 @@ export class Respond<SuccessType = unknown> {
         code: "NOT_FOUND",
       },
     });
-    return this;
+    return body;
   }
 
   /**
@@ -531,13 +540,13 @@ export class Respond<SuccessType = unknown> {
    *
    * @param provider Optional provider name
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempIsBound = (provider?: string, restErr?: RestError) => {
-    this.body({
+    const body = this.body({
       error: { ...restErr, code: "IS_BOUND", message: `Account is already bound to ${provider ?? "local"}`, title: "Account already bounded" },
     });
-    return this;
+    return body;
   };
 
   /**
@@ -550,10 +559,10 @@ export class Respond<SuccessType = unknown> {
    *
    * @param provider Optional provider name
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempNotBound(provider?: string, restErr?: RestError) {
-    this.body({
+    const body = this.body({
       error: {
         ...restErr,
         message: `Account is not bounded to ${provider ?? "local"} yet, please bind to ${provider ?? "local"} first`,
@@ -561,7 +570,7 @@ export class Respond<SuccessType = unknown> {
         title: "Account is not bounded",
       },
     });
-    return this;
+    return body;
   }
 
   /**
@@ -574,10 +583,10 @@ export class Respond<SuccessType = unknown> {
    *
    * @param desc Optional description
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempTooMuchReq(desc?: string, restErr?: RestError) {
-    this.body({
+    const body = this.body({
       error: {
         ...restErr,
         title: "Too many requests",
@@ -585,7 +594,7 @@ export class Respond<SuccessType = unknown> {
         code: "TOO_MUCH_REQUEST",
       },
     });
-    return this;
+    return body;
   }
 
   /**
@@ -597,10 +606,10 @@ export class Respond<SuccessType = unknown> {
    * ```
    *
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempLimitSendEmail(restErr?: RestError) {
-    this.body({
+    const body = this.body({
       error: {
         ...restErr,
         title: "Too much request",
@@ -608,7 +617,7 @@ export class Respond<SuccessType = unknown> {
         code: "TOO_MUCH_REQUEST",
       },
     });
-    return this;
+    return body;
   }
 
   /**
@@ -620,11 +629,11 @@ export class Respond<SuccessType = unknown> {
    * ```
    *
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempIsVerified(restErr?: RestError) {
-    this.body({ error: { ...restErr, message: "Your email has been verified", code: "IS_VERIFIED", title: "You have been verified" } });
-    return this;
+    const body = this.body({ error: { ...restErr, message: "Your email has been verified", code: "IS_VERIFIED", title: "You have been verified" } });
+    return body;
   }
 
   /**
@@ -636,10 +645,10 @@ export class Respond<SuccessType = unknown> {
    * ```
    *
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempNotVerified(restErr?: RestError) {
-    this.body({
+    const body = this.body({
       error: {
         ...restErr,
         message: "Insufficient permissions, please verify your account",
@@ -647,7 +656,7 @@ export class Respond<SuccessType = unknown> {
         title: "Insufficient permissions",
       },
     });
-    return this;
+    return body;
   }
 
   /**
@@ -659,10 +668,10 @@ export class Respond<SuccessType = unknown> {
    * ```
    *
    * @param restErr Additional error properties
-   * @returns this
+   * @returns typeof .body({ error })
    */
   tempSelfReq(restErr?: RestError) {
-    this.body({
+    const body = this.body({
       error: {
         ...restErr,
         message: "Can not self request, please report this issue to Hoshify Team",
@@ -670,10 +679,11 @@ export class Respond<SuccessType = unknown> {
         code: "SELF_REQUEST",
       },
     });
+    return body;
   }
 }
 
 /**
  * Extends Express Response with Respond features.
  */
-export interface Respond extends Response {}
+export interface Respond extends Omit<Response, "res"> {}
