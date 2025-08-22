@@ -13,8 +13,8 @@ import "./services/passport";
 import "./utils/extends";
 import { resMiddleware } from "./middlewares/res";
 
-export const CLIENT_URL = process.env.CLIENT_URL_DEV;
-export const NODE_ENV = process.env.NODE_ENV;
+export const { NODE_ENV, HOSHIFY_ICON } = process.env;
+export const CLIENT_URL = NODE_ENV === "development" ? process.env.CLIENT_URL_DEV : process.env.CLIENT_URL;
 
 const app = express();
 connectDB();

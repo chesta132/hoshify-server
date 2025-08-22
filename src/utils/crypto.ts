@@ -7,10 +7,10 @@ const algorithm = "aes-256-cbc";
  * Encrypts a string or object using AES-256-CBC algorithm.
  *
  * @param data - The data to encrypt. Objects will be stringified automatically.
- * @returns A string in the format "iv:encryptedData" where both parts are hex encoded
+ * @returns A string in the format "iv-encryptedData" where both parts are hex encoded
  *
  * @example
- * encrypt({ foo: "bar" }) // "8f5a1c...:9e2b3c..."
+ * encrypt({ foo: "bar" }) // "8f5a1c...-9e2b3c..."
  */
 export const encrypt = (data: any) => {
   let stringifyData = data;
@@ -24,24 +24,24 @@ export const encrypt = (data: any) => {
   let encrypted = cipher.update(stringifyData, "utf8", "hex");
   encrypted += cipher.final("hex");
 
-  return iv.toString("hex") + ":" + encrypted;
+  return iv.toString("hex") + "-" + encrypted;
 };
 
 /**
  * Decrypts an encrypted string using AES-256-CBC algorithm.
  *
- * @param encrypted - The string to decrypt in "iv:encryptedData" format
+ * @param encrypted - The string to decrypt in "iv-encryptedData" format
  * @param options - Optional settings
  * @param options.parse - If true, attempts to parse decrypted string as JSON
  * @returns Decrypted string or object (if parse=true). Returns null if decryption fails
  *
  * @example
- * decrypt("8f5a1c...:9e2b3c...", { parse: true }) // { foo: "bar" }
+ * decrypt("8f5a1c...-9e2b3c...", { parse: true }) // { foo: "bar" }
  */
 export const decrypt = (encrypted?: string | null, options?: { parse?: boolean }) => {
   if (!encrypted) return "";
 
-  const parts = encrypted.split(":");
+  const parts = encrypted.split("-");
   if (parts.length !== 2) {
     console.error("Invalid chipper format.");
     return null;

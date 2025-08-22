@@ -39,12 +39,16 @@ export const verifyEmail = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const updatedUser = await User.updateByIdAndSanitize(user.id, { verified: true }, { project: userProject() });
+    const updatedUser = await User.updateByIdAndSanitize(
+      user.id,
+      { verified: true },
+      { project: userProject(), options: { new: true, runValidators: true } }
+    );
     if (!updatedUser) {
       res.tempNotFound("user");
       return;
     }
-    await Verify.deleteMany({ value: otp, type: "VERIFY_EMAIL", userId: user.id });
+    await Verify.deleteOne({ value: otp, type: "VERIFY_EMAIL", userId: user.id });
     res.body({ success: updatedUser }).ok();
     return;
   } catch (err) {

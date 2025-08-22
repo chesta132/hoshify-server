@@ -20,7 +20,7 @@ export const signout = async (req: Request, { res }: Response) => {
 
     await Revoked.create({ value: refreshToken, userId: user.id, deleteAt: expIn, type: "TOKEN" });
 
-      res.clearCookie("accessToken").clearCookie("refreshToken");
+    res.clearCookie("accessToken").clearCookie("refreshToken");
     redirect();
   } catch (error) {
     handleError(error, res);

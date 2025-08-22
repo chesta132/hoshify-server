@@ -1,3 +1,5 @@
+import { HOSHIFY_ICON } from "../app";
+
 export function emailTemplate(props: {
   title: string;
   name: string;
@@ -380,7 +382,7 @@ export function emailTemplate(props: {
         <div class="header">
             <div class="logo-container">
                 <div class="logo">
-                    <img class="logo-icon" src="https://raw.githubusercontent.com/chesta132/hoshify-client/refs/heads/main/src/app/favicon.ico?token=GHSAT0AAAAAADF5M5B3YN4OLR52TPDF2FOK2FDCIHA"></img>
+                    <img class="logo-icon" src="${HOSHIFY_ICON}"></img>
                 </div>
                 <div class="brand-name">Hoshify</div>
             </div>
