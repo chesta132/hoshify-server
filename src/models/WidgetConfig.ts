@@ -1,16 +1,19 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
+import { virtualId } from "../utils/manipulate";
+import { SchemaOptions } from "./User";
 const WidgetTypes = ["WEATHER", "CHART", "MONEY_OVERVIEW", "SCHEDULE", "QUICK_LINKS", "TODO_3_DAY"] as const;
 
-export interface IWidgetConfig extends Document {
+export interface IWidgetConfig {
+  _id: ObjectId;
   type: (typeof WidgetTypes)[number];
   position: number;
-  userId: mongoose.Types.ObjectId;
+  userId: ObjectId;
   settings: any;
   color: string;
 }
 
-const WidgetConfigSchema = new Schema<IWidgetConfig>(
+const WidgetConfigSchema = new Schema(
   {
     type: { type: String, enum: WidgetTypes, required: true },
     position: { type: Number, required: true },
@@ -18,8 +21,10 @@ const WidgetConfigSchema = new Schema<IWidgetConfig>(
     settings: { type: Schema.Types.Mixed, default: {} },
     color: { type: String, default: "9B5DE5" },
   },
-  { timestamps: true }
+  SchemaOptions
 );
+
+virtualId(WidgetConfigSchema);
 
 const WidgetConfigRaw = model<IWidgetConfig>("WidgetConfig", WidgetConfigSchema);
 

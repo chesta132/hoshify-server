@@ -1,5 +1,4 @@
 import {
-  Document,
   InsertManyOptions,
   isValidObjectId,
   Model,
@@ -13,7 +12,7 @@ import {
   UpdateQuery,
   UpdateWithAggregationPipeline,
 } from "mongoose";
-import { SanitizedData } from "../types/types";
+import { NormalizedData } from "../types/types";
 import { normalizeQuery } from "../utils/normalizeQuery";
 
 type Settings<T> = {
@@ -24,7 +23,7 @@ type Settings<T> = {
   sortOptions?: { override?: boolean };
 };
 
-export class Database<T extends Document> {
+export class Database<T extends Record<string, any>> {
   private model: Model<T>;
   constructor(model: Model<T>) {
     this.model = model;
@@ -39,7 +38,7 @@ export class Database<T extends Document> {
     });
   }
 
-  async findByIdAndSanitize(id: string | ObjectId, settings?: Settings<T>) {
+  async findByIdAndNormalize(id: string | ObjectId, settings?: Settings<T>) {
     if (!isValidObjectId(id)) {
       console.warn(`Invalid ObjectId provided for model ${this.model.modelName}: ${id}`);
       return null;
@@ -48,35 +47,36 @@ export class Database<T extends Document> {
     const rawQuery = await this.model
       .findById(id, settings?.project, settings?.options)
       .sort(settings?.sort, settings?.sortOptions)
-      .lean<T>()
-      .populate(settings?.populate || []);
+      .populate(settings?.populate || [])
+      .lean<T>();
 
     if (!rawQuery) return null;
-    return normalizeQuery(rawQuery) as SanitizedData<T>;
+    return normalizeQuery(rawQuery) as NormalizedData<T>;
   }
 
-  async findOneAndSanitize(filter: RootFilterQuery<T>, settings?: Settings<T>) {
+  async findOneAndNormalize(filter: RootFilterQuery<T>, settings?: Settings<T>) {
     const rawQuery = await this.model
       .findOne(filter, settings?.project, settings?.options)
       .sort(settings?.sort, settings?.sortOptions)
-      .lean<T>()
-      .populate(settings?.populate || []);
+      .populate(settings?.populate || [])
+      .lean<T>();
 
     if (!rawQuery) return null;
-    return normalizeQuery(rawQuery) as SanitizedData<T>;
+    return normalizeQuery(rawQuery) as NormalizedData<T>;
   }
 
-  async findAndSanitize(filter: RootFilterQuery<T>, settings?: Settings<T> & { returnArray?: boolean }) {
+  async findAndNormalize(filter: RootFilterQuery<T>, settings?: Settings<T> & { returnArray?: boolean }) {
     const rawQuery = await this.model
       .find(filter, settings?.project, settings?.options)
       .sort(settings?.sort, settings?.sortOptions)
-      .populate(settings?.populate || []);
+      .populate(settings?.populate || [])
+      .lean<T>();
 
     if (rawQuery.length === 0 && !settings?.returnArray) return null;
-    return normalizeQuery(rawQuery) as SanitizedData<T>[];
+    return normalizeQuery(rawQuery) as NormalizedData<T>[];
   }
 
-  async updateByIdAndSanitize(id: string | ObjectId, update: UpdateQuery<T>, settings?: Settings<T>) {
+  async updateByIdAndNormalize(id: string | ObjectId, update: UpdateQuery<T>, settings?: Settings<T>) {
     if (!isValidObjectId(id)) {
       console.warn(`Invalid ObjectId provided for model ${this.model.modelName}: ${id}`);
       return null;
@@ -85,25 +85,25 @@ export class Database<T extends Document> {
     const rawQuery = await this.model
       .findByIdAndUpdate(id, update, { ...settings?.options, projection: settings?.project })
       .sort(settings?.sort, settings?.sortOptions)
-      .lean<T>()
-      .populate(settings?.populate || []);
+      .populate(settings?.populate || [])
+      .lean<T>();
 
     if (!rawQuery) return null;
-    return normalizeQuery(rawQuery as Document) as SanitizedData<T>;
+    return normalizeQuery(rawQuery) as NormalizedData<T>;
   }
 
-  async updateOneAndSanitize(filter: RootFilterQuery<T>, update: UpdateQuery<T>, settings?: Settings<T>) {
+  async updateOneAndNormalize(filter: RootFilterQuery<T>, update: UpdateQuery<T>, settings?: Settings<T>) {
     const rawQuery = await this.model
       .findOneAndUpdate(filter, update, { ...settings?.options, projection: settings?.project })
       .sort(settings?.sort, settings?.sortOptions)
-      .lean<T>()
-      .populate(settings?.populate || []);
+      .populate(settings?.populate || [])
+      .lean<T>();
 
     if (!rawQuery) return null;
-    return normalizeQuery(rawQuery) as SanitizedData<T>;
+    return normalizeQuery(rawQuery) as NormalizedData<T>;
   }
 
-  async updateManyAndSanitize(
+  async updateManyAndNormalize(
     filter: RootFilterQuery<T>,
     update: UpdateQuery<T> | UpdateWithAggregationPipeline,
     settings: { sanitize?: boolean; options: MongooseUpdateQueryOptions } & Omit<Settings<T>, "project" | "options"> & { returnArray?: boolean }
@@ -114,18 +114,18 @@ export class Database<T extends Document> {
 
     if (rawQuery.modifiedCount === 0 && !settings?.returnArray) return null;
     if (!settings.sanitize) return rawQuery;
-    return (await this.findAndSanitize(filter, settings)) as SanitizedData<T>[];
+    return (await this.findAndNormalize(filter, settings)) as NormalizedData<T>[];
   }
 
-  async createAndSanitize(doc: T | Partial<T>) {
+  async createAndNormalize(doc: T | Partial<T>) {
     const rawQuery = await this.model.create(doc);
-    return normalizeQuery(rawQuery) as SanitizedData<T>;
+    return normalizeQuery(rawQuery) as NormalizedData<T>;
   }
 
-  async insertManyAndSanitize(docs: T[] | Partial<T>[], settings?: { options?: InsertManyOptions }): Promise<SanitizedData<T>[]> {
+  async insertManyAndNormalize(docs: T[] | Partial<T>[], settings?: { options?: InsertManyOptions }): Promise<NormalizedData<T>[]> {
     const rawQuery = await this.model.insertMany(docs, settings?.options ?? {});
-    return normalizeQuery(rawQuery) as SanitizedData<T>[];
+    return normalizeQuery(rawQuery) as NormalizedData<T>[];
   }
 }
 
-export interface Database<T extends Document> extends Model<T> {}
+export interface Database<T extends Record<string, any>> extends Model<T> {}

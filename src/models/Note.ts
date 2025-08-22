@@ -1,15 +1,18 @@
-import mongoose, { Schema, model, Document, InferSchemaType } from "mongoose";
+import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
+import { virtualId } from "../utils/manipulate";
+import { SchemaOptions } from "./User";
 
-export interface INote extends Document {
+export interface INote {
+  _id: ObjectId;
   title: string;
   details?: string;
-  userId: mongoose.Types.ObjectId;
+  userId: ObjectId;
   isRecycled: boolean;
   deleteAt?: Date;
 }
 
-const NoteSchema = new Schema<INote>(
+const NoteSchema = new Schema(
   {
     title: { type: String, required: true },
     details: String,
@@ -17,8 +20,10 @@ const NoteSchema = new Schema<INote>(
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
   },
-  { timestamps: true }
+  SchemaOptions
 );
+
+virtualId(NoteSchema);
 
 const NoteRaw = model<INote>("Note", NoteSchema);
 

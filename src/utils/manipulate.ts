@@ -1,3 +1,5 @@
+import { Schema } from "mongoose";
+
 /**
  * Only pick some fields in object, other properties will deleted.
  *
@@ -30,4 +32,15 @@ export const omit = <T extends Record<string, any>, Z extends (keyof T)[]>(data:
       delete omittedData[omit];
     }
   return omittedData;
+};
+
+/**
+ * Create id from _id reference.
+ *
+ * @param schema - Schema to initiate.
+ */
+export const virtualId = (schema: Schema) => {
+  schema.virtual("id").get(function () {
+    return (this._id as string).toString();
+  });
 };

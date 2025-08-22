@@ -18,7 +18,7 @@ export const bindLocal = async (req: Request, { res }: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const updatedUser = await User.updateByIdAndSanitize(
+    const updatedUser = await User.updateByIdAndNormalize(
       user.id,
       {
         email,

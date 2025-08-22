@@ -1,9 +1,9 @@
-import mongoose, { Document } from "mongoose";
+import mongoose from "mongoose";
 import { omit } from "./manipulate";
-import { SanitizedData } from "../types/types";
+import { NormalizedData } from "../types/types";
 import { IUser } from "../models/User";
 
-export const traverseAndSanitize = (data: any, mongo = true): any => {
+export const traverseAndNormalize = (data: any, mongo = true): any => {
   if (mongo && !data?._id && !Array.isArray(data)) {
     return data;
   }
@@ -17,20 +17,20 @@ export const traverseAndSanitize = (data: any, mongo = true): any => {
   }
 
   if (Array.isArray(data)) {
-    return data.map((item) => traverseAndSanitize(item));
+    return data.map((item) => traverseAndNormalize(item));
   }
 
   const normalizedObject: { [key: string]: any } = {};
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
-      normalizedObject[key] = traverseAndSanitize(data[key]);
+      normalizedObject[key] = traverseAndNormalize(data[key]);
     }
   }
 
   return normalizedObject;
 };
 
-export const traverseCreateId = (data: any, mongo = true): any => {
+export const traverseHandleIdAndV = (data: any, mongo = true): any => {
   if (mongo && !data?._id && !Array.isArray(data)) {
     return data;
   }
@@ -40,41 +40,46 @@ export const traverseCreateId = (data: any, mongo = true): any => {
   }
 
   if (Array.isArray(data)) {
-    return data.map((item) => traverseCreateId(item));
+    return data.map((item) => traverseHandleIdAndV(item));
   }
 
   for (const key in data) {
-    data[key] = traverseCreateId(data[key]);
+    data[key] = traverseHandleIdAndV(data[key]);
   }
+  data = omit(data, ["__v", "_id"]);
 
   if (data?._id) return { id: data._id, ...data };
   return data;
 };
 
-export const normalizeQuery = <T extends Document | Document[]>(queryData: T) => {
+export const normalizeQuery = <T extends Record<string, any> | Record<string, any>[]>(queryData: T) => {
   if (Array.isArray(queryData)) {
     const normalizedData = queryData.map((queryDT) => {
-      let data = omit(queryDT, ["__v"]);
-      if (queryDT.toObject) {
+      let data = queryDT;
+      if (queryDT.lean) {
+        data = queryDT.lean();
+      } else if (queryDT.toObject) {
         data = queryDT.toObject();
       }
-      return traverseCreateId(traverseAndSanitize(data));
+      return traverseHandleIdAndV(traverseAndNormalize(data));
     });
-    return normalizedData as SanitizedData<T>[];
+    return normalizedData as NormalizedData<T>[];
   }
 
-  let data = omit(queryData as Document, ["__v"]);
-  if (queryData.toObject) {
+  let data = queryData;
+  if (queryData.lean) {
+    data = queryData.lean();
+  } else if (queryData.toObject) {
     data = queryData.toObject();
   }
-  const normalizedData = traverseCreateId(traverseAndSanitize(data));
-  return normalizedData as SanitizedData<T>;
+  const normalizedData = traverseHandleIdAndV(traverseAndNormalize(data));
+  return normalizedData as NormalizedData<T>;
 };
 
-export const normalizeUserQuery = <T extends Partial<IUser>>(queryData: T, options?: { isGuest?: boolean }) => {
-  let data = omit(queryData, ["__v", "password", "googleId"]);
+export const normalizeUserQuery = <T extends Partial<IUser> | NormalizedData<IUser>>(queryData: T, options?: { isGuest?: boolean }) => {
+  let data = omit(queryData, ["password", "googleId"]);
   if (queryData._id instanceof mongoose.Types.ObjectId) {
-    data = normalizeQuery(data as Document) as Omit<T, "__v" | "password" | "googleId">;
+    data = normalizeQuery(data as Record<string, any>) as Omit<T, "password" | "googleId">;
   }
   if (options?.isGuest) {
     delete data.gmail;
@@ -82,7 +87,7 @@ export const normalizeUserQuery = <T extends Partial<IUser>>(queryData: T, optio
     delete data.verified;
     delete data.createdAt;
   }
-  return data as SanitizedData<T>;
+  return data as unknown as NormalizedData<T>;
 };
 
 export const userProject = (isGuest?: boolean) => {

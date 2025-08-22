@@ -1,11 +1,11 @@
 import { Respond } from "../class/Response";
 import { IUser } from "../models/User";
-import { SanitizedData } from "./types";
+import { NormalizedData } from "./types";
 import jwt from "jsonwebtoken";
 
 declare global {
   namespace Express {
-    interface User extends IUser {}
+    interface User extends NormalizedData<IUser> {}
     interface Response {
       res: Respond;
     }
@@ -19,12 +19,6 @@ declare global {
      * Console table when its not in production env
      */
     debugTable: typeof console.table;
-  }
-}
-
-declare module "mongoose" {
-  interface Document {
-    __v?: number;
   }
 }
 

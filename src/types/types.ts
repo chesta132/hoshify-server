@@ -1,6 +1,5 @@
 import { Document, ObjectId } from "mongoose";
 import { codeErrorAuth, codeErrorClient, codeErrorField, codeErrorServer, CodeErrorValues } from "../class/Response";
-import { Response } from "express";
 
 export type Fields = "password" | "newPassword" | "username" | "email" | "newEmail" | "otp" | "newFullName";
 
@@ -18,7 +17,7 @@ export type OneFieldOnly<T extends Record<string, unknown>> = {
   };
 }[keyof T];
 
-export type SanitizedData<T> = Omit<
+export type NormalizedData<T> = Omit<
   {
     [K in keyof T]: T[K] extends ObjectId ? string : T[K];
   },

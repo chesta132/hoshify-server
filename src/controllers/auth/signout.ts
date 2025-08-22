@@ -1,27 +1,24 @@
 import { Response, Request } from "express";
-import jwt from "jsonwebtoken";
 import handleError from "../../utils/handleError";
 import { CLIENT_URL } from "../../app";
 import { verifyRefreshToken } from "../../utils/token";
 import { Revoked } from "../../models/Revoked";
 
 export const signout = async (req: Request, { res }: Response) => {
-  const redirect = () => res.redirect(`${CLIENT_URL}/signin`);
+  const clearAndRedirect = () => res.clearCookie("accessToken").clearCookie("refreshToken").redirect(`${CLIENT_URL}/signin`);
   try {
     const user = req.user!;
     const { refreshToken } = req.cookies;
-    const verifiedPayload = verifyRefreshToken(refreshToken) as jwt.JwtPayload | null;
+    const verifiedPayload = verifyRefreshToken(refreshToken);
     if (!verifiedPayload) {
-      res.clearCookie("accessToken").clearCookie("refreshToken");
-      redirect();
+      clearAndRedirect();
       return;
     }
     const expIn = new Date(verifiedPayload.exp! * 1000);
 
     await Revoked.create({ value: refreshToken, userId: user.id, deleteAt: expIn, type: "TOKEN" });
 
-    res.clearCookie("accessToken").clearCookie("refreshToken");
-    redirect();
+    clearAndRedirect();
   } catch (error) {
     handleError(error, res);
   }

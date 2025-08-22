@@ -27,7 +27,7 @@ export const authMiddleware = async (req: Request, { res }: Response, next: Next
 
     if (!payload) {
       // Check if refresh token exists in database
-      const user = await User.findById(refreshPayload.userId);
+      const user = await User.findByIdAndNormalize(refreshPayload.userId);
       if (!user) {
         res.tempInvalidToken().respond();
         return;
@@ -40,7 +40,7 @@ export const authMiddleware = async (req: Request, { res }: Response, next: Next
       return next();
     }
 
-    const user = await User.findById(payload.userId);
+    const user = await User.findByIdAndNormalize(payload.userId);
     if (!user) {
       res.tempNotFound("user", "please back to dashboard or sign in page").respond();
       return;

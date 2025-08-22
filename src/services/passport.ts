@@ -3,12 +3,14 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import bcrypt from "bcrypt";
 import { ErrorResponseType } from "../class/Response";
-import { User } from "../models/User";
+import { IUser, User } from "../models/User";
+import { normalizeQuery } from "../utils/normalizeQuery";
+import { NormalizedData } from "../types/types";
 
 passport.use(
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
     try {
-      const user = await User.findOne({ email: email.trim() });
+      const user = await User.findOneAndNormalize({ email: email.trim() });
       if (!user || !user.password) {
         return done(null, false, { message: "Email not registered", code: "CLIENT_FIELD", field: "email" } as ErrorResponseType);
       }
@@ -36,7 +38,7 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const user = await User.findOne({
+        const user = await User.findOneAndNormalize({
           $or: [{ googleId: profile.id }, { email: profile.emails![0].value }],
         });
 
@@ -45,7 +47,7 @@ passport.use(
         }
 
         if (user?.email === profile.emails![0].value) {
-          const updatedUser = await User.findByIdAndUpdate(user.id, {
+          const updatedUser = await User.updateByIdAndNormalize(user.id, {
             googleId: profile.id,
             gmail: profile.emails![0].value,
           });
@@ -57,8 +59,9 @@ passport.use(
           gmail: profile.emails![0]?.value,
           fullName: profile.displayName,
         });
+        const normalized = normalizeQuery(newUser) as NormalizedData<IUser>
 
-        done(null, newUser);
+        done(null, normalized);
       } catch (err) {
         console.error(err);
         done(err);
@@ -79,7 +82,7 @@ passport.use(
     async (req, accessToken, refreshToken, profile, done) => {
       try {
         const user = req.user!;
-        const updatedUser = await User.findByIdAndUpdate(user.id, {
+        const updatedUser = await User.updateByIdAndNormalize(user.id, {
           googleId: profile.id,
           gmail: profile.emails![0].value,
         });
@@ -105,7 +108,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (userId, done) => {
   try {
-    const user = await User.findOne({ id: userId as string });
+    const user = await User.findOneAndNormalize({ id: userId as string });
 
     if (!user) {
       return done(new Error("User not found"));

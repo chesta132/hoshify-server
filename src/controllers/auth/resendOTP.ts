@@ -22,7 +22,7 @@ export const resendOTP = async (req: Request, { res }: Response) => {
     const createAndSend = async (type: IVerify["type"]) => {
       await Verify.create({ value: otp, type, userId: user.id, deleteAt: new Date(Date.now() + oneMin * 2) });
       await sendOTPEmail(user.email || user.gmail!, otp, user.fullName);
-      const updatedUser = await User.updateByIdAndSanitize(
+      const updatedUser = await User.updateByIdAndNormalize(
         user.id,
         { timeToAllowSendEmail: new Date(Date.now() + 1000 * 60 * 2) },
         { project: userProject() }

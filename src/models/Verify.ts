@@ -1,24 +1,29 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
+import { virtualId } from "../utils/manipulate";
+import { SchemaOptions } from "./User";
 
 const VerifyType = ["CHANGE_EMAIL_OTP", "RESET_PASSWORD_OTP", "DELETE_ACCOUNT_OTP", "VERIFY_EMAIL"] as const;
 
-export interface IVerify extends Document {
+export interface IVerify {
+  _id: ObjectId;
   value: string;
   type: (typeof VerifyType)[number];
-  userId: mongoose.Types.ObjectId;
+  userId: ObjectId;
   deleteAt: Date;
 }
 
-const VerifySchema = new Schema<IVerify>(
+const VerifySchema = new Schema(
   {
     value: { type: String, required: true },
     type: { type: String, enum: VerifyType, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     deleteAt: { type: Date, required: true, index: { expireAfterSeconds: 0 } },
   },
-  { timestamps: true }
+  SchemaOptions
 );
+
+virtualId(VerifySchema);
 
 const VerifyRaw = model<IVerify>("Verify", VerifySchema);
 

@@ -16,7 +16,7 @@ export const deleteUser = async (req: Request, { res }: Response) => {
     const { token } = req.body;
     const userIncludes = ["links", "money", "notes", "schedules", "todos", "widgets"];
 
-    const user = await User.findByIdAndSanitize(userId, { populate: userIncludes });
+    const user = await User.findByIdAndNormalize(userId, { populate: userIncludes });
     if (!user) {
       res.tempNotFound("user").respond();
       return;

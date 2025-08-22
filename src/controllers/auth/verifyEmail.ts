@@ -39,7 +39,7 @@ export const verifyEmail = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const updatedUser = await User.updateByIdAndSanitize(
+    const updatedUser = await User.updateByIdAndNormalize(
       user.id,
       { verified: true },
       { project: userProject(), options: { new: true, runValidators: true } }

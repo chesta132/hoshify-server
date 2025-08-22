@@ -28,7 +28,7 @@ export const changeEmail = async (req: Request, { res }: Response) => {
     }
 
     const updateEmail = async () => {
-      const updatedUser = await User.updateByIdAndSanitize(
+      const updatedUser = await User.updateByIdAndNormalize(
         user.id,
         {
           email: newEmail,

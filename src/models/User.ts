@@ -1,7 +1,17 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, SchemaOptions as MongooseSchemaOptions, model, ObjectId } from "mongoose";
 import { Database } from "../class/Database";
+import { virtualId } from "../utils/manipulate";
+import { ITodo } from "./Todo";
+import { INote } from "./Note";
+import { ITransaction } from "./Transaction";
+import { ISchedule } from "./Schedule";
+import { IQuickLink } from "./QuickLink";
+import { IWidgetConfig } from "./WidgetConfig";
 
-export interface IUser extends Document {
+export const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+
+export interface IUser {
+  _id: ObjectId;
   fullName: string;
   email?: string;
   password?: string;
@@ -10,11 +20,25 @@ export interface IUser extends Document {
   verified: boolean;
   timeToAllowSendEmail: Date;
   createdAt: Date;
+  todos?: ITodo;
+  notes?: INote;
+  transactions?: ITransaction;
+  schedules?: ISchedule;
+  quickLinks?: IQuickLink;
+  widgetConfigs?: IWidgetConfig;
 }
 
-export const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+export const SchemaOptions: MongooseSchemaOptions = {
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    transform: (doc, { _id, __v, ...rest }) => {
+      return { id: _id.toString(), ...rest };
+    },
+  },
+};
 
-const UserSchema = new Schema<IUser>(
+const UserSchema = new Schema(
   {
     fullName: { type: String, required: true },
     email: {
@@ -44,47 +68,25 @@ const UserSchema = new Schema<IUser>(
     timeToAllowSendEmail: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
   },
-  { timestamps: true }
+  SchemaOptions
 );
 
 UserSchema.set("toObject", { virtuals: true });
 UserSchema.set("toJSON", { virtuals: true });
 
-UserSchema.virtual("todos", {
-  ref: "Todo",
-  localField: "_id",
-  foreignField: "userId",
-});
+virtualId(UserSchema);
 
-UserSchema.virtual("notes", {
-  ref: "Note",
-  localField: "_id",
-  foreignField: "userId",
-});
+const virtualRef = (...ref: string[]) => {
+  for (const r of ref) {
+    UserSchema.virtual(r.toLowerCase() + "s", {
+      ref: r,
+      localField: "_id",
+      foreignField: "userId",
+    });
+  }
+};
 
-UserSchema.virtual("money", {
-  ref: "Transaction",
-  localField: "_id",
-  foreignField: "userId",
-});
-
-UserSchema.virtual("schedules", {
-  ref: "Schedule",
-  localField: "_id",
-  foreignField: "userId",
-});
-
-UserSchema.virtual("links", {
-  ref: "QuickLink",
-  localField: "_id",
-  foreignField: "userId",
-});
-
-UserSchema.virtual("widgets", {
-  ref: "WidgetConfig",
-  localField: "_id",
-  foreignField: "userId",
-});
+virtualRef("Todo", "Note", "Transaction", "Schedule", "QuickLink", "WidgetConfig");
 
 const UserRaw = model<IUser>("User", UserSchema);
 

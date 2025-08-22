@@ -1,17 +1,20 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
+import { virtualId } from "../utils/manipulate";
+import { SchemaOptions } from "./User";
 
-export interface ISchedule extends Document {
+export interface ISchedule {
+  _id: ObjectId;
   title: string;
   details?: string;
   start: Date;
   end?: Date;
-  userId: mongoose.Types.ObjectId;
+  userId: ObjectId;
   isRecycled: boolean;
   deleteAt?: Date;
 }
 
-const ScheduleSchema = new Schema<ISchedule>(
+const ScheduleSchema = new Schema(
   {
     title: { type: String, required: true },
     details: String,
@@ -21,9 +24,11 @@ const ScheduleSchema = new Schema<ISchedule>(
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
   },
-  { timestamps: true }
+  SchemaOptions
 );
+
+virtualId(ScheduleSchema);
 
 const ScheduleRaw = model<ISchedule>("Schedule", ScheduleSchema);
 
-export const Schedule = new Database(ScheduleRaw)
+export const Schedule = new Database(ScheduleRaw);

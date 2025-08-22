@@ -15,7 +15,7 @@ export const editUser = async (req: Request, { res }: Response) => {
       res.tempClientField({ message: "New full name can not same as old full name", field: "newFullName" }).error();
       return;
     }
-    const updatedUser = await User.updateByIdAndSanitize(
+    const updatedUser = await User.updateByIdAndNormalize(
       user.id,
       { fullName },
       { options: { new: true, runValidators: true }, project: userProject() }

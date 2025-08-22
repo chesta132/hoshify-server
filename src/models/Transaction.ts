@@ -1,20 +1,23 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
+import { virtualId } from "../utils/manipulate";
+import { SchemaOptions } from "./User";
 
 const TransactionType = ["INCOME", "OUTCOME"] as const;
 
-export interface ITransaction extends Document {
+export interface ITransaction {
+  _id: ObjectId;
   amount: number;
   type: (typeof TransactionType)[number];
   title?: string;
   details?: string;
   date: Date;
-  userId: mongoose.Types.ObjectId;
+  userId: ObjectId;
   isRecycled: boolean;
   deleteAt?: Date;
 }
 
-const TransactionSchema = new Schema<ITransaction>(
+const TransactionSchema = new Schema(
   {
     amount: { type: Number, required: true },
     type: { type: String, enum: TransactionType, required: true },
@@ -25,8 +28,10 @@ const TransactionSchema = new Schema<ITransaction>(
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
   },
-  { timestamps: true }
+  SchemaOptions
 );
+
+virtualId(TransactionSchema);
 
 const TransactionRaw = model<ITransaction>("Transaction", TransactionSchema);
 

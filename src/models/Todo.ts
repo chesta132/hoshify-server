@@ -1,19 +1,22 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
+import { virtualId } from "../utils/manipulate";
+import { SchemaOptions } from "./User";
 
 const TodoStatus = ["PENDING", "ACTIVE", "COMPLETED", "CANCELED"] as const;
 
-export interface ITodo extends Document {
+export interface ITodo {
+  _id: ObjectId;
   title: string;
   details?: string;
   status: (typeof TodoStatus)[number];
   dueDate?: Date;
-  userId: mongoose.Types.ObjectId;
+  userId: ObjectId;
   isRecycled: boolean;
   deleteAt?: Date;
 }
 
-const TodoSchema = new Schema<ITodo>(
+const TodoSchema = new Schema(
   {
     title: { type: String, required: true },
     details: String,
@@ -23,9 +26,11 @@ const TodoSchema = new Schema<ITodo>(
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
   },
-  { timestamps: true }
+  SchemaOptions
 );
+
+virtualId(TodoSchema);
 
 const TodoRaw = model<ITodo>("Todo", TodoSchema);
 
-export const Todo = new Database(TodoRaw)
+export const Todo = new Database(TodoRaw);

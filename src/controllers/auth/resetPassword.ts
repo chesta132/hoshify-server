@@ -36,7 +36,7 @@ export const resetPassword = async (req: Request, { res }: Response) => {
       res.tempInvalidOTP().respond();
       return;
     }
-    const updatedUser = await User.updateByIdAndSanitize(user.id, { password }, { project: userProject() });
+    const updatedUser = await User.updateByIdAndNormalize(user.id, { password }, { project: userProject() });
     if (!updatedUser) {
       res.tempNotFound("user").respond();
       return;
