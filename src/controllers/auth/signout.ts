@@ -5,11 +5,6 @@ import { CLIENT_URL } from "../../app";
 import { verifyRefreshToken } from "../../utils/token";
 import { Revoked } from "../../models/Revoked";
 
-export const clearCookies = (res: Response) => {
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
-};
-
 export const signout = async (req: Request, { res }: Response) => {
   const redirect = () => res.redirect(`${CLIENT_URL}/signin`);
   try {
@@ -17,7 +12,7 @@ export const signout = async (req: Request, { res }: Response) => {
     const { refreshToken } = req.cookies;
     const verifiedPayload = verifyRefreshToken(refreshToken) as jwt.JwtPayload | null;
     if (!verifiedPayload) {
-      clearCookies(res);
+      res.clearCookie("accessToken").clearCookie("refreshToken");
       redirect();
       return;
     }
@@ -25,7 +20,7 @@ export const signout = async (req: Request, { res }: Response) => {
 
     await Revoked.create({ value: refreshToken, userId: user.id, deleteAt: expIn, type: "TOKEN" });
 
-    clearCookies(res);
+      res.clearCookie("accessToken").clearCookie("refreshToken");
     redirect();
   } catch (error) {
     handleError(error, res);

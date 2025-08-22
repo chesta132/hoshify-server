@@ -9,7 +9,6 @@ import { Schedule } from "../../models/Schedule";
 import { Todo } from "../../models/Todo";
 import { WidgetConfig } from "../../models/WidgetConfig";
 import { Transaction } from "../../models/Transaction";
-import { clearCookies } from "../auth/signout";
 
 export const deleteUser = async (req: Request, { res }: Response) => {
   try {
@@ -40,7 +39,7 @@ export const deleteUser = async (req: Request, { res }: Response) => {
       Transaction.deleteMany(deleteConfig),
     ]);
     await User.findByIdAndDelete(user.id);
-    clearCookies(res);
+    res.clearCookie("accessToken").clearCookie("refreshToken");
 
     res.redirect(`${CLIENT_URL}/signin`);
   } catch (err) {
