@@ -2,27 +2,30 @@ import { Response, Request, NextFunction } from "express";
 import handleError from "../utils/handleError";
 import { verifyAccessToken, verifyRefreshToken } from "../utils/token";
 import { Revoked } from "../models/Revoked";
-import { User } from "../models/User";
+import { User, UserRole } from "../models/User";
+
+const isRefreshSafe = async (refreshToken: string) => {
+  const refreshPayload = verifyRefreshToken(refreshToken);
+
+  if (!refreshPayload) return;
+  const blacklistedToken = await Revoked.findOne({ value: refreshToken });
+  if (blacklistedToken) return;
+  return { refreshPayload, blacklistedToken };
+};
 
 export const authMiddleware = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
+    const { refreshToken, accessToken } = req.cookies;
+
     // refresh token validation
-    const refreshToken = req.cookies?.refreshToken;
-    const refreshPayload = verifyRefreshToken(refreshToken);
-
-    if (!refreshPayload) {
+    const isRSafe = await isRefreshSafe(refreshToken);
+    if (!isRSafe) {
       res.tempInvalidToken().respond();
       return;
     }
-
-    const blacklistedToken = await Revoked.findOne({ value: refreshToken });
-    if (blacklistedToken) {
-      res.tempInvalidToken().respond();
-      return;
-    }
+    const { refreshPayload } = isRSafe;
 
     // access token validation
-    const accessToken = req.cookies?.accessToken;
     const payload = verifyAccessToken(accessToken);
 
     if (!payload) {
@@ -58,7 +61,38 @@ export const authMiddleware = async (req: Request, { res }: Response, next: Next
   }
 };
 
-export const requireVerified = (req: Request, { res }: Response, next: NextFunction) => {
-  if (req.user?.verified) next();
-  else res.tempNotVerified().respond();
+export const requireVerified = async (req: Request, { res }: Response, next: NextFunction) => {
+  if (req.user?.verified) {
+    if (req.user.verified) next();
+    else res.tempNotVerified().respond();
+  } else {
+    const { refreshToken } = req.cookies;
+    const isRSafe = await isRefreshSafe(refreshToken);
+    if (!isRSafe) {
+      res.tempInvalidToken().respond();
+      return;
+    }
+    const { refreshPayload } = isRSafe;
+
+    if (refreshPayload.verified) next();
+    else res.tempNotVerified().respond();
+  }
+};
+
+export const requireRole = async (req: Request, { res }: Response, next: NextFunction, role: UserRole | UserRole[]) => {
+  if (req.user?.role) {
+    if (typeof role === "string" ? req.user.role === role : role.includes(req.user.role)) next();
+    else res.tempInvalidRole(typeof role === "string" ? role : role.join(", ")).respond();
+  } else {
+    const { refreshToken } = req.cookies;
+    const isRSafe = await isRefreshSafe(refreshToken);
+    if (!isRSafe) {
+      res.tempInvalidToken().respond();
+      return;
+    }
+    const { refreshPayload } = isRSafe;
+
+    if (typeof role === "string" ? refreshPayload.role === role : role.includes(refreshPayload.role)) next();
+    else res.tempInvalidRole(typeof role === "string" ? role : role.join(", ")).respond();
+  }
 };

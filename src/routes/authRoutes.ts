@@ -1,4 +1,4 @@
-import { authMiddleware, requireVerified } from "../middlewares/auth";
+import { authMiddleware, requireRole, requireVerified } from "../middlewares/auth";
 import { signin } from "../controllers/auth/signin";
 import { signout } from "../controllers/auth/signout";
 import { signup } from "../controllers/auth/signup";
@@ -13,6 +13,8 @@ import { resetPassword } from "../controllers/auth/resetPassword";
 import { changePassword } from "../controllers/auth/changePassword";
 import { CLIENT_URL } from "../app";
 import { googleCallback } from "../controllers/auth/google";
+import { requestRole } from "@/controllers/auth/requestRole";
+import { acceptRequestRole } from "@/controllers/auth/acceptRequestRole";
 const authRouter = Router();
 
 authRouter.post("/signup", signup);
@@ -46,5 +48,9 @@ authRouter.put("/update-email", changeEmail);
 authRouter.use(requireVerified);
 authRouter.put("/reset-password", resetPassword);
 authRouter.put("/update-password", changePassword);
+authRouter.post("/request-role", requestRole);
+
+authRouter.use((req, res, next) => requireRole(req, res, next, "OWNER"));
+authRouter.put("/accept-request-role", acceptRequestRole);
 
 export default authRouter;

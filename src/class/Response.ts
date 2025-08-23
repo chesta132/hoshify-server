@@ -9,11 +9,12 @@ import {
   resRefreshToken,
   resRefreshTokenSessionOnly,
 } from "../utils/token";
+import { UserRole } from "@/models/User";
 
 /**
  * Authentication-related error codes.
  */
-export const codeErrorAuth = ["INVALID_AUTH", "IS_BOUND", "NOT_BOUND", "INVALID_TOKEN"] as const;
+export const codeErrorAuth = ["INVALID_AUTH", "IS_BOUND", "NOT_BOUND", "INVALID_TOKEN", "INVALID_ROLE"] as const;
 
 /**
  * Field validation-related error codes.
@@ -23,7 +24,7 @@ export const codeErrorField = ["MISSING_FIELDS", "CLIENT_FIELD"] as const;
 /**
  * Client-side related error codes.
  */
-export const codeErrorClient = ["TOO_MUCH_REQUEST", "SELF_REQUEST", "CLIENT_REFRESH", "IS_VERIFIED", "NOT_VERIFIED"] as const;
+export const codeErrorClient = ["TOO_MUCH_REQUEST", "SELF_REQUEST", "CLIENT_REFRESH", "IS_VERIFIED", "NOT_VERIFIED", "INVALID_CLIENT_TYPE"] as const;
 
 /**
  * Server-side related error codes.
@@ -60,7 +61,7 @@ const statusAlias: {
   status: number;
 }[] = [
   { code: ["INVALID_AUTH", "INVALID_TOKEN"], status: 401 },
-  { code: ["IS_BOUND", "NOT_BOUND"], status: 403 },
+  { code: ["IS_BOUND", "NOT_BOUND", "INVALID_ROLE"], status: 403 },
   { code: ["NOT_FOUND"], status: 404 },
   { code: ["CLIENT_FIELD", "MISSING_FIELDS", "SELF_REQUEST"], status: 406 },
   { code: ["TOO_MUCH_REQUEST"], status: 429 },
@@ -95,7 +96,7 @@ export type ResType<SuccessReady extends boolean, ErrorReady extends boolean> = 
   ConditionalFunc<ErrorReady, () => Responded>
 >;
 
-type CookieUserBase = { id: string | unknown; verified: boolean };
+type CookieUserBase = { id: string | unknown; verified: boolean; role: UserRole };
 type CookieUser<T> = T extends CookieUserBase ? { user?: CookieUserBase } : { user: CookieUserBase };
 
 type CookieType<T = undefined> = EitherWithKeys<
@@ -131,7 +132,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   private _rememberMe?: boolean;
 
   /**
-   * Initialize Respond with the original Response.
+   * Initialize Template of the original Response.
    * Uses Proxy to fallback to the underlying Express Response methods and properties.
    */
   constructor(res: Response) {
@@ -224,12 +225,12 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   ) => {
     if (Array.isArray(this._body)) {
       const { limit, offset } = paginateMeta;
-      const hasNext = this._body.length > limit;
+      const hasNext = this._body.length >= limit;
       const nextOffset = hasNext ? offset + limit : null;
 
-      const data = hasNext ? this._body.slice(0, limit) : this._body;
+      // const data = hasNext ? this._body.slice(0, limit) : this._body;
 
-      this._jsonBody.data = data;
+      // this._jsonBody.data = data;
       this._jsonBody.meta.hasNext = hasNext;
       this._jsonBody.meta.nextOffset = nextOffset;
     }
@@ -256,10 +257,10 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
       if (!this._body) return this;
       user = this._body as unknown as CookieUserBase;
     }
-    let { id: userId, verified } = user as { id: string; verified: boolean };
-    this._accessToken = createAccessToken({ userId, verified, expires: new Date(Date.now() + fiveMin) });
+    let { id, verified, role } = user;
+    this._accessToken = createAccessToken({ userId: id as string, verified, expires: new Date(Date.now() + fiveMin), role });
     this._refreshToken = createRefreshToken(
-      { userId, verified, expires: new Date(Date.now() + oneWeeks * 1.5) },
+      { userId: id as string, verified, expires: new Date(Date.now() + oneWeeks * 1.5), role },
       this._rememberMe ? undefined : null
     );
     return this;
@@ -355,12 +356,12 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    *
    * @returns this
    */
-  noContent: ResType<SuccessReady, false> = (() => {
+  noContent() {
     this.finalize(true);
-    this._res.status(204).json(this._jsonBody);
+    this._res.status(204).send();
     this.reset();
     return this;
-  }) as any;
+  }
 
   /**
    * Send a standard 201 Created response.
@@ -405,7 +406,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }) as any;
 
   /**
-   * Respond with a missing fields error.
+   * Template of a missing fields error.
    *
    * @example
    * ```ts
@@ -422,23 +423,42 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond with a client field error.
+   * Template of a client field error.
    *
    * @example
    * ```ts
    * res.tempClientField("username", "Username is invalid");
    * ```
    *
-   * @param err Field name & Error message causing the error
+   * @param field Field name that causing error
+   * @param message Error message for client
+   * @param restErr Additional error properties
    * @returns this
    */
-  tempClientField(err: Omit<ErrorResponseType, "code">) {
-    const body = this.body({ error: { code: "CLIENT_FIELD", ...err } });
+  tempClientField(field: ErrorResponseType["field"], message: string, restErr?: RestError) {
+    const body = this.body({ error: { ...restErr, field, message, code: "CLIENT_FIELD" } });
     return body;
   }
 
   /**
-   * Respond with an invalid OTP error.
+   * Template of an invalid client field type.
+   *
+   * @example
+   * ```ts
+   * res.tempClientField("username");
+   * ```
+   *
+   * @param field Field name that causing the error
+   * @param restErr Additional error properties
+   * @returns this
+   */
+  tempClientType(field: string, restErr?: RestError) {
+    const body = this.body({ error: { ...restErr, code: "INVALID_CLIENT_TYPE", message: `Invalid ${field} type`, title: "Invalid Type" } });
+    return body;
+  }
+
+  /**
+   * Template of an invalid OTP error.
    *
    * @example
    * ```ts
@@ -462,7 +482,31 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond with an authentication error.
+   * Template of an invalid OTP error.
+   *
+   * @example
+   * ```ts
+   * res.tempInvalidVerifyToken();
+   * ```
+   *
+   * @param restErr Additional error properties
+   * @returns typeof .body({ error })
+   */
+  tempInvalidVerifyToken(restErr?: Omit<RestError, "field">) {
+    const body = this.body({
+      error: {
+        ...restErr,
+        title: "Invalid OTP",
+        message: "Invalid or expired Verification token. Please create a new verification email request.",
+        code: "CLIENT_FIELD",
+        field: "token",
+      },
+    });
+    return body;
+  }
+
+  /**
+   * Template of an authentication error.
    *
    * @example
    * ```ts
@@ -476,7 +520,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     const body = this.body({
       error: {
         ...restErr,
-        title: "Authentication needed",
+        title: "Authentication Needed",
         message: "Authentication needed please back to dashboard or change your account",
         code: "INVALID_AUTH",
       },
@@ -485,7 +529,23 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond with an invalid token error.
+   * Template of an invalid role.
+   *
+   * @example
+   * ```ts
+   * res.tempInvalidRole("DEVELOPER");
+   * ```
+   *
+   * @param role Role to access
+   * @returns typeof .body({ error })
+   */
+  tempInvalidRole(role: string) {
+    const body = this.body({ error: { code: "INVALID_ROLE", message: `${role.toLowerCase().capital()} role needed`, title: "Invalid Role" } });
+    return body;
+  }
+
+  /**
+   * Template of an invalid token error.
    *
    * @example
    * ```ts
@@ -508,7 +568,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond with a not found error.
+   * Template of a not found error.
    *
    * @example
    * ```ts
@@ -533,7 +593,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond when account is already bound.
+   * Template when account is already bound.
    *
    * @example
    * ```ts
@@ -552,7 +612,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   };
 
   /**
-   * Respond when account is not bound.
+   * Template when account is not bound.
    *
    * @example
    * ```ts
@@ -576,7 +636,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond with too many requests error.
+   * Template of too many requests error.
    *
    * @example
    * ```ts
@@ -600,7 +660,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond with limit send email error.
+   * Template of limit send email error.
    *
    * @example
    * ```ts
@@ -623,7 +683,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond when email is already verified.
+   * Template when email is already verified.
    *
    * @example
    * ```ts
@@ -639,7 +699,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond when account is not verified.
+   * Template when account is not verified.
    *
    * @example
    * ```ts
@@ -662,7 +722,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Respond when a user tries to perform a self request.
+   * Template when a user tries to perform a self request.
    *
    * @example
    * ```ts

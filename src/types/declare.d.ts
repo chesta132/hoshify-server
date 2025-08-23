@@ -1,5 +1,5 @@
 import { Respond } from "../class/Response";
-import { IUser } from "../models/User";
+import { IUser, UserRole } from "../models/User";
 import { NormalizedData } from "./types";
 import jwt from "jsonwebtoken";
 
@@ -27,5 +27,6 @@ declare module "jsonwebtoken" {
     userId: string;
     expires: Date;
     verified: boolean;
+    role: UserRole;
   }
 }

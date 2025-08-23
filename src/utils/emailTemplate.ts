@@ -16,7 +16,7 @@ export function emailTemplate(props: {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>${props.title}</title>
+    <title>${props.title.capitalEach()}</title>
     <!--[if mso]>
     <noscript>
         <xml>
@@ -391,7 +391,7 @@ export function emailTemplate(props: {
         
         <!-- Main Content -->
         <div class="content">
-            <h1 class="title">${props.title}</h1>
+            <h1 class="title">${props.title.capitalEach()}</h1>
             
             <p class="greeting">Hello ${props.name}! 👋</p>
             

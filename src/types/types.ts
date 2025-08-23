@@ -1,7 +1,7 @@
 import { Document, ObjectId } from "mongoose";
 import { codeErrorAuth, codeErrorClient, codeErrorField, codeErrorServer, CodeErrorValues } from "../class/Response";
 
-export type Fields = "password" | "newPassword" | "username" | "email" | "newEmail" | "otp" | "newFullName";
+export type Fields = "password" | "newPassword" | "username" | "email" | "newEmail" | "otp" | "newFullName" | "token";
 
 export type CodeAuthError = (typeof codeErrorAuth)[number];
 export type CodeFieldError = (typeof codeErrorField)[number];

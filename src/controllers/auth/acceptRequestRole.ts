@@ -1,0 +1,50 @@
+import { Request, Response } from "express";
+import handleError from "@/utils/handleError";
+import { Verify } from "@/models/Verify";
+import { decrypt } from "@/utils/crypto";
+import { User, UserRole } from "@/models/User";
+import { normalizeUserQuery, userProject } from "@/utils/normalizeQuery";
+import { sendRoleGranted } from "@/utils/email";
+
+export const acceptRequestRole = async (req: Request, { res }: Response) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      res.tempMissingFields("token").respond();
+      return;
+    }
+
+    const decrToken = decrypt(token) as string;
+    const indexOfReqRole = decrToken.indexOf("requestRole_");
+    const indexOfRole = decrToken.lastIndexOf("role_");
+
+    const userId = decrToken.slice(indexOfReqRole + 12, indexOfRole - 1);
+    const role = decrToken.slice(indexOfRole + 5) as UserRole
+
+    const verification = await Verify.findOne({
+      userId,
+      value: token,
+      type: "REQUEST_ROLE",
+    });
+    if (!verification) {
+      res.tempInvalidVerifyToken().error();
+      return;
+    }
+
+    const user = await User.updateByIdAndNormalize(userId, { role }, { options: { new: true, runValidators: true }, project: userProject() });
+    if (!user) {
+      res.tempInvalidVerifyToken().error();
+      return;
+    }
+
+    await Verify.deleteOne({ value: token, type: "REQUEST_ROLE", userId });
+    await sendRoleGranted(role, user.email || user.gmail!, user.fullName);
+
+    res
+      .body({ success: normalizeUserQuery(user) })
+      .notif(`You has been promoted to ${role.toLowerCase()} role`)
+      .respond();
+  } catch (err) {
+    handleError(err, res);
+  }
+};
