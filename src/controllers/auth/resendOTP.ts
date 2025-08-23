@@ -11,15 +11,14 @@ type TypeOTP = "CHANGE_EMAIL" | "CHANGE_PASSWORD" | "DELETE_ACCOUNT";
 export const resendOTP = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const { type }: { type?: TypeOTP } = req.body;
+    const { type }: { type?: TypeOTP } = req.query;
     const otp = generateOTP();
 
-    if (typeof user.timeToAllowSendEmail === "object" && (user.timeToAllowSendEmail as Date) > new Date()) {
-      res.tempLimitSendEmail().respond();
-      return;
-    }
-
     const createAndSend = async (type: IVerify["type"]) => {
+      if (typeof user.timeToAllowSendEmail === "object" && (user.timeToAllowSendEmail as Date) > new Date()) {
+        res.tempLimitSendEmail().respond();
+        return;
+      }
       await Verify.create({ value: otp, type, userId: user.id, deleteAt: new Date(Date.now() + oneMin * 2) });
       await sendOTPEmail(user.email || user.gmail!, otp, user.fullName);
       const updatedUser = await User.updateByIdAndNormalize(
@@ -39,9 +38,10 @@ export const resendOTP = async (req: Request, { res }: Response) => {
         return;
       case "DELETE_ACCOUNT":
         await createAndSend("DELETE_ACCOUNT_OTP");
+        return;
+      default:
+        res.tempClientField("otp", "Invalid type. Please send a valid type").error();
     }
-
-    res.tempClientField("otp", "Invalid type please select a valid type").error();
   } catch (err) {
     handleError(err, res);
   }

@@ -1,17 +1,19 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Todo } from "@/models/Todo";
+import { isValidObjectId } from "mongoose";
 
 export const editTodo = async (req: Request, { res }: Response) => {
   try {
-    const { todoId, title, details, status, dueDate } = req.body;
-    if (!todoId) {
-      res.tempMissingFields("todo ID").respond();
+    const { id } = req.params;
+    const { title, details, status, dueDate } = req.body;
+    if (!isValidObjectId(id)) {
+      res.tempClientType("Id").respond();
       return;
     }
 
     const todo = await Todo.updateByIdAndNormalize(
-      todoId,
+      id,
       {
         title,
         details,

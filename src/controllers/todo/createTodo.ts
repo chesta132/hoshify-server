@@ -18,7 +18,10 @@ export const createTodo = async (req: Request, { res }: Response) => {
       dueDate,
       userId: user.id,
     });
-    res.body({ success: todo }).notif(`${title} added`).respond();
+    res
+      .body({ success: todo })
+      .notif(`${todo.title.ellipsis(10)} added`)
+      .respond();
   } catch (err) {
     handleError(err, res);
   }

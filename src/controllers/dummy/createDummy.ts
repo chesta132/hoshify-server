@@ -6,8 +6,10 @@ import { oneWeeks } from "@/utils/token";
 export const createDummy = async <T extends { isRecycled: boolean }>(model: Database<T>, name: string, req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const { length, transactionType, todoStatus } = req.body;
-    const dummys = await model.generateDummy(length, {
+    const { length } = req.query;
+    const { transactionType, todoStatus } = req.body;
+
+    const dummys = await model.generateDummy(parseInt(length?.toString() || "0") || 0, {
       userId: { fixed: user.id },
       title: { dynamicString: `Dummy ${name.capitalEach()}` },
       details: { fixed: new Date().toFormattedString({ includeHour: true }) },

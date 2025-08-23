@@ -9,9 +9,10 @@ import { User } from "../../models/User";
 export const resetPassword = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const { newPassword, otp } = req.body;
-    if (!newPassword || !otp) {
-      res.tempMissingFields("New password, otp").respond();
+    const { token } = req.query;
+    const { newPassword } = req.body;
+    if (!newPassword || !token) {
+      res.tempMissingFields("New password, token").respond();
       return;
     }
     if (!user.password || !user.email) {
@@ -31,7 +32,7 @@ export const resetPassword = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const verifyOtp = await Verify.findOne({ value: otp, type: "RESET_PASSWORD_OTP", userId: user.id });
+    const verifyOtp = await Verify.findOne({ value: token, type: "RESET_PASSWORD_OTP", userId: user.id });
     if (!verifyOtp) {
       res.tempInvalidOTP().respond();
       return;
@@ -41,7 +42,7 @@ export const resetPassword = async (req: Request, { res }: Response) => {
       res.tempNotFound("user").respond();
       return;
     }
-    await Verify.deleteOne({ value: otp, type: "RESET_PASSWORD_OTP", userId: user.id });
+    await Verify.deleteOne({ value: token, type: "RESET_PASSWORD_OTP", userId: user.id });
     await sendCredentialChanges(user.email, user.fullName);
 
     res.body({ success: updatedUser }).notif("Successfully reset and update new password").ok();

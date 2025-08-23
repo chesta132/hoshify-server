@@ -81,15 +81,15 @@ console.debug = function (message?: any, ...optionalParams: any[]) {
   const createdError = new Error();
   const callerLine = createdError.stack?.split("\n")[2];
   console.log("Called by: ", callerLine);
-  return console.log(message, ...optionalParams);
+  return this.log(message, ...optionalParams);
 };
 
 console.debugTable = function (message?: any, ...optionalParams: any[]) {
   if (NODE_ENV === "production") return;
   const createdError = new Error();
   const callerLine = createdError.stack?.split("\n")[2];
-  console.log("Called by: ", callerLine);
-  return console.table(message, ...optionalParams);
+  this.log("Called by: ", callerLine);
+  return this.table(message, ...optionalParams);
 };
 
 Date.prototype.toFormattedString = function (optionsProp = { includeThisYear: true, includeHour: false }) {
@@ -126,4 +126,11 @@ Date.prototype.toFormattedString = function (optionsProp = { includeThisYear: tr
 Array.prototype.plural = function (baseWord, uncountableNouns = false) {
   if (this.length === 1 || (uncountableNouns && this.length === 0)) return baseWord;
   else return baseWord + "s";
+};
+
+String.prototype.ellipsis = function (max) {
+  if (max <= 0) return "";
+  if (this.length <= max) return this.toString();
+  if (max <= 3) return this.slice(0, max);
+  return this.slice(0, max - 3) + "...";
 };

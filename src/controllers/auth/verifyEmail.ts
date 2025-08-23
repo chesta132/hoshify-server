@@ -7,13 +7,13 @@ import { Verify } from "../../models/Verify";
 
 export const verifyEmail = async (req: Request, { res }: Response) => {
   try {
-    const { token } = req.body;
+    const { token } = req.query;
     if (!token) {
       res.tempMissingFields("token").respond();
       return;
     }
 
-    const tokenDecrypted = decrypt(token);
+    const tokenDecrypted = decrypt(token?.toString());
     const userId = tokenDecrypted.slice(tokenDecrypted.indexOf("verify_") + 7);
     const user = await User.findById(userId);
     if (!user) {

@@ -42,7 +42,6 @@ authRouter.get(
 );
 
 authRouter.post("/send-otp", resendOTP);
-
 authRouter.put("/update-email", changeEmail);
 
 authRouter.use(requireVerified);

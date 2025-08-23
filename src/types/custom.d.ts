@@ -45,6 +45,14 @@ interface String {
    * @returns The string with the specified word capitalized.
    */
   capitalEach: (start?: string | number, end?: string | number) => string;
+
+  /**
+   * Truncates the string and appends an ellipsis (`...`) if it exceeds the specified maximum length.
+   *
+   * @param max - The maximum allowed length of the string before truncation.
+   * @returns The truncated string with an ellipsis if it exceeded the maximum length, otherwise the original string.
+   */
+  ellipsis: (max: number) => string;
 }
 
 interface Date {

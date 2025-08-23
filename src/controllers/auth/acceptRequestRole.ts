@@ -8,13 +8,13 @@ import { sendRoleGranted } from "@/utils/email";
 
 export const acceptRequestRole = async (req: Request, { res }: Response) => {
   try {
-    const { token } = req.body;
+    const { token } = req.query;
     if (!token) {
       res.tempMissingFields("token").respond();
       return;
     }
 
-    const decrToken = decrypt(token) as string;
+    const decrToken = decrypt(token.toString()) as string;
     const indexOfReqRole = decrToken.indexOf("requestRole_");
     const indexOfRole = decrToken.lastIndexOf("role_");
 

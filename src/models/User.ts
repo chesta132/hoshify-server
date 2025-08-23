@@ -104,6 +104,7 @@ const virtualRef = (...ref: (string | [string, string])[]) => {
 };
 
 virtualRef("Todo", "Note", "Transaction", "Schedule", ["links", "QuickLink"], ["widgets", "Widget"]);
+export const allUserPopulate = ["links", "money", "notes", "schedules", "todos", "widgets"];
 
 const UserRaw = model<IUser>("User", UserSchema);
 

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
-import { User, userRole } from "@/models/User";
+import { User, UserRole, userRole } from "@/models/User";
 import { Verify } from "@/models/Verify";
 import { encrypt } from "@/utils/crypto";
 import { sendRequestRole } from "@/utils/email";
@@ -10,7 +10,8 @@ import { userProject } from "@/utils/normalizeQuery";
 export const requestRole = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const { role } = req.body;
+    let { role }: { role?: UserRole } = req.query;
+    role = role?.toString().toUpperCase() as UserRole;
     if (!userRole.includes(role) || user.role === role) {
       res.tempClientType("role").respond();
     }

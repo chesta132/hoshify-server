@@ -8,9 +8,10 @@ import { Verify } from "../../models/Verify";
 export const changeEmail = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const { newEmail, otp } = req.body;
-    if (!newEmail || !otp) {
-      res.tempMissingFields("new email, otp").error();
+    const { token } = req.query;
+    const { newEmail } = req.body;
+    if (!newEmail) {
+      res.tempMissingFields("new email").error();
       return;
     }
 
@@ -41,7 +42,6 @@ export const changeEmail = async (req: Request, { res }: Response) => {
         res.tempNotFound("user").error();
         return;
       }
-      await Verify.deleteOne({ value: otp, type: "CHANGE_EMAIL_OTP", userId: user.id });
       return updatedUser;
     };
 
@@ -52,13 +52,19 @@ export const changeEmail = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const VerifyOtp = await Verify.findOne({ value: otp, type: "CHANGE_EMAIL_OTP", userId: user.id });
+    if (!token) {
+      res.tempMissingFields("token").respond();
+      return;
+    }
+
+    const VerifyOtp = await Verify.findOne({ value: token, type: "CHANGE_EMAIL_OTP", userId: user.id });
     if (!VerifyOtp) {
       res.tempInvalidOTP().error();
       return;
     }
 
     const updatedUser = await updateEmail();
+    await Verify.deleteOne({ value: token, type: "CHANGE_EMAIL_OTP", userId: user.id });
     await sendCredentialChanges(user.email, user.fullName, "email");
 
     res.body({ success: updatedUser }).notif("Local email successfully updated").ok();

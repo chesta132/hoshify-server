@@ -9,6 +9,6 @@ export const todoRoutes = Router();
 
 todoRoutes.post("/", createTodo);
 todoRoutes.get("/", getTodos);
-todoRoutes.get("/:todoId", getTodo);
-todoRoutes.put("/", editTodo);
-todoRoutes.delete("/", deleteTodo);
+todoRoutes.get("/:id", getTodo);
+todoRoutes.put("/:id", editTodo);
+todoRoutes.delete("/:id", deleteTodo);
