@@ -1,0 +1,34 @@
+import { Request, Response } from "express";
+import handleError from "@/utils/handleError";
+import { Todo } from "@/models/Todo";
+
+export const getTodos = async (req: Request, { res }: Response) => {
+  try {
+    const user = req.user!;
+    const { offset } = req.query;
+    if (offset) {
+      try {
+        parseInt(offset.toString());
+      } catch {
+        res.tempClientType("offset").respond();
+        return;
+      }
+    }
+    const limit = 30;
+    const skip = parseInt(offset?.toString() || "0");
+
+    const todos = await Todo.findAndNormalize(
+      { userId: user.id, isRecycled: false },
+      { returnArray: true, sort: { createdAt: -1 }, options: { limit, skip } }
+    );
+    res
+      .body({ success: todos })
+      .paginate({
+        limit,
+        offset: skip,
+      })
+      .respond();
+  } catch (err) {
+    handleError(err, res);
+  }
+};
