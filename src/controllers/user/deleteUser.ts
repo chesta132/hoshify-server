@@ -7,7 +7,7 @@ import { Note } from "../../models/Note";
 import { QuickLink } from "../../models/QuickLink";
 import { Schedule } from "../../models/Schedule";
 import { Todo } from "../../models/Todo";
-import { WidgetConfig } from "../../models/WidgetConfig";
+import { Widget } from "../../models/Widget";
 import { Transaction } from "../../models/Transaction";
 
 export const deleteUser = async (req: Request, { res }: Response) => {
@@ -35,7 +35,7 @@ export const deleteUser = async (req: Request, { res }: Response) => {
       QuickLink.deleteMany(deleteConfig),
       Schedule.deleteMany(deleteConfig),
       Todo.deleteMany(deleteConfig),
-      WidgetConfig.deleteMany(deleteConfig),
+      Widget.deleteMany(deleteConfig),
       Transaction.deleteMany(deleteConfig),
     ]);
     await User.findByIdAndDelete(user.id);

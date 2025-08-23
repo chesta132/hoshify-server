@@ -10,7 +10,7 @@ export interface ITodo {
   title: string;
   details: string;
   status: (typeof TodoStatus)[number];
-  dueDate?: Date;
+  dueDate: Date;
   userId: ObjectId | string;
   isRecycled: boolean;
   deleteAt?: Date;

@@ -6,7 +6,7 @@ import { INote } from "./Note";
 import { ITransaction } from "./Transaction";
 import { ISchedule } from "./Schedule";
 import { IQuickLink } from "./QuickLink";
-import { IWidgetConfig } from "./WidgetConfig";
+import { IWidget } from "./Widget";
 
 export const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 export const userRole = ["OWNER", "DEVELOPER", "USER"] as const;
@@ -28,7 +28,7 @@ export interface IUser {
   transactions?: ITransaction;
   schedules?: ISchedule;
   quickLinks?: IQuickLink;
-  widgetConfigs?: IWidgetConfig;
+  widget?: IWidget;
 }
 
 export const schemaOptions: SchemaOptions = {
@@ -103,7 +103,7 @@ const virtualRef = (...ref: (string | [string, string])[]) => {
   }
 };
 
-virtualRef("Todo", "Note", "Transaction", "Schedule", ["links", "QuickLink"], ["widgets", "WidgetConfig"]);
+virtualRef("Todo", "Note", "Transaction", "Schedule", ["links", "QuickLink"], ["widgets", "Widget"]);
 
 const UserRaw = model<IUser>("User", UserSchema);
 

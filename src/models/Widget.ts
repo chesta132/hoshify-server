@@ -4,7 +4,7 @@ import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
 const WidgetTypes = ["WEATHER", "CHART", "MONEY_OVERVIEW", "SCHEDULE", "QUICK_LINKS", "TODO_3_DAY"] as const;
 
-export interface IWidgetConfig {
+export interface IWidget {
   _id: ObjectId;
   type: (typeof WidgetTypes)[number];
   position: number;
@@ -13,7 +13,7 @@ export interface IWidgetConfig {
   color: string;
 }
 
-const WidgetConfigSchema = new Schema(
+const WidgetSchema = new Schema(
   {
     type: { type: String, enum: WidgetTypes, required: true },
     position: { type: Number, required: true },
@@ -24,8 +24,8 @@ const WidgetConfigSchema = new Schema(
   schemaOptions
 );
 
-virtualSchema(WidgetConfigSchema);
+virtualSchema(WidgetSchema);
 
-const WidgetConfigRaw = model<IWidgetConfig>("WidgetConfig", WidgetConfigSchema);
+const WidgetRaw = model<IWidget>("Widget", WidgetSchema);
 
-export const WidgetConfig = new Database(WidgetConfigRaw);
+export const Widget = new Database(WidgetRaw);
