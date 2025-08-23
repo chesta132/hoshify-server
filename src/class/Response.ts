@@ -1,4 +1,4 @@
-import { CodeError, EitherWithKeys, Fields, OneFieldOnly } from "../types/types";
+import { CodeError, ConditionalFunc, EitherWithKeys, Fields, OneFieldOnly } from "../types/types";
 import { CookieOptions, Response } from "express";
 import {
   createAccessToken,
@@ -87,11 +87,13 @@ export interface DataToResponse<T> {
   data: T;
 }
 
-export type ResType<SuccessReady extends boolean = true, ErrorReady extends boolean = true> = SuccessReady extends true
-  ? () => Respond<unknown, false, false>
-  : ErrorReady extends true
-  ? () => () => Respond<unknown, false, false>
-  : never;
+type Responded = Respond<unknown, false, false>;
+
+export type ResType<SuccessReady extends boolean, ErrorReady extends boolean> = ConditionalFunc<
+  SuccessReady,
+  () => Responded,
+  ConditionalFunc<ErrorReady, () => Responded>
+>;
 
 type CookieUserBase = { id: string | unknown; verified: boolean };
 type CookieUser<T> = T extends CookieUserBase ? { user?: CookieUserBase } : { user: CookieUserBase };
@@ -151,13 +153,13 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     this._jsonBody = defaultBody();
     this._accessToken = undefined;
     this._refreshToken = undefined;
-    return this as Respond<unknown, false>;
+    return this as Respond<unknown, false, false>;
   }
 
   private finalize<S extends boolean>(success: S) {
     this._jsonBody.meta.status = success ? "SUCCESS" : "ERROR";
     this._jsonBody.data = success ? this._body : this._errorBody;
-    return this as unknown as S extends true ? Respond<SuccessType, true> : Respond<ErrorResponseType, true>;
+    return this as unknown as S extends true ? Respond<SuccessType, true, false> : Respond<unknown, false, true>;
   }
 
   /**
@@ -217,7 +219,9 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    * @param paginateMeta Pagination options (limit, offset)
    * @returns this
    */
-  paginate(paginateMeta: RespondOptions["paginateMeta"]) {
+  paginate: ConditionalFunc<SuccessType extends any[] ? true : false, (paginateMeta: RespondOptions["paginateMeta"]) => this> = ((
+    paginateMeta: RespondOptions["paginateMeta"]
+  ) => {
     if (Array.isArray(this._body)) {
       const { limit, offset } = paginateMeta;
       const hasNext = this._body.length > limit;
@@ -230,7 +234,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
       this._jsonBody.meta.nextOffset = nextOffset;
     }
     return this;
-  }
+  }) as any;
 
   /**
    * Generate access and refresh tokens for the given user.
