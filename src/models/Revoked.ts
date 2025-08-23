@@ -9,7 +9,7 @@ export interface IRevoked {
   _id: ObjectId;
   value: string;
   type: (typeof Revoke)[number];
-  userId: ObjectId;
+  userId: ObjectId | string;
   deleteAt: Date;
 }
 

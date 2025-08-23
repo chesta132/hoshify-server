@@ -8,7 +8,7 @@ export interface IWidgetConfig {
   _id: ObjectId;
   type: (typeof WidgetTypes)[number];
   position: number;
-  userId: ObjectId;
+  userId: ObjectId | string;
   settings: any;
   color: string;
 }

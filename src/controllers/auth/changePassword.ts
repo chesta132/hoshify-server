@@ -18,12 +18,12 @@ export const changePassword = async (req: Request, { res }: Response) => {
       return;
     }
     if (user.password && !(await bcrypt.compare(password, user.password))) {
-      res.tempClientField({ message: "Old password is wrong", field: "password" }).respond();
+      res.tempClientField("password", "Old password is wrong").respond();
       return;
     }
 
     if (user.password && (await bcrypt.compare(newPassword, user.password))) {
-      res.tempClientField({ message: "New password and old password can not same", field: "newPassword" }).respond();
+      res.tempClientField("newPassword", "New password and old password can not same").respond();
       return;
     }
 

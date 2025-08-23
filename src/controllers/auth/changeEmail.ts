@@ -19,11 +19,11 @@ export const changeEmail = async (req: Request, { res }: Response) => {
       return;
     }
     if (user.email === newEmail) {
-      res.tempClientField({ message: "New email and old email can not same", field: "newEmail" }).error();
+      res.tempClientField("newEmail", "New email and old email can not same").error();
       return;
     }
     if (await User.find({ email: newEmail })) {
-      res.tempClientField({ message: "Email is already in use", field: "newEmail" }).error();
+      res.tempClientField("newEmail", "Email is already in use").error();
       return;
     }
 

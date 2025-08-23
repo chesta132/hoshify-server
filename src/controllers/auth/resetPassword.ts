@@ -20,14 +20,14 @@ export const resetPassword = async (req: Request, { res }: Response) => {
     }
 
     if (!user.verified) {
-      res.tempClientField({ message: "User email must be verified first", field: "newPassword" }).error();
+      res.tempClientField("newPassword", "User email must be verified first").error();
       return;
     }
 
     const password = await bcrypt.hash(newPassword, 10);
 
     if (await bcrypt.compare(newPassword, user.password)) {
-      res.tempClientField({ message: "New password and old password can not same", field: "newPassword" }).error();
+      res.tempClientField("newPassword", "New password and old password can not same").error();
       return;
     }
 

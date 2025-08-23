@@ -12,7 +12,7 @@ export const editUser = async (req: Request, { res }: Response) => {
       return;
     }
     if (fullName.trim() === user.fullName.trim()) {
-      res.tempClientField({ message: "New full name can not same as old full name", field: "newFullName" }).error();
+      res.tempClientField("newFullName", "New full name can not same as old full name").error();
       return;
     }
     const updatedUser = await User.updateByIdAndNormalize(

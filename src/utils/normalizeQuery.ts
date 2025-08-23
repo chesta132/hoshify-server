@@ -39,7 +39,7 @@ export const traverseAndNormalize = (data: any, mongo = true): any => {
 
   const normalizedObject: { [key: string]: any } = {};
   for (const key in data) {
-    if (Object.prototype.hasOwnProperty.call(data, key)) {
+    if (data?.hasOwnProperty(key)) {
       normalizedObject[key] = traverseAndNormalize(data[key], mongo);
     }
   }
@@ -60,16 +60,16 @@ export const traverseHandleIdAndV = (data: any, mongo = true): any => {
     return data.map((item) => traverseHandleIdAndV(item, mongo));
   }
 
-  const processedData = { ...data };
+  const processedData = objecting(data);
   for (const key in processedData) {
-    if (processedData.hasOwnProperty(key)) {
+    if (processedData?.hasOwnProperty(key)) {
       processedData[key] = traverseHandleIdAndV(processedData[key], mongo);
     }
   }
 
-  const cleanedData = omit(processedData, ["__v", "_id"]);
+  const cleanedData = omit(processedData, ["__v", "_id", "dummy"]);
 
-  if (processedData._id) {
+  if (processedData._id && !processedData.id) {
     return { id: processedData._id, ...cleanedData };
   }
 
@@ -78,15 +78,14 @@ export const traverseHandleIdAndV = (data: any, mongo = true): any => {
 
 export const normalizeQuery = <T extends Record<string, any> | Record<string, any>[]>(queryData: T) => {
   if (Array.isArray(queryData)) {
-    const normalizedData = queryData.map((data) => {
-      objecting(data);
+    const normalizedData = queryData.map((dat) => {
+      const data = objecting(dat);
       return traverseHandleIdAndV(traverseAndNormalize(data));
     });
     return normalizedData as NormalizedData<T>[];
   }
 
-  let data = queryData;
-  objecting(data);
+  const data = objecting(queryData);
   const normalizedData = traverseHandleIdAndV(traverseAndNormalize(data));
   return normalizedData as NormalizedData<T>;
 };

@@ -3,13 +3,13 @@ import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
 
-const VerifyType = ["CHANGE_EMAIL_OTP", "RESET_PASSWORD_OTP", "DELETE_ACCOUNT_OTP", "VERIFY_EMAIL"] as const;
+const VerifyType = ["CHANGE_EMAIL_OTP", "RESET_PASSWORD_OTP", "DELETE_ACCOUNT_OTP", "VERIFY_EMAIL", "REQUEST_ROLE"] as const;
 
 export interface IVerify {
   _id: ObjectId;
   value: string;
   type: (typeof VerifyType)[number];
-  userId: ObjectId;
+  userId: ObjectId | string;
   deleteAt: Date;
 }
 

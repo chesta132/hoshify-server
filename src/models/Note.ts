@@ -6,19 +6,21 @@ import { schemaOptions } from "./User";
 export interface INote {
   _id: ObjectId;
   title: string;
-  details?: string;
-  userId: ObjectId;
+  details: string;
+  userId: ObjectId | string;
   isRecycled: boolean;
   deleteAt?: Date;
+  dummy: boolean;
 }
 
 const NoteSchema = new Schema(
   {
     title: { type: String, required: true },
-    details: String,
+    details: { type: String, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
+    dummy: { type: Boolean, default: false },
   },
   schemaOptions
 );

@@ -17,14 +17,8 @@ export const signup = async (req: Request, { res }: Response) => {
     potentialUser.forEach((potential) => {
       if (potential) {
         if (potential?.email === email) {
-          return res.tempClientField({ message: "Email is already in use", field: "email" }).error();
-        } else
-          return res
-            .tempClientField({
-              message: "Email is already bind with google account, please bind on account settings",
-              field: "email",
-            })
-            .error();
+          return res.tempClientField("email", "Email is already in use").error();
+        } else return res.tempClientField("email", "Email is already bind with google account, please bind on account settings").error();
       }
     });
 

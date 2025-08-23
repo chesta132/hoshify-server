@@ -6,23 +6,25 @@ import { schemaOptions } from "./User";
 export interface ISchedule {
   _id: ObjectId;
   title: string;
-  details?: string;
+  details: string;
   start: Date;
   end?: Date;
-  userId: ObjectId;
+  userId: ObjectId | string;
   isRecycled: boolean;
   deleteAt?: Date;
+  dummy: boolean;
 }
 
 const ScheduleSchema = new Schema(
   {
     title: { type: String, required: true },
-    details: String,
+    details: { type: String, required: true },
     start: { type: Date, required: true },
     end: Date,
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
+    dummy: { type: Boolean, default: false },
   },
   schemaOptions
 );

@@ -9,6 +9,8 @@ import { IQuickLink } from "./QuickLink";
 import { IWidgetConfig } from "./WidgetConfig";
 
 export const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+export const userRole = ["OWNER", "DEVELOPER", "USER"] as const;
+export type UserRole = (typeof userRole)[number];
 
 export interface IUser {
   _id: ObjectId;
@@ -18,6 +20,7 @@ export interface IUser {
   gmail?: string;
   googleId?: string;
   verified: boolean;
+  role: UserRole;
   timeToAllowSendEmail: Date;
   createdAt: Date;
   todos?: ITodo;
@@ -62,6 +65,13 @@ const UserSchema = new Schema(
       trim: true,
       match: [emailRegex, "Please enter a valid gmail"],
       index: 1,
+    },
+    role: {
+      type: String,
+      enum: userRole,
+      default: "USER",
+      required: true,
+      uppercase: true,
     },
     googleId: String,
     verified: { type: Boolean, default: false },

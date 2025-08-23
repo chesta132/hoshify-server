@@ -9,24 +9,26 @@ export interface ITransaction {
   _id: ObjectId;
   amount: number;
   type: (typeof TransactionType)[number];
-  title?: string;
-  details?: string;
+  title: string;
+  details: string;
   date: Date;
-  userId: ObjectId;
+  userId: ObjectId | string;
   isRecycled: boolean;
   deleteAt?: Date;
+  dummy: boolean;
 }
 
 const TransactionSchema = new Schema(
   {
     amount: { type: Number, required: true },
     type: { type: String, enum: TransactionType, required: true },
-    title: String,
-    details: String,
+    title: { type: String, required: true },
+    details: { type: String, required: true },
     date: { type: Date, default: Date.now },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
+    dummy: { type: Boolean, default: false },
   },
   schemaOptions
 );

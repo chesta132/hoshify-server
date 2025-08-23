@@ -12,8 +12,9 @@ import {
   UpdateQuery,
   UpdateWithAggregationPipeline,
 } from "mongoose";
-import { NormalizedData } from "../types/types";
+import { NormalizedData, OneFieldOnly } from "../types/types";
 import { normalizeQuery } from "../utils/normalizeQuery";
+import { NODE_ENV } from "@/app";
 
 type Settings<T> = {
   project?: ProjectionType<T>;
@@ -25,6 +26,7 @@ type Settings<T> = {
 
 export class Database<T extends Record<string, any>> {
   private model: Model<T>;
+
   constructor(model: Model<T>) {
     this.model = model;
     return new Proxy(this, {
@@ -36,6 +38,17 @@ export class Database<T extends Record<string, any>> {
         return typeof value === "function" ? value.bind(model) : value;
       },
     });
+  }
+
+  private async validateDoc(doc: object) {
+    try {
+      const model = new this.model(doc);
+      await model.validate();
+      return model;
+    } catch (err) {
+      console.error("Invalid doc model", doc);
+      throw err;
+    }
   }
 
   async findByIdAndNormalize(id: string | ObjectId, settings?: Settings<T>) {
@@ -122,9 +135,51 @@ export class Database<T extends Record<string, any>> {
     return normalizeQuery(rawQuery) as NormalizedData<T>;
   }
 
-  async insertManyAndNormalize(docs: T[] | Partial<T>[], settings?: { options?: InsertManyOptions }): Promise<NormalizedData<T>[]> {
+  async insertManyAndNormalize(
+    docs: T[] | Partial<T>[],
+    settings?: { options?: InsertManyOptions; skipValidation: boolean }
+  ): Promise<NormalizedData<T>[]> {
+    const document = docs;
+    if (!settings?.skipValidation) {
+      for (const [idx, doc] of document.entries()) {
+        document[idx] = await this.validateDoc(doc);
+      }
+    }
     const rawQuery = await this.model.insertMany(docs, settings?.options ?? {});
     return normalizeQuery(rawQuery) as NormalizedData<T>[];
+  }
+
+  async generateDummy(
+    length: number,
+    document?: Partial<Record<keyof T, OneFieldOnly<{ dynamicString: string; fixed: T[keyof T] }>>>,
+    settings?: { options?: InsertManyOptions; normalize?: boolean }
+  ) {
+    if (NODE_ENV !== "development") return;
+
+    const dummys = Array.from(new Array(length));
+
+    for (const [idx] of dummys.entries()) {
+      const customized: [string, string][] = [];
+      for (const doc in document) {
+        const val = document[doc];
+        if (val?.dynamicString) {
+          const dynamiced = `${val.dynamicString}_${crypto.randomUUID()}`;
+          customized.push([doc, dynamiced]);
+        } else if (val?.fixed) {
+          customized.push([doc, val.fixed]);
+        }
+      }
+      const ret = { dummy: true } as Record<string, any>;
+      customized.forEach(([key, val]) => {
+        ret[key] = val;
+      });
+
+      dummys[idx] = await this.validateDoc(ret);
+    }
+
+    const rawQuery = await this.model.insertMany(dummys, settings?.options ?? {});
+    if (settings?.normalize) return normalizeQuery(rawQuery);
+    return rawQuery;
   }
 }
 

@@ -8,7 +8,8 @@ export interface IQuickLink {
   link: string;
   title: string;
   position: number;
-  userId: ObjectId;
+  userId: ObjectId | string;
+  dummy: boolean;
 }
 
 const QuickLinkSchema = new Schema(
@@ -17,6 +18,7 @@ const QuickLinkSchema = new Schema(
     title: { type: String, required: true },
     position: { type: Number, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    dummy: { type: Boolean, default: false },
   },
   schemaOptions
 );
