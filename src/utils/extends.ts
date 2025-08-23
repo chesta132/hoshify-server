@@ -78,10 +78,52 @@ String.prototype.capital = function (scissors?: string | number) {
 
 console.debug = function (message?: any, ...optionalParams: any[]) {
   if (NODE_ENV === "production") return;
+  const createdError = new Error();
+  const callerLine = createdError.stack?.split("\n")[2];
+  console.log("Called by: ", callerLine);
   return console.log(message, ...optionalParams);
 };
 
 console.debugTable = function (message?: any, ...optionalParams: any[]) {
   if (NODE_ENV === "production") return;
+  const createdError = new Error();
+  const callerLine = createdError.stack?.split("\n")[2];
+  console.log("Called by: ", callerLine);
   return console.table(message, ...optionalParams);
+};
+
+Date.prototype.toFormattedString = function (optionsProp = { includeThisYear: true, includeHour: false }) {
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  const hourOptions: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  try {
+    if (this.toString() === "Invalid Date") {
+      return "Invalid Date";
+    }
+    const { includeHour, includeThisYear } = optionsProp;
+    const formatter = new Intl.DateTimeFormat("en-US", includeHour ? { ...options, ...hourOptions } : options);
+    const formattedDate = formatter.format(this);
+    const thisYear = new Date().getFullYear().toString();
+
+    if (formattedDate.includes(thisYear) && !includeThisYear) {
+      const splittedDate = formattedDate.split(", " + thisYear);
+      return splittedDate.join("");
+    }
+
+    return formattedDate;
+  } catch (error) {
+    console.error(error);
+    return "Invalid Date";
+  }
+};
+
+Array.prototype.plural = function (baseWord, uncountableNouns = false) {
+  if (this.length === 1 || (uncountableNouns && this.length === 0)) return baseWord;
+  else return baseWord + "s";
 };

@@ -46,3 +46,17 @@ interface String {
    */
   capitalEach: (start?: string | number, end?: string | number) => string;
 }
+
+interface Date {
+  /**
+   * Returns a string representation of a date. The format of the string is en-US locale.
+   */
+  toFormattedString(options?: { includeThisYear?: boolean; includeHour?: boolean }): string;
+}
+
+interface Array {
+  /**
+   * Returns a string representation plural or singular of base word based on array length.
+   */
+  plural(baseWord: string, uncountableNouns?: boolean): string;
+}
