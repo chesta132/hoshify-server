@@ -61,9 +61,10 @@ const statusAlias: {
   status: number;
 }[] = [
   { code: ["INVALID_AUTH", "INVALID_TOKEN"], status: 401 },
-  { code: ["IS_BOUND", "NOT_BOUND", "INVALID_ROLE"], status: 403 },
+  { code: ["IS_BOUND", "NOT_BOUND", "INVALID_ROLE", "NOT_VERIFIED"], status: 403 },
   { code: ["NOT_FOUND"], status: 404 },
-  { code: ["CLIENT_FIELD", "MISSING_FIELDS", "SELF_REQUEST"], status: 406 },
+  { code: ["CLIENT_FIELD", "MISSING_FIELDS", "SELF_REQUEST", "INVALID_CLIENT_TYPE"], status: 406 },
+  { code: ["IS_VERIFIED"], status: 409 },
   { code: ["TOO_MUCH_REQUEST"], status: 429 },
   { code: ["CLIENT_REFRESH"], status: 301 },
   { code: ["SERVER_ERROR"], status: 500 },
@@ -228,9 +229,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
       const hasNext = this._body.length >= limit;
       const nextOffset = hasNext ? offset + limit : null;
 
-      // const data = hasNext ? this._body.slice(0, limit) : this._body;
-
-      // this._jsonBody.data = data;
       this._jsonBody.meta.hasNext = hasNext;
       this._jsonBody.meta.nextOffset = nextOffset;
     }

@@ -12,9 +12,10 @@ import {
   UpdateQuery,
   UpdateWithAggregationPipeline,
 } from "mongoose";
-import { NormalizedData, OneFieldOnly } from "../types/types";
+import { ConditionalFunc, NormalizedData, OneFieldOnly } from "../types/types";
 import { normalizeQuery } from "../utils/normalizeQuery";
 import { NODE_ENV } from "@/app";
+import { oneWeeks } from "@/utils/token";
 
 type Settings<T> = {
   project?: ProjectionType<T>;
@@ -22,7 +23,10 @@ type Settings<T> = {
   populate?: PopulateOptions | (PopulateOptions | string)[];
   sort?: string | { [key: string]: SortOrder | { $meta: any } } | [string, SortOrder][] | undefined | null;
   sortOptions?: { override?: boolean };
+  raw?: boolean;
 };
+
+type QueryReturn<S, T> = Promise<([S] extends [{ raw: true }] ? T : NormalizedData<T>) | null>;
 
 export class Database<T extends Record<string, any>> {
   private model: Model<T>;
@@ -51,7 +55,7 @@ export class Database<T extends Record<string, any>> {
     }
   }
 
-  async findByIdAndNormalize(id: string | ObjectId, settings?: Settings<T>) {
+  async findByIdAndNormalize<S extends Settings<T>>(id: string | ObjectId, settings?: S): QueryReturn<S, T> {
     if (!isValidObjectId(id)) {
       console.warn(`Invalid ObjectId provided for model ${this.model.modelName}: ${id}`);
       return null;
@@ -64,10 +68,11 @@ export class Database<T extends Record<string, any>> {
       .lean<T>();
 
     if (!rawQuery) return null;
-    return normalizeQuery(rawQuery) as NormalizedData<T>;
+    if (settings?.raw) return rawQuery as any;
+    return normalizeQuery(rawQuery) as any;
   }
 
-  async findOneAndNormalize(filter: RootFilterQuery<T>, settings?: Settings<T>) {
+  async findOneAndNormalize<S extends Settings<T>>(filter: RootFilterQuery<T>, settings?: S): QueryReturn<S, T> {
     const rawQuery = await this.model
       .findOne(filter, settings?.project, settings?.options)
       .sort(settings?.sort, settings?.sortOptions)
@@ -75,10 +80,11 @@ export class Database<T extends Record<string, any>> {
       .lean<T>();
 
     if (!rawQuery) return null;
-    return normalizeQuery(rawQuery) as NormalizedData<T>;
+    if (settings?.raw) return rawQuery as any;
+    return normalizeQuery(rawQuery) as any;
   }
 
-  async findAndNormalize(filter: RootFilterQuery<T>, settings?: Settings<T> & { returnArray?: boolean }) {
+  async findAndNormalize<S extends Settings<T>>(filter: RootFilterQuery<T>, settings?: S & { returnArray?: boolean }): QueryReturn<S, T[]> {
     const rawQuery = await this.model
       .find(filter, settings?.project, settings?.options)
       .sort(settings?.sort, settings?.sortOptions)
@@ -86,10 +92,11 @@ export class Database<T extends Record<string, any>> {
       .lean<T>();
 
     if (rawQuery.length === 0 && !settings?.returnArray) return null;
-    return normalizeQuery(rawQuery) as NormalizedData<T>[];
+    if (settings?.raw) return rawQuery as any;
+    return normalizeQuery(rawQuery) as any;
   }
 
-  async updateByIdAndNormalize(id: string | ObjectId, update: UpdateQuery<T>, settings?: Settings<T>) {
+  async updateByIdAndNormalize<S extends Settings<T>>(id: string | ObjectId, update: UpdateQuery<T>, settings?: S): QueryReturn<S, T> {
     if (!isValidObjectId(id)) {
       console.warn(`Invalid ObjectId provided for model ${this.model.modelName}: ${id}`);
       return null;
@@ -102,10 +109,11 @@ export class Database<T extends Record<string, any>> {
       .lean<T>();
 
     if (!rawQuery) return null;
-    return normalizeQuery(rawQuery) as NormalizedData<T>;
+    if (settings?.raw) return rawQuery as any;
+    return normalizeQuery(rawQuery) as any;
   }
 
-  async updateOneAndNormalize(filter: RootFilterQuery<T>, update: UpdateQuery<T>, settings?: Settings<T>) {
+  async updateOneAndNormalize<S extends Settings<T>>(filter: RootFilterQuery<T>, update: UpdateQuery<T>, settings?: S): QueryReturn<S, T> {
     const rawQuery = await this.model
       .findOneAndUpdate(filter, update, { ...settings?.options, projection: settings?.project })
       .sort(settings?.sort, settings?.sortOptions)
@@ -113,21 +121,20 @@ export class Database<T extends Record<string, any>> {
       .lean<T>();
 
     if (!rawQuery) return null;
-    return normalizeQuery(rawQuery) as NormalizedData<T>;
+    if (settings?.raw) return rawQuery as any;
+    return normalizeQuery(rawQuery) as any;
   }
 
-  async updateManyAndNormalize(
+  async updateManyAndNormalize<S extends Settings<T>>(
     filter: RootFilterQuery<T>,
     update: UpdateQuery<T> | UpdateWithAggregationPipeline,
-    settings: { sanitize?: boolean; options: MongooseUpdateQueryOptions } & Omit<Settings<T>, "project" | "options"> & { returnArray?: boolean }
-  ) {
+    settings?: { options?: MongooseUpdateQueryOptions } & Omit<S, "project" | "options"> & { returnArray?: boolean }
+  ): QueryReturn<S, T[]> {
     const rawQuery = await this.model.updateMany(filter, update, settings?.options).sort(settings?.sort, settings?.sortOptions);
 
-    if (settings?.options && settings.sanitize === undefined) settings = { ...settings, sanitize: true };
-
     if (rawQuery.modifiedCount === 0 && !settings?.returnArray) return null;
-    if (!settings.sanitize) return rawQuery;
-    return (await this.findAndNormalize(filter, settings)) as NormalizedData<T>[];
+    if (settings?.raw) return rawQuery as any;
+    return (await this.findAndNormalize(filter, settings)) as any;
   }
 
   async createAndNormalize(doc: T | Partial<T>) {
@@ -135,10 +142,7 @@ export class Database<T extends Record<string, any>> {
     return normalizeQuery(rawQuery) as NormalizedData<T>;
   }
 
-  async insertManyAndNormalize(
-    docs: T[] | Partial<T>[],
-    settings?: { options?: InsertManyOptions; skipValidation: boolean }
-  ): Promise<NormalizedData<T>[]> {
+  async insertManyAndNormalize(docs: T[] | Partial<T>[], settings?: { options?: InsertManyOptions; skipValidation: boolean; raw: boolean }) {
     const document = docs;
     if (!settings?.skipValidation) {
       for (const [idx, doc] of document.entries()) {
@@ -146,13 +150,14 @@ export class Database<T extends Record<string, any>> {
       }
     }
     const rawQuery = await this.model.insertMany(docs, settings?.options ?? {});
+    if (settings?.raw) return rawQuery;
     return normalizeQuery(rawQuery) as NormalizedData<T>[];
   }
 
   async generateDummy(
     length: number,
     document?: Partial<Record<keyof T, OneFieldOnly<{ dynamicString: string; fixed: T[keyof T] }>>>,
-    settings?: { options?: InsertManyOptions; normalize?: boolean }
+    settings?: { options?: InsertManyOptions; raw?: boolean }
   ) {
     if (NODE_ENV !== "development") return;
 
@@ -178,9 +183,31 @@ export class Database<T extends Record<string, any>> {
     }
 
     const rawQuery = await this.model.insertMany(dummys, settings?.options ?? {});
-    if (settings?.normalize) return normalizeQuery(rawQuery);
-    return rawQuery;
+    if (settings?.raw) return rawQuery;
+    return normalizeQuery(rawQuery);
   }
+
+  softDeleteById: ConditionalFunc<
+    T extends { isRecycled: any } ? true : false,
+    <S extends Settings<T>>(
+      id: string | ObjectId,
+      update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">,
+      settings?: S
+    ) => Promise<([S] extends [{ raw: true }] ? T : NormalizedData<T>) | null>
+  > = (async <S extends Settings<T>>(id: string | ObjectId, update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">, settings?: S) => {
+    return await this.updateByIdAndNormalize(id, { ...update, isRecycled: true, deleteAt: new Date(Date.now() + oneWeeks) }, settings);
+  }) as any;
+
+  softDeleteOne: ConditionalFunc<
+    T extends { isRecycled: any } ? true : false,
+    <S extends Settings<T>>(
+      filter: RootFilterQuery<T>,
+      update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">,
+      settings?: S
+    ) => Promise<([S] extends [{ raw: true }] ? T : NormalizedData<T>) | null>
+  > = (async <S extends Settings<T>>(filter: RootFilterQuery<T>, update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">, settings?: S) => {
+    return await this.updateOneAndNormalize(filter, { ...update, isRecycled: true, deleteAt: new Date(Date.now() + oneWeeks) }, settings);
+  }) as any;
 }
 
 export interface Database<T extends Record<string, any>> extends Model<T> {}
