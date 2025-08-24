@@ -5,7 +5,7 @@ import { ITodo } from "./Todo";
 import { INote } from "./Note";
 import { ITransaction } from "./Transaction";
 import { ISchedule } from "./Schedule";
-import { IQuickLink } from "./QuickLink";
+import { ILink } from "./Link";
 import { IWidget } from "./Widget";
 import { IMoney } from "./Money";
 
@@ -22,15 +22,16 @@ export interface IUser {
   googleId?: string;
   verified: boolean;
   role: UserRole;
+  currency: string;
   timeToAllowSendEmail: Date;
   createdAt: Date;
   todos?: ITodo;
   notes?: INote;
   transactions?: ITransaction;
   schedules?: ISchedule;
-  links?: IQuickLink;
+  links?: ILink;
   widgets?: IWidget;
-  moneys?: IMoney;
+  money?: IMoney;
 }
 
 export const schemaOptions: SchemaOptions = {
@@ -75,6 +76,7 @@ const UserSchema = new Schema(
       required: true,
       uppercase: true,
     },
+    currency: { type: String, required: true, default: "IDR" },
     googleId: String,
     verified: { type: Boolean, default: false },
     timeToAllowSendEmail: { type: Date, default: Date.now },
@@ -105,9 +107,9 @@ const virtualRef = (...ref: (string | [string, string])[]) => {
   }
 };
 
-virtualRef("Todo", "Note", "Transaction", "Schedule", "Money", ["links", "QuickLink"], ["widgets", "Widget"]);
+virtualRef("Todo", "Note", "Transaction", "Schedule", "Link", ["money", "Money"], ["widgets", "Widget"]);
 
-export type UserPopulateField = "links" | "transactions" | "notes" | "schedules" | "todos" | "widgets" | "moneys";
+export type UserPopulateField = "links" | "transactions" | "notes" | "schedules" | "todos" | "widgets" | "money";
 
 const sortMap: Partial<Record<UserPopulateField, object>> & { default: object } = {
   schedules: { start: -1 },

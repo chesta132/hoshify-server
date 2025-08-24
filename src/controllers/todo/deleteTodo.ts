@@ -7,7 +7,7 @@ export const deleteTodo = async (req: Request, { res }: Response) => {
   try {
     const { id } = req.params;
     if (!isValidObjectId(id)) {
-      res.tempClientType("Id").respond();
+      res.tempClientType("Object ID").respond();
       return;
     }
 

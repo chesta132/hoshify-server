@@ -91,9 +91,9 @@ export const normalizeQuery = <T extends Record<string, any> | Record<string, an
 };
 
 export const normalizeUserQuery = <T extends Partial<IUser> | NormalizedData<IUser>>(queryData: T, options?: { isGuest?: boolean }) => {
-  let data = omit(queryData, ["password", "googleId"]);
+  let data = omit(queryData, ["password", "googleId", "currency"]);
   if ((queryData as Partial<IUser>)._id instanceof mongoose.Types.ObjectId) {
-    data = normalizeQuery(data as Record<string, any>) as Omit<T, "password" | "googleId">;
+    data = normalizeQuery(data as Record<string, any>) as typeof data;
   }
   if (options?.isGuest) {
     delete data.gmail;
@@ -101,7 +101,7 @@ export const normalizeUserQuery = <T extends Partial<IUser> | NormalizedData<IUs
     delete data.verified;
     delete data.createdAt;
   }
-  return data as unknown as NormalizedData<Omit<T, "password" | "googleId">>;
+  return data as unknown as NormalizedData<typeof data>;
 };
 
 export const userProject = (isGuest?: boolean) => {

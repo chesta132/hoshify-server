@@ -4,7 +4,7 @@ import { CLIENT_URL } from "../../app";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
 import { Note } from "../../models/Note";
-import { QuickLink } from "../../models/QuickLink";
+import { Link } from "../../models/Link";
 import { Schedule } from "../../models/Schedule";
 import { Todo } from "../../models/Todo";
 import { Widget } from "../../models/Widget";
@@ -25,7 +25,7 @@ export const deleteUser = async (req: Request, { res }: Response) => {
       const deleteConfig = { userId: user.id } as const;
       await Promise.allSettled([
         Note.deleteMany(deleteConfig),
-        QuickLink.deleteMany(deleteConfig),
+        Link.deleteMany(deleteConfig),
         Schedule.deleteMany(deleteConfig),
         Todo.deleteMany(deleteConfig),
         Widget.deleteMany(deleteConfig),

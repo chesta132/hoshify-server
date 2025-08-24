@@ -24,7 +24,7 @@ export const createDummy = async <T extends { dummy: boolean }>(model: Database<
       type: { fixed: transactionType || "INCOME" },
       status: { fixed: todoStatus },
     } as any);
-    console.debug(dummys);
+    console.warn(`${dummys?.length} created by ${user.fullName}:\n`, dummys);
 
     res
       .body({ success: dummys })

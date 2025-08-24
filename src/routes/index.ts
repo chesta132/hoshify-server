@@ -4,6 +4,7 @@ import { userRoutes } from "./userRoutes";
 import { authMiddleware, requireRole } from "@/middlewares/auth";
 import { todoRoutes } from "./todoRoutes";
 import { dummyRoutes } from "./dummyRoutes";
+import { tranRoutes } from "./tranRoutes";
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -11,6 +12,7 @@ router.use("/auth", authRoutes);
 router.use(authMiddleware);
 router.use("/user", userRoutes);
 router.use("/todo", todoRoutes);
+router.use("/transaction", tranRoutes);
 
 router.use((req, res, next) => requireRole(req, res, next, ["DEVELOPER", "OWNER"]));
 router.use("/dummy", dummyRoutes);

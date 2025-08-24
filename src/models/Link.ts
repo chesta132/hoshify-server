@@ -3,7 +3,7 @@ import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
 
-export interface IQuickLink {
+export interface ILink {
   _id: ObjectId;
   link: string;
   title: string;
@@ -12,7 +12,7 @@ export interface IQuickLink {
   dummy: boolean;
 }
 
-const QuickLinkSchema = new Schema(
+const LinkSchema = new Schema(
   {
     link: { type: String, required: true },
     title: { type: String, required: true, maxLength: 50 },
@@ -23,8 +23,8 @@ const QuickLinkSchema = new Schema(
   schemaOptions
 );
 
-virtualSchema(QuickLinkSchema);
+virtualSchema(LinkSchema);
 
-const QuickLinkRaw = model<IQuickLink>("QuickLink", QuickLinkSchema);
+const LinkRaw = model<ILink>("Link", LinkSchema);
 
-export const QuickLink = new Database(QuickLinkRaw);
+export const Link = new Database(LinkRaw);

@@ -8,7 +8,7 @@ export const editNote = async (req: Request, { res }: Response) => {
     const { id } = req.params;
     const { title, details } = req.body;
     if (!isValidObjectId(id)) {
-      res.tempClientType("Id").respond();
+      res.tempClientType("Object ID").respond();
       return;
     }
 
