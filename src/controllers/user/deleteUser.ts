@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
 import { CLIENT_URL } from "../../app";
-import { User } from "../../models/User";
+import { IUser, User } from "../../models/User";
 import { Verify } from "../../models/Verify";
 import { Note } from "../../models/Note";
 import { Link } from "../../models/Link";
@@ -9,6 +9,22 @@ import { Schedule } from "../../models/Schedule";
 import { Todo } from "../../models/Todo";
 import { Widget } from "../../models/Widget";
 import { Transaction } from "../../models/Transaction";
+import { Money } from "@/models/Money";
+import { NormalizedData } from "@/types/types";
+
+const deletes = async (user: NormalizedData<IUser>) => {
+  const deleteConfig = { userId: user.id } as const;
+  await Promise.allSettled([
+    Note.deleteMany(deleteConfig),
+    Link.deleteMany(deleteConfig),
+    Schedule.deleteMany(deleteConfig),
+    Todo.deleteMany(deleteConfig),
+    Widget.deleteMany(deleteConfig),
+    Transaction.deleteMany(deleteConfig),
+    Money.deleteMany(deleteConfig),
+  ]);
+  await User.findByIdAndDelete(user.id);
+};
 
 export const deleteUser = async (req: Request, { res }: Response) => {
   try {
@@ -21,22 +37,10 @@ export const deleteUser = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const deletes = async () => {
-      const deleteConfig = { userId: user.id } as const;
-      await Promise.allSettled([
-        Note.deleteMany(deleteConfig),
-        Link.deleteMany(deleteConfig),
-        Schedule.deleteMany(deleteConfig),
-        Todo.deleteMany(deleteConfig),
-        Widget.deleteMany(deleteConfig),
-        Transaction.deleteMany(deleteConfig),
-      ]);
-      await User.findByIdAndDelete(user.id);
-    };
-
     if (!user.verified && !user.googleId) {
-      await deletes();
+      await deletes(user);
       res.clearCookie("accessToken").clearCookie("refreshToken").redirect(`${CLIENT_URL}/signin`);
+      return;
     }
     if (!token) {
       res.tempMissingFields("token").respond();
@@ -44,11 +48,11 @@ export const deleteUser = async (req: Request, { res }: Response) => {
     }
 
     const otp = await Verify.findOne({ value: token, type: "DELETE_ACCOUNT_OTP", userId: user.id });
-    if (!otp && user.verified) {
+    if (!otp) {
       res.tempInvalidOTP().respond();
       return;
     }
-    await deletes();
+    await deletes(user);
     res.clearCookie("accessToken").clearCookie("refreshToken").redirect(`${CLIENT_URL}/signin`);
   } catch (err) {
     handleError(err, res);

@@ -95,6 +95,7 @@ const virtualRef = (...ref: (string | [string, string])[]) => {
         ref,
         localField: "_id",
         foreignField: "userId",
+        justOne: name === "money",
       });
       continue;
     }
