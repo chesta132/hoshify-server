@@ -53,6 +53,12 @@ interface String {
    * @returns The truncated string with an ellipsis if it exceeded the maximum length, otherwise the original string.
    */
   ellipsis: (max: number) => string;
+
+  /**
+   * Returns a string representation plural or singular based on array length.
+   * @param array - If array not provided, it will return singular (remove last "s")
+   */
+  plural: (array?: any[]) => string;
 }
 
 interface Date {

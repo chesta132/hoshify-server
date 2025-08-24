@@ -3,7 +3,7 @@ import handleError from "@/utils/handleError";
 import { isValidObjectId } from "mongoose";
 import { Database } from "@/class/Database";
 
-export const getOne = async <T extends Record<string, any>>(model: Database<T>, req: Request, res: Response["res"]) => {
+export const softDeleteOne = async <T extends { isRecycled: boolean; title: string }>(model: Database<T>, req: Request, res: Response["res"]) => {
   try {
     const { id } = req.params;
     if (!isValidObjectId(id)) {
@@ -11,13 +11,13 @@ export const getOne = async <T extends Record<string, any>>(model: Database<T>, 
       return;
     }
 
-    const data = await model.findByIdAndNormalize(id);
+    const data = await model.softDeleteById(id, undefined, { options: { new: true, runValidators: true } });
     if (!data) {
       res.tempNotFound(model.collection.name.plural());
       return;
     }
 
-    res.body({ success: data }).respond();
+    res.body({ success: data }).notif(`${data.title.ellipsis(10)} deleted`);
   } catch (err) {
     handleError(err, res);
   }

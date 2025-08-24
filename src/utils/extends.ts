@@ -128,6 +128,21 @@ Array.prototype.plural = function (baseWord, uncountableNouns = false) {
   else return baseWord + "s";
 };
 
+String.prototype.plural = function (array) {
+  const last = this[this.length - 1];
+  const lastIsS = last === "s";
+  const singularingAndReturn = () => {
+    if (lastIsS) return this.slice(0, -1);
+    else return this.toString();
+  };
+  if (!array || array.length === 1) return singularingAndReturn();
+  else {
+    if (lastIsS) {
+      return this + "es";
+    } else return this + "s";
+  }
+};
+
 String.prototype.ellipsis = function (max) {
   if (max <= 0) return "";
   if (this.length <= max) return this.toString();

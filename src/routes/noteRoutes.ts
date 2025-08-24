@@ -1,5 +1,5 @@
 import { createNote } from "@/controllers/note/createNote";
-import { deleteNote } from "@/controllers/note/deletedNote";
+import { deleteNote } from "@/controllers/note/deleteNote";
 import { editNote } from "@/controllers/note/editNote";
 import { getNote } from "@/controllers/note/getNote";
 import { getNotes } from "@/controllers/note/getNotes";
