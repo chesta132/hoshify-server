@@ -27,9 +27,3 @@ export type NormalizedData<T> = Omit<
 export type EitherWithKeys<Keys extends object, Others extends object> =
   | (Keys & { [K in keyof Others]?: undefined })
   | (Others & { [K in keyof Keys]?: never });
-
-export type ConditionalFunc<Conditions extends boolean, Func extends Function, Fallback = undefined> = Conditions extends true
-  ? Func
-  : Fallback extends undefined
-  ? never
-  : Fallback;

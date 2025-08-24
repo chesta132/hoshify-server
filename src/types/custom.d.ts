@@ -68,3 +68,15 @@ interface Array {
    */
   plural(baseWord: string, uncountableNouns?: boolean): string;
 }
+
+/** Type representing all falsy values. */
+type Falsy = "" | 0 | false | null | undefined | never;
+
+/** Type representing all truthy values. */
+type Truthy = Exclude<string | number | boolean | object | symbol | bigint | Function, Falsy>;
+
+/** Returns `TrueType` if `T` is not falsy, otherwise `FalseType`. */
+type IsTruthy<T, TrueType = T, FalseType = never> = [T] extends [Falsy] ? FalseType : TrueType;
+
+/** Returns `TrueType` if `T` is falsy, otherwise `FalseType`. */
+type IsFalsy<T, TrueType = T, FalseType = never> = [T] extends [Falsy] ? TrueType : FalseType;

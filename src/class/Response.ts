@@ -1,4 +1,4 @@
-import { CodeError, ConditionalFunc, EitherWithKeys, Fields, OneFieldOnly } from "../types/types";
+import { CodeError, EitherWithKeys, Fields, OneFieldOnly } from "../types/types";
 import { CookieOptions, Response } from "express";
 import {
   createAccessToken,
@@ -91,10 +91,10 @@ export interface DataToResponse<T> {
 
 type Responded = Respond<unknown, false, false>;
 
-export type ResType<SuccessReady extends boolean, ErrorReady extends boolean> = ConditionalFunc<
+export type ResType<SuccessReady extends boolean, ErrorReady extends boolean> = IsTruthy<
   SuccessReady,
   () => Responded,
-  ConditionalFunc<ErrorReady, () => Responded>
+  IsTruthy<ErrorReady, () => Responded>
 >;
 
 type CookieUserBase = { id: string | unknown; verified: boolean; role: UserRole };
@@ -221,7 +221,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    * @param paginateMeta Pagination options (limit, offset)
    * @returns this
    */
-  paginate: ConditionalFunc<SuccessType extends any[] ? true : false, (paginateMeta: RespondOptions["paginateMeta"]) => this> = ((
+  paginate: IsTruthy<SuccessType extends any[] ? true : false, (paginateMeta: RespondOptions["paginateMeta"]) => this> = ((
     paginateMeta: RespondOptions["paginateMeta"]
   ) => {
     if (Array.isArray(this._body)) {

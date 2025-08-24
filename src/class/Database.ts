@@ -11,8 +11,9 @@ import {
   SortOrder,
   UpdateQuery,
   UpdateWithAggregationPipeline,
+  UpdateWriteOpResult,
 } from "mongoose";
-import { ConditionalFunc, NormalizedData, OneFieldOnly } from "../types/types";
+import { NormalizedData, OneFieldOnly } from "../types/types";
 import { normalizeQuery } from "../utils/normalizeQuery";
 import { NODE_ENV } from "@/app";
 import { oneWeeks } from "@/utils/token";
@@ -26,7 +27,12 @@ type Settings<T> = {
   raw?: boolean;
 };
 
-type QueryReturn<S, T> = Promise<([S] extends [{ raw: true }] ? T : NormalizedData<T>) | null>;
+type QueryReturn<T, S> = Promise<([S] extends [{ raw: true }] ? T : NormalizedData<T>) | null>;
+
+type SoftDelete<T extends Record<string, any>, FilterType> = IsTruthy<
+  T["isRecycled"],
+  <S extends Settings<T>>(filter: FilterType, update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">, settings?: S) => QueryReturn<T, S>
+>;
 
 export class Database<T extends Record<string, any>> {
   private model: Model<T>;
@@ -55,7 +61,7 @@ export class Database<T extends Record<string, any>> {
     }
   }
 
-  async findByIdAndNormalize<S extends Settings<T>>(id: string | ObjectId, settings?: S): QueryReturn<S, T> {
+  async findByIdAndNormalize<S extends Settings<T>>(id: string | ObjectId, settings?: S): QueryReturn<T, S> {
     if (!isValidObjectId(id)) {
       console.warn(`Invalid ObjectId provided for model ${this.model.modelName}: ${id}`);
       return null;
@@ -72,7 +78,7 @@ export class Database<T extends Record<string, any>> {
     return normalizeQuery(rawQuery) as any;
   }
 
-  async findOneAndNormalize<S extends Settings<T>>(filter: RootFilterQuery<T>, settings?: S): QueryReturn<S, T> {
+  async findOneAndNormalize<S extends Settings<T>>(filter: RootFilterQuery<T>, settings?: S): QueryReturn<T, S> {
     const rawQuery = await this.model
       .findOne(filter, settings?.project, settings?.options)
       .sort(settings?.sort, settings?.sortOptions)
@@ -84,19 +90,19 @@ export class Database<T extends Record<string, any>> {
     return normalizeQuery(rawQuery) as any;
   }
 
-  async findAndNormalize<S extends Settings<T>>(filter: RootFilterQuery<T>, settings?: S & { returnArray?: boolean }): QueryReturn<S, T[]> {
+  async findAndNormalize<S extends Settings<T>>(filter: RootFilterQuery<T>, settings?: S & { returnArray?: boolean }): QueryReturn<T[], S> {
     const rawQuery = await this.model
       .find(filter, settings?.project, settings?.options)
       .sort(settings?.sort, settings?.sortOptions)
       .populate(settings?.populate || [])
-      .lean<T>();
+      .lean<T[]>();
 
     if (rawQuery.length === 0 && !settings?.returnArray) return null;
     if (settings?.raw) return rawQuery as any;
     return normalizeQuery(rawQuery) as any;
   }
 
-  async updateByIdAndNormalize<S extends Settings<T>>(id: string | ObjectId, update: UpdateQuery<T>, settings?: S): QueryReturn<S, T> {
+  async updateByIdAndNormalize<S extends Settings<T>>(id: string | ObjectId, update: UpdateQuery<T>, settings?: S): QueryReturn<T, S> {
     if (!isValidObjectId(id)) {
       console.warn(`Invalid ObjectId provided for model ${this.model.modelName}: ${id}`);
       return null;
@@ -113,7 +119,7 @@ export class Database<T extends Record<string, any>> {
     return normalizeQuery(rawQuery) as any;
   }
 
-  async updateOneAndNormalize<S extends Settings<T>>(filter: RootFilterQuery<T>, update: UpdateQuery<T>, settings?: S): QueryReturn<S, T> {
+  async updateOneAndNormalize<S extends Settings<T>>(filter: RootFilterQuery<T>, update: UpdateQuery<T>, settings?: S): QueryReturn<T, S> {
     const rawQuery = await this.model
       .findOneAndUpdate(filter, update, { ...settings?.options, projection: settings?.project })
       .sort(settings?.sort, settings?.sortOptions)
@@ -129,12 +135,12 @@ export class Database<T extends Record<string, any>> {
     filter: RootFilterQuery<T>,
     update: UpdateQuery<T> | UpdateWithAggregationPipeline,
     settings?: { options?: MongooseUpdateQueryOptions } & Omit<S, "project" | "options"> & { returnArray?: boolean }
-  ): QueryReturn<S, T[]> {
+  ): QueryReturn<T[] | UpdateWriteOpResult, S> {
     const rawQuery = await this.model.updateMany(filter, update, settings?.options).sort(settings?.sort, settings?.sortOptions);
 
     if (rawQuery.modifiedCount === 0 && !settings?.returnArray) return null;
     if (settings?.raw) return rawQuery as any;
-    return (await this.findAndNormalize(filter, settings)) as any;
+    return await this.findAndNormalize(filter, settings);
   }
 
   async createAndNormalize(doc: T | Partial<T>) {
@@ -187,25 +193,19 @@ export class Database<T extends Record<string, any>> {
     return normalizeQuery(rawQuery);
   }
 
-  softDeleteById: ConditionalFunc<
-    T extends { isRecycled: any } ? true : false,
-    <S extends Settings<T>>(
-      id: string | ObjectId,
-      update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">,
-      settings?: S
-    ) => Promise<([S] extends [{ raw: true }] ? T : NormalizedData<T>) | null>
-  > = (async <S extends Settings<T>>(id: string | ObjectId, update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">, settings?: S) => {
+  softDeleteById: SoftDelete<T, string | ObjectId> = (async <S extends Settings<T>>(
+    id: string | ObjectId,
+    update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">,
+    settings?: S
+  ) => {
     return await this.updateByIdAndNormalize(id, { ...update, isRecycled: true, deleteAt: new Date(Date.now() + oneWeeks) }, settings);
   }) as any;
 
-  softDeleteOne: ConditionalFunc<
-    T extends { isRecycled: any } ? true : false,
-    <S extends Settings<T>>(
-      filter: RootFilterQuery<T>,
-      update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">,
-      settings?: S
-    ) => Promise<([S] extends [{ raw: true }] ? T : NormalizedData<T>) | null>
-  > = (async <S extends Settings<T>>(filter: RootFilterQuery<T>, update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">, settings?: S) => {
+  softDeleteOne: SoftDelete<T, RootFilterQuery<T>> = (async <S extends Settings<T>>(
+    filter: RootFilterQuery<T>,
+    update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">,
+    settings?: S
+  ) => {
     return await this.updateOneAndNormalize(filter, { ...update, isRecycled: true, deleteAt: new Date(Date.now() + oneWeeks) }, settings);
   }) as any;
 }
