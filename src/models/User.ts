@@ -7,6 +7,7 @@ import { ITransaction } from "./Transaction";
 import { ISchedule } from "./Schedule";
 import { IQuickLink } from "./QuickLink";
 import { IWidget } from "./Widget";
+import { IMoney } from "./Money";
 
 export const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 export const userRole = ["OWNER", "DEVELOPER", "USER"] as const;
@@ -29,6 +30,7 @@ export interface IUser {
   schedules?: ISchedule;
   links?: IQuickLink;
   widgets?: IWidget;
+  moneys?: IMoney;
 }
 
 export const schemaOptions: SchemaOptions = {
@@ -103,9 +105,9 @@ const virtualRef = (...ref: (string | [string, string])[]) => {
   }
 };
 
-virtualRef("Todo", "Note", "Transaction", "Schedule", ["links", "QuickLink"], ["widgets", "Widget"]);
+virtualRef("Todo", "Note", "Transaction", "Schedule", "Money", ["links", "QuickLink"], ["widgets", "Widget"]);
 
-export type UserPopulateField = "links" | "transactions" | "notes" | "schedules" | "todos" | "widgets";
+export type UserPopulateField = "links" | "transactions" | "notes" | "schedules" | "todos" | "widgets" | "moneys";
 
 const sortMap: Partial<Record<UserPopulateField, object>> & { default: object } = {
   schedules: { start: -1 },

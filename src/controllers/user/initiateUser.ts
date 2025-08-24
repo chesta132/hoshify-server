@@ -13,6 +13,7 @@ export const initiateUser = async (req: Request, { res }: Response) => {
       links: "all",
       schedules: 3,
       widgets: "all",
+      moneys: "all",
     };
 
     const populatedUser = await User.findByIdAndNormalize(user.id, { populate: buildUserPopulate(populateConfig) });

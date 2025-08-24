@@ -3,6 +3,7 @@ import handleError from "../../utils/handleError";
 import bcrypt from "bcrypt";
 import { normalizeUserQuery } from "../../utils/normalizeQuery";
 import { User } from "../../models/User";
+import { Money } from "@/models/Money";
 
 export const signup = async (req: Request, { res }: Response) => {
   try {
@@ -29,6 +30,7 @@ export const signup = async (req: Request, { res }: Response) => {
       fullName,
     });
     const newUser = normalizeUserQuery(rawNewUser);
+    await Money.create({ userId: newUser.id });
 
     res.body({ success: newUser }).sendCookie({ template: "REFRESH_ACCESS", rememberMe }).created();
   } catch (error) {

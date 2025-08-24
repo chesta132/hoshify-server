@@ -11,7 +11,6 @@ export interface ITransaction {
   type: (typeof TransactionType)[number];
   title: string;
   details: string;
-  date: Date;
   userId: ObjectId | string;
   isRecycled: boolean;
   deleteAt?: Date;
@@ -24,7 +23,6 @@ const TransactionSchema = new Schema(
     type: { type: String, enum: TransactionType, required: true },
     title: { type: String, required: true, maxLength: 150 },
     details: { type: String, required: true },
-    date: { type: Date, default: Date.now },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
