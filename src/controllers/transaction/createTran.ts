@@ -12,7 +12,7 @@ export const createTran = async (req: Request, { res }: Response) => {
       return;
     }
     if (!transactionType.includes(type)) {
-      res.tempClientType("type").respond();
+      res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
       return;
     }
 

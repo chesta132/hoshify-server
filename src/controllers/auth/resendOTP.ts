@@ -40,7 +40,7 @@ export const resendOTP = async (req: Request, { res }: Response) => {
         await createAndSend("DELETE_ACCOUNT_OTP");
         return;
       default:
-        res.tempClientField("otp", "Invalid type. Please send a valid type").error();
+        res.tempClientField("type", "Invalid type. Please send a valid type").error();
     }
   } catch (err) {
     handleError(err, res);

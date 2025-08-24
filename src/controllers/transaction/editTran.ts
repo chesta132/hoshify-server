@@ -13,7 +13,7 @@ export const editTran = async (req: Request, { res }: Response) => {
       return;
     }
     if (!transactionType.includes(type)) {
-      res.tempClientType("type").error();
+      res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
       return;
     }
 

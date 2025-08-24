@@ -485,7 +485,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
         title: "Invalid OTP",
         message: "Invalid or expired OTP. Please request a new OTP code.",
         code: "CLIENT_FIELD",
-        field: "otp",
+        field: "token",
       },
     });
     return body;
