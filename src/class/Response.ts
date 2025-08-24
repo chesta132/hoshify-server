@@ -10,6 +10,7 @@ import {
   resRefreshTokenSessionOnly,
 } from "../utils/token";
 import { UserRole } from "@/models/User";
+import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "@/app";
 
 /**
  * Authentication-related error codes.
@@ -256,9 +257,14 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
       user = this._body as unknown as CookieUserBase;
     }
     let { id, verified, role } = user;
-    this._accessToken = createAccessToken({ userId: id as string, verified, expires: new Date(Date.now() + fiveMin), role });
+    this._accessToken = createAccessToken({
+      userId: id as string,
+      verified,
+      expires: new Date(Date.now() + (Number(ACCESS_TOKEN_EXPIRY) || fiveMin)),
+      role,
+    });
     this._refreshToken = createRefreshToken(
-      { userId: id as string, verified, expires: new Date(Date.now() + oneWeeks * 1.5), role },
+      { userId: id as string, verified, expires: new Date(Date.now() + (Number(REFRESH_TOKEN_EXPIRY) || oneWeeks)), role },
       this._rememberMe ? undefined : null
     );
     return this;
@@ -397,6 +403,12 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     const errorBody = this._errorBody;
     if (errorBody) {
       const status = errorBody.status ?? statusAlias.find((s) => s.code.includes(errorBody.code))?.status ?? 500;
+      if (status >= 500) {
+        console.error("\nServer error found and sent successfully:");
+      } else {
+        console.warn("\nClient error found and sent successfully:");
+      }
+      console.table(errorBody);
       this._res.status(status).json(this._jsonBody);
     }
     this.reset();

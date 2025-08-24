@@ -1,3 +1,4 @@
+import pluralize from "pluralize";
 import { NODE_ENV } from "../app";
 
 JSON.isJSON = function (item: any) {
@@ -123,24 +124,12 @@ Date.prototype.toFormattedString = function (optionsProp = { includeThisYear: tr
   }
 };
 
-Array.prototype.plural = function (baseWord, uncountableNouns = false) {
-  if (this.length === 1 || (uncountableNouns && this.length === 0)) return baseWord;
-  else return baseWord + "s";
+Array.prototype.plural = function (baseWord) {
+  return pluralize(baseWord, this.length || 1);
 };
 
-String.prototype.plural = function (array) {
-  const last = this[this.length - 1];
-  const lastIsS = last === "s";
-  const singularingAndReturn = () => {
-    if (lastIsS) return this.slice(0, -1);
-    else return this.toString();
-  };
-  if (!array || array.length === 1) return singularingAndReturn();
-  else {
-    if (lastIsS) {
-      return this + "es";
-    } else return this + "s";
-  }
+String.prototype.plural = function (items?: any[]): string {
+  return pluralize(this.toString(), items?.length || 1);
 };
 
 String.prototype.ellipsis = function (max) {
