@@ -19,7 +19,7 @@ export interface ITodo {
 
 const TodoSchema = new Schema(
   {
-    title: { type: String, required: true },
+    title: { type: String, required: true, maxLength: 150 },
     details: { type: String, required: true },
     status: { type: String, enum: TodoStatus, default: "PENDING" },
     dueDate: { type: Date, required: true },

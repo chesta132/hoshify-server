@@ -1,4 +1,4 @@
-import { Schema, SchemaOptions, model, ObjectId } from "mongoose";
+import { Schema, SchemaOptions, model, ObjectId, PopulateOptions } from "mongoose";
 import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { ITodo } from "./Todo";
@@ -27,8 +27,8 @@ export interface IUser {
   notes?: INote;
   transactions?: ITransaction;
   schedules?: ISchedule;
-  quickLinks?: IQuickLink;
-  widget?: IWidget;
+  links?: IQuickLink;
+  widgets?: IWidget;
 }
 
 export const schemaOptions: SchemaOptions = {
@@ -43,7 +43,7 @@ export const schemaOptions: SchemaOptions = {
 
 const UserSchema = new Schema(
   {
-    fullName: { type: String, required: true },
+    fullName: { type: String, required: true, maxLength: 20 },
     email: {
       type: String,
       sparse: true,
@@ -104,7 +104,25 @@ const virtualRef = (...ref: (string | [string, string])[]) => {
 };
 
 virtualRef("Todo", "Note", "Transaction", "Schedule", ["links", "QuickLink"], ["widgets", "Widget"]);
-export const allUserPopulate = ["links", "money", "notes", "schedules", "todos", "widgets"];
+
+export type UserPopulateField = "links" | "transactions" | "notes" | "schedules" | "todos" | "widgets";
+
+const sortMap: Partial<Record<UserPopulateField, object>> & { default: object } = {
+  schedules: { start: -1 },
+  widgets: { position: -1 },
+  links: { position: -1 },
+  default: { updatedAt: -1 },
+};
+
+export type BuildUserPopulateProps = Partial<Record<UserPopulateField, number | "all">>;
+
+export const buildUserPopulate = (config: BuildUserPopulateProps) => {
+  return Object.entries(config).map(([f, l]) => {
+    const field = f as UserPopulateField;
+    const limit = l === "all" ? undefined : l;
+    return { path: field, options: { limit, sort: sortMap[field] || sortMap.default } } as PopulateOptions;
+  });
+};
 
 const UserRaw = model<IUser>("User", UserSchema);
 

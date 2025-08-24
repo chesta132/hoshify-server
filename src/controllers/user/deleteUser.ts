@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
 import { CLIENT_URL } from "../../app";
-import { allUserPopulate, User } from "../../models/User";
+import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
 import { Note } from "../../models/Note";
 import { QuickLink } from "../../models/QuickLink";
@@ -15,7 +15,7 @@ export const deleteUser = async (req: Request, { res }: Response) => {
     const userId = req.user!.id;
     const { token } = req.query;
 
-    const user = await User.findByIdAndNormalize(userId, { populate: allUserPopulate });
+    const user = await User.findByIdAndNormalize(userId);
     if (!user) {
       res.tempNotFound("user").respond();
       return;

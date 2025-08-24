@@ -2,7 +2,7 @@ import { ObjectId, Schema, model } from "mongoose";
 import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
-const WidgetTypes = ["WEATHER", "CHART", "MONEY_OVERVIEW", "SCHEDULE", "QUICK_LINKS", "TODO_3_DAY"] as const;
+const WidgetTypes = ["WEATHER", "CHART", "MONEY_OVERVIEW", "SCHEDULE"] as const;
 
 export interface IWidget {
   _id: ObjectId;

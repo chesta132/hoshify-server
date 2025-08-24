@@ -17,7 +17,7 @@ export interface ISchedule {
 
 const ScheduleSchema = new Schema(
   {
-    title: { type: String, required: true },
+    title: { type: String, required: true, maxLength: 100 },
     details: { type: String, required: true },
     start: { type: Date, required: true },
     end: Date,

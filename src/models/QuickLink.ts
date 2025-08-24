@@ -15,7 +15,7 @@ export interface IQuickLink {
 const QuickLinkSchema = new Schema(
   {
     link: { type: String, required: true },
-    title: { type: String, required: true },
+    title: { type: String, required: true, maxLength: 50 },
     position: { type: Number, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     dummy: { type: Boolean, default: false },

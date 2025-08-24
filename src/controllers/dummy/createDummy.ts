@@ -2,12 +2,17 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Database } from "@/class/Database";
 import { oneWeeks } from "@/utils/token";
+import { NODE_ENV } from "@/app";
 
-export const createDummy = async <T extends { isRecycled: boolean }>(model: Database<T>, name: string, req: Request, { res }: Response) => {
+export const createDummy = async <T extends { dummy: boolean }>(model: Database<T>, name: string, req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { length } = req.query;
     const { transactionType, todoStatus } = req.body;
+    if (NODE_ENV !== "development") {
+      res.body({ error: { code: "SERVER_ERROR", message: "ENV is not in development" } }).respond();
+      return;
+    }
 
     const dummys = await model.generateDummy(parseInt(length?.toString() || "0") || 0, {
       userId: { fixed: user.id },
@@ -19,6 +24,7 @@ export const createDummy = async <T extends { isRecycled: boolean }>(model: Data
       type: { fixed: transactionType || "INCOME" },
       status: { fixed: todoStatus },
     } as any);
+    console.debug(dummys);
 
     res
       .body({ success: dummys })

@@ -15,7 +15,7 @@ export interface INote {
 
 const NoteSchema = new Schema(
   {
-    title: { type: String, required: true },
+    title: { type: String, required: true, maxLength: 150 },
     details: { type: String, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     isRecycled: { type: Boolean, default: false },
