@@ -59,7 +59,7 @@ passport.use(
           gmail: profile.emails![0]?.value,
           fullName: profile.displayName,
         });
-        const normalized = normalizeQuery(newUser) as NormalizedData<IUser>
+        const normalized = normalizeQuery(newUser) as NormalizedData<IUser>;
 
         done(null, normalized);
       } catch (err) {

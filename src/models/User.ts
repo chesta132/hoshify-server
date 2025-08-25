@@ -25,14 +25,21 @@ export interface IUser {
   currency: string;
   timeToAllowSendEmail: Date;
   createdAt: Date;
-  todos?: ITodo;
-  notes?: INote;
-  transactions?: ITransaction;
-  schedules?: ISchedule;
-  links?: ILink;
-  widgets?: IWidget;
-  money?: IMoney;
 }
+
+export interface UserPopulateField {
+  todos: ITodo[];
+  notes: INote[];
+  transactions: ITransaction[];
+  schedules: ISchedule[];
+  links: ILink[];
+  widgets: IWidget[];
+  money: IMoney;
+}
+
+export type UserCred = "password" | "googleId" | "currency";
+
+export type PopulatedUser<S extends keyof UserPopulateField> = IUser & Pick<UserPopulateField, S>;
 
 export const schemaOptions: SchemaOptions = {
   timestamps: true,
@@ -110,20 +117,20 @@ const virtualRef = (...ref: (string | [string, string])[]) => {
 
 virtualRef("Todo", "Note", "Transaction", "Schedule", "Link", ["money", "Money"], ["widgets", "Widget"]);
 
-export type UserPopulateField = "links" | "transactions" | "notes" | "schedules" | "todos" | "widgets" | "money";
+export const USER_CRED: UserCred[] = ["password", "googleId", "currency"];
 
-const sortMap: Partial<Record<UserPopulateField, object>> & { default: object } = {
+const sortMap: Partial<Record<keyof UserPopulateField, object>> & { default: object } = {
   schedules: { start: -1 },
   widgets: { position: -1 },
   links: { position: -1 },
   default: { updatedAt: -1 },
 };
 
-export type BuildUserPopulateProps = Partial<Record<UserPopulateField, number | "all">>;
+export type BuildUserPopulateProps = Partial<Record<keyof UserPopulateField, number | "all">>;
 
 export const buildUserPopulate = (config: BuildUserPopulateProps) => {
   return Object.entries(config).map(([f, l]) => {
-    const field = f as UserPopulateField;
+    const field = f as keyof UserPopulateField;
     const limit = l === "all" ? undefined : l;
     return { path: field, options: { limit, sort: sortMap[field] || sortMap.default } } as PopulateOptions;
   });

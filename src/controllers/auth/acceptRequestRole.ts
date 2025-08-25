@@ -19,7 +19,7 @@ export const acceptRequestRole = async (req: Request, { res }: Response) => {
     const indexOfRole = decrToken.lastIndexOf("role_");
 
     const userId = decrToken.slice(indexOfReqRole + 12, indexOfRole - 1);
-    const role = decrToken.slice(indexOfRole + 5) as UserRole
+    const role = decrToken.slice(indexOfRole + 5) as UserRole;
 
     const verification = await Verify.findOne({
       userId,

@@ -1,4 +1,4 @@
-import { CodeError, EitherWithKeys, Fields, OneFieldOnly } from "../types/types";
+import { CodeError, EitherWithKeys, Fields, NormalizedData, OneFieldOnly } from "../types/types";
 import { CookieOptions, Response } from "express";
 import {
   createAccessToken,
@@ -9,8 +9,9 @@ import {
   resRefreshToken,
   resRefreshTokenSessionOnly,
 } from "../utils/token";
-import { UserRole } from "@/models/User";
+import { USER_CRED, UserRole } from "@/models/User";
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "@/app";
+import { normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
 
 /**
  * Authentication-related error codes.
@@ -126,7 +127,7 @@ const defaultBody = <T>(): DataToResponse<T> => ({ data: {} as T, meta: { status
  */
 export class Respond<SuccessType = unknown, SuccessReady extends boolean = false, ErrorReady extends boolean = false> {
   private _jsonBody: DataToResponse<typeof this._body | typeof this._errorBody> = defaultBody();
-  private _body?: SuccessType | SuccessType[];
+  private _body?: SuccessType | SuccessType[] | NormalizedData<SuccessType> | NormalizedData<SuccessType>[];
   private _errorBody?: ErrorResponseType;
   private _accessToken?: string;
   private _refreshToken?: string;
@@ -160,6 +161,18 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   private finalize<S extends boolean>(success: S) {
+    if (success && typeof this._body === "object" && this._body !== null) {
+      const body = this._body as Record<string, any> | any[];
+      const hasId = Array.isArray(body) ? body.some((body) => body?._id) : body?._id;
+
+      if (hasId) {
+        type Normalizable = NormalizedData<SuccessType> | NormalizedData<SuccessType>[];
+
+        const isUserCred = !Array.isArray(body) && Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number]));
+
+        this._body = isUserCred ? (normalizeUserQuery(body) as Normalizable) : (normalizeQuery(body) as Normalizable);
+      }
+    }
     this._jsonBody.meta.status = success ? "SUCCESS" : "ERROR";
     this._jsonBody.data = success ? this._body : this._errorBody;
     return this as unknown as S extends true ? Respond<SuccessType, true, false> : Respond<unknown, false, true>;

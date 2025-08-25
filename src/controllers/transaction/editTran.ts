@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Transaction, transactionType } from "@/models/Transaction";
 import { isValidObjectId } from "mongoose";
-import { updateMoney } from "@/models/Money";
+import { getTotal, Money } from "@/models/Money";
 
 export const editTran = async (req: Request, { res }: Response) => {
   try {
+    const user = req.user!;
     const { id } = req.params;
     let { title, details, type, amount } = req.body;
     if (!isValidObjectId(id)) {
@@ -31,17 +32,21 @@ export const editTran = async (req: Request, { res }: Response) => {
       res.tempNotFound("transaction");
       return;
     }
-    const { userId } = tran;
+    const { amount: tranAmount } = tran;
+    const tranType = tran.type.toLowerCase() as "income" | "outcome";
+    const typeField = type.toLowerCase() as "income" | "outcome";
+    const dataToUpdate = { [tranType]: -tranAmount, total: -getTotal(tran) + getTotal({ type, amount }) };
 
     if (tran.amount !== amount || tran.type !== type) {
-      await updateMoney({ ...tran, reverse: true });
-      await updateMoney({ userId, type, amount });
+      dataToUpdate[typeField] = (-dataToUpdate[typeField] || 0) + amount;
+
+      await Money.updateOne({ userId: user.id }, { $inc: dataToUpdate });
     }
 
     if (!title) title = tran.title;
     if (!details) details = tran.details;
     if (!type) type = tran.type;
-    if (!amount) amount = tran.amount;
+    amount = amount ?? tran.amount;
 
     res.body({ success: { ...tran, amount, type, details, title } }).respond();
   } catch (err) {

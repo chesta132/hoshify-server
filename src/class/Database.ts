@@ -15,8 +15,9 @@ import {
 } from "mongoose";
 import { NormalizedData, OneFieldOnly } from "../types/types";
 import { normalizeQuery } from "../utils/normalizeQuery";
-import { NODE_ENV } from "@/app";
-import { oneWeeks } from "@/utils/token";
+import { NODE_ENV } from "../app";
+import { oneWeeks } from "../utils/token";
+import crypto from "crypto";
 
 type Settings<T> = {
   project?: ProjectionType<T>;
@@ -27,12 +28,14 @@ type Settings<T> = {
   raw?: boolean;
 };
 
-type QueryReturn<T, S> = Promise<([S] extends [{ raw: true }] ? T : NormalizedData<T>) | null>;
+type QueryReturn<T, S, Z = T> = Promise<([S] extends [{ raw: true }] ? Z : NormalizedData<T>) | null>;
 
 type SoftDelete<T extends Record<string, any>, FilterType> = IsTruthy<
   T["isRecycled"],
   <S extends Settings<T>>(filter: FilterType, update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">, settings?: S) => QueryReturn<T, S>
 >;
+
+export const test = "test success";
 
 export class Database<T extends Record<string, any>> {
   private model: Model<T>;
@@ -135,12 +138,12 @@ export class Database<T extends Record<string, any>> {
     filter: RootFilterQuery<T>,
     update: UpdateQuery<T> | UpdateWithAggregationPipeline,
     settings?: { options?: MongooseUpdateQueryOptions } & Omit<S, "project" | "options"> & { returnArray?: boolean }
-  ): QueryReturn<T[] | UpdateWriteOpResult, S> {
+  ): QueryReturn<T[], S, UpdateWriteOpResult> {
     const rawQuery = await this.model.updateMany(filter, update, settings?.options).sort(settings?.sort, settings?.sortOptions);
 
     if (rawQuery.modifiedCount === 0 && !settings?.returnArray) return null;
     if (settings?.raw) return rawQuery as any;
-    return await this.findAndNormalize(filter, settings);
+    return (await this.findAndNormalize(filter, settings)) as any;
   }
 
   async createAndNormalize(doc: T | Partial<T>) {

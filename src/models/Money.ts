@@ -26,10 +26,14 @@ virtualSchema(MoneySchema);
 
 const MoneyRaw = model<IMoney>("Money", MoneySchema);
 
+export const getTotal = ({ type, amount }: { type: ITransaction["type"]; amount: number }) => {
+  return type === "INCOME" ? amount : -amount;
+};
+
 export const incremByAmount = (transaction: Pick<ITransaction, "type" | "amount">, reverse?: boolean) => {
   let { type, amount } = transaction;
   if (reverse) amount = -amount;
-  return type === "INCOME" ? { income: amount, total: amount } : { outcome: amount, total: -amount };
+  return { [type.toLowerCase()]: amount, total: getTotal({ ...transaction, amount }) };
 };
 
 export const updateMoney = async ({ userId, type, amount, reverse }: Pick<ITransaction, "userId" | "type" | "amount"> & { reverse?: boolean }) => {

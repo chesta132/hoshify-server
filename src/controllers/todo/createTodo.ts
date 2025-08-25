@@ -21,7 +21,7 @@ export const createTodo = async (req: Request, { res }: Response) => {
     res
       .body({ success: todo })
       .notif(`${todo.title.ellipsis(10)} added`)
-      .respond();
+      .created();
   } catch (err) {
     handleError(err, res);
   }

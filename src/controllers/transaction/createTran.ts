@@ -27,7 +27,7 @@ export const createTran = async (req: Request, { res }: Response) => {
     res
       .body({ success: tran })
       .notif(`${tran.title.ellipsis(10)} added`)
-      .respond();
+      .created();
   } catch (err) {
     handleError(err, res);
   }

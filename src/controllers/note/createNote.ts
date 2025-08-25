@@ -19,7 +19,7 @@ export const createNote = async (req: Request, { res }: Response) => {
     res
       .body({ success: note })
       .notif(`${note.title.ellipsis(10)} added`)
-      .respond();
+      .created();
   } catch (err) {
     handleError(err, res);
   }
