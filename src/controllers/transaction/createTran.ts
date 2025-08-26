@@ -6,7 +6,7 @@ import { updateMoney } from "@/models/Money";
 export const createTran = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const { title, details, type, amount } = req.body;
+    let { title, details, type, amount } = req.body;
     if (!title || !type || !amount) {
       res.tempMissingFields("title, type, amount").respond();
       return;
@@ -14,6 +14,10 @@ export const createTran = async (req: Request, { res }: Response) => {
     if (!transactionType.includes(type)) {
       res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
       return;
+    }
+    if (amount < 0) {
+      type = type === "INCOME" ? "OUTCOME" : "INCOME";
+      amount = Math.abs(amount);
     }
 
     const tran = await Transaction.createAndNormalize({

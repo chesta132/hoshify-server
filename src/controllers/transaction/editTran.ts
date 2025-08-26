@@ -17,6 +17,10 @@ export const editTran = async (req: Request, { res }: Response) => {
       res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
       return;
     }
+    if (amount < 0) {
+      type = type === "INCOME" ? "OUTCOME" : "INCOME";
+      amount = Math.abs(amount);
+    }
 
     const tran = await Transaction.updateByIdAndNormalize(
       id,
