@@ -3,6 +3,7 @@ import { deleteNote } from "@/controllers/note/deleteNote";
 import { editNote } from "@/controllers/note/editNote";
 import { getNote } from "@/controllers/note/getNote";
 import { getNotes } from "@/controllers/note/getNotes";
+import { restoreNote } from "@/controllers/note/restoreNote";
 import { Router } from "express";
 
 export const noteRoutes = Router()
@@ -12,3 +13,4 @@ noteRoutes.get("/", getNotes);
 noteRoutes.get("/:id", getNote);
 noteRoutes.put("/:id", editNote);
 noteRoutes.delete("/:id", deleteNote);
+noteRoutes.patch("/:id", restoreNote);

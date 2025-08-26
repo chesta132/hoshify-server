@@ -49,7 +49,7 @@ authRouter.put("/reset-password", resetPassword);
 authRouter.put("/update-password", changePassword);
 authRouter.post("/request-role", requestRole);
 
-authRouter.use((req, res, next) => requireRole(req, res, next, "OWNER"));
+authRouter.use(requireRole("OWNER"));
 authRouter.put("/accept-request-role", acceptRequestRole);
 
 export default authRouter;

@@ -26,7 +26,16 @@ export const codeErrorField = ["MISSING_FIELDS", "CLIENT_FIELD"] as const;
 /**
  * Client-side related error codes.
  */
-export const codeErrorClient = ["TOO_MUCH_REQUEST", "SELF_REQUEST", "CLIENT_REFRESH", "IS_VERIFIED", "NOT_VERIFIED", "INVALID_CLIENT_TYPE"] as const;
+export const codeErrorClient = [
+  "TOO_MUCH_REQUEST",
+  "SELF_REQUEST",
+  "CLIENT_REFRESH",
+  "IS_VERIFIED",
+  "NOT_VERIFIED",
+  "INVALID_CLIENT_TYPE",
+  "IS_RECYCLED",
+  "NOT_RECYCLED",
+] as const;
 
 /**
  * Server-side related error codes.
@@ -66,7 +75,7 @@ const statusAlias: {
   { code: ["IS_BOUND", "NOT_BOUND", "INVALID_ROLE", "NOT_VERIFIED"], status: 403 },
   { code: ["NOT_FOUND"], status: 404 },
   { code: ["CLIENT_FIELD", "MISSING_FIELDS", "SELF_REQUEST", "INVALID_CLIENT_TYPE"], status: 406 },
-  { code: ["IS_VERIFIED"], status: 409 },
+  { code: ["IS_VERIFIED", "IS_RECYCLED", "NOT_RECYCLED"], status: 409 },
   { code: ["TOO_MUCH_REQUEST"], status: 429 },
   { code: ["CLIENT_REFRESH"], status: 301 },
   { code: ["SERVER_ERROR"], status: 500 },
@@ -762,6 +771,52 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
         message: "Can not self request, please report this issue to Hoshify Team",
         title: "Self request detected",
         code: "SELF_REQUEST",
+      },
+    });
+    return body;
+  }
+
+  /**
+   * Template when item is recycled but user want to access it.
+   *
+   * @example
+   * ```ts
+   * res.tempIsRecycled("fix motherboard");
+   * ```
+   *
+   * @param name Name of item
+   * @param restErr Additional error properties
+   * @returns typeof .body({ error })
+   */
+  tempIsRecycled(name: string, restErr?: RestError) {
+    const body = this.body({
+      error: {
+        ...restErr,
+        message: `${name.capital()} is recycled, please restore first`,
+        code: "IS_RECYCLED",
+      },
+    });
+    return body;
+  }
+
+  /**
+   * Template when item is not recycled.
+   *
+   * @example
+   * ```ts
+   * res.tempIsRecycled("fix motherboard");
+   * ```
+   *
+   * @param name Name of item
+   * @param restErr Additional error properties
+   * @returns typeof .body({ error })
+   */
+  tempNotRecycled(name: string, restErr?: RestError) {
+    const body = this.body({
+      error: {
+        ...restErr,
+        message: `${name.capital()} is not recycled, please recycle first`,
+        code: "NOT_RECYCLED",
       },
     });
     return body;

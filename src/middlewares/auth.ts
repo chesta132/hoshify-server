@@ -79,20 +79,22 @@ export const requireVerified = async (req: Request, { res }: Response, next: Nex
   }
 };
 
-export const requireRole = async (req: Request, { res }: Response, next: NextFunction, role: UserRole | UserRole[]) => {
-  if (req.user?.role) {
-    if (typeof role === "string" ? req.user.role === role : role.includes(req.user.role)) next();
-    else res.tempInvalidRole(typeof role === "string" ? role : role.join(", ")).respond();
-  } else {
-    const { refreshToken } = req.cookies;
-    const isRSafe = await isRefreshSafe(refreshToken);
-    if (!isRSafe) {
-      res.tempInvalidToken().respond();
-      return;
-    }
-    const { refreshPayload } = isRSafe;
+export const requireRole = (role: UserRole | UserRole[]) => {
+  return async (req: Request, { res }: Response, next: NextFunction) => {
+    if (req.user?.role) {
+      if (typeof role === "string" ? req.user.role === role : role.includes(req.user.role)) next();
+      else res.tempInvalidRole(typeof role === "string" ? role : role.join(", ")).respond();
+    } else {
+      const { refreshToken } = req.cookies;
+      const isRSafe = await isRefreshSafe(refreshToken);
+      if (!isRSafe) {
+        res.tempInvalidToken().respond();
+        return;
+      }
+      const { refreshPayload } = isRSafe;
 
-    if (typeof role === "string" ? refreshPayload.role === role : role.includes(refreshPayload.role)) next();
-    else res.tempInvalidRole(typeof role === "string" ? role : role.join(", ")).respond();
-  }
+      if (typeof role === "string" ? refreshPayload.role === role : role.includes(refreshPayload.role)) next();
+      else res.tempInvalidRole(typeof role === "string" ? role : role.join(", ")).respond();
+    }
+  };
 };

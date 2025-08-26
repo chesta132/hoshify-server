@@ -26,7 +26,7 @@ export const createTran = async (req: Request, { res }: Response) => {
     await updateMoney(tran);
     res
       .body({ success: tran })
-      .notif(`${tran.title.ellipsis(10)} added`)
+      .notif(`${tran.title.ellipsis(30)} added`)
       .created();
   } catch (err) {
     handleError(err, res);

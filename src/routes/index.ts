@@ -14,7 +14,7 @@ router.use("/user", userRoutes);
 router.use("/todo", todoRoutes);
 router.use("/transaction", tranRoutes);
 
-router.use((req, res, next) => requireRole(req, res, next, ["DEVELOPER", "OWNER"]));
+router.use(requireRole(["DEVELOPER", "OWNER"]));
 router.use("/dummy", dummyRoutes);
 
 router.get("/health", (req, res) => {

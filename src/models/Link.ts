@@ -9,7 +9,6 @@ export interface ILink {
   title: string;
   position: number;
   userId: ObjectId | string;
-  dummy: boolean;
 }
 
 const LinkSchema = new Schema(
@@ -18,7 +17,6 @@ const LinkSchema = new Schema(
     title: { type: String, required: true, maxLength: 50 },
     position: { type: Number, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    dummy: { type: Boolean, default: false },
   },
   schemaOptions
 );

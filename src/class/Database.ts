@@ -211,6 +211,22 @@ export class Database<T extends Record<string, any>> {
   ) => {
     return await this.updateOneAndNormalize(filter, { ...update, isRecycled: true, deleteAt: new Date(Date.now() + oneWeeks) }, settings);
   }) as any;
+
+  restoreById: SoftDelete<T, string | ObjectId> = (async <S extends Settings<T>>(
+    id: string | ObjectId,
+    update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">,
+    settings?: S
+  ) => {
+    return await this.updateByIdAndNormalize(id, { ...update, isRecycled: false, deleteAt: null }, settings);
+  }) as any;
+
+  restoreOne: SoftDelete<T, RootFilterQuery<T>> = (async <S extends Settings<T>>(
+    filter: RootFilterQuery<T>,
+    update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">,
+    settings?: S
+  ) => {
+    return await this.updateOneAndNormalize(filter, { ...update, isRecycled: false, deleteAt: null }, settings);
+  }) as any;
 }
 
 export interface Database<T extends Record<string, any>> extends Model<T> {}

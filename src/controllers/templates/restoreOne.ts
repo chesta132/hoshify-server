@@ -4,7 +4,7 @@ import { isValidObjectId } from "mongoose";
 import { Database } from "@/class/Database";
 import { NormalizedData } from "@/types/types";
 
-export const getOne = async <T extends Record<string, any>>(
+export const restoreOne = async <T extends Record<string, any>>(
   model: Database<T>,
   req: Request,
   res: Response["res"],
@@ -17,14 +17,22 @@ export const getOne = async <T extends Record<string, any>>(
       return;
     }
 
-    const data = await model.findByIdAndNormalize(id);
+    const data = await model.restoreById(id);
     if (!data) {
       res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase());
       return;
     }
+    if (!data.isRecycled) {
+      await model.findByIdAndUpdate(data.id, data);
+      res.tempNotRecycled(data.title).respond();
+      return;
+    }
     if (funcBeforeRes) await funcBeforeRes(data);
 
-    res.body({ success: data }).respond();
+    res
+      .body({ success: { ...data, isRecycled: false, deleteAt: null } })
+      .notif(`${data.title.ellipsis(30)} restored`)
+      .respond();
   } catch (err) {
     handleError(err, res);
   }
