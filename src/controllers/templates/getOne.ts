@@ -19,7 +19,7 @@ export const getOne = async <T extends Record<string, any>>(
 
     const data = await model.findByIdAndNormalize(id);
     if (!data) {
-      res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase());
+      res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond();
       return;
     }
     if (funcBeforeRes) await funcBeforeRes(data);

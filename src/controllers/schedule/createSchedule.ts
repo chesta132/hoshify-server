@@ -5,11 +5,12 @@ import { Schedule } from "@/models/Schedule";
 export const createSchedule = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const { title, details, start, end } = req.body;
-    if (!title || !details || !start) {
-      res.tempMissingFields("title, details, start").respond();
+    let { title, details, start, end } = req.body;
+    if (!title || !details) {
+      res.tempMissingFields("title, details").respond();
       return;
     }
+    if (!end) end = start;
 
     const schedule = await Schedule.createAndNormalize({
       title,

@@ -24,7 +24,7 @@ export const editSchedule = async (req: Request, { res }: Response) => {
     res
       .body({ success: schedule })
       .notif(`${schedule.title.ellipsis(30)} added`)
-      .created();
+      .respond();
   } catch (err) {
     handleError(err, res);
   }

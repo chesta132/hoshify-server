@@ -21,7 +21,7 @@ export const softDeleteOne = async <T extends { isRecycled: boolean; title: stri
     const data = await model.softDeleteById(id);
     const deleteAt = new Date(Date.now() + oneWeeks);
     if (!data) {
-      res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase());
+      res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond()
       return;
     }
     if (data.isRecycled) {

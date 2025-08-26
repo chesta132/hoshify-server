@@ -1,0 +1,30 @@
+import { Request, Response } from "express";
+import handleError from "@/utils/handleError";
+import { Link } from "@/models/Link";
+
+export const editLink = async (req: Request, { res }: Response) => {
+  try {
+    const { id } = req.params;
+    let { title, link, position } = req.body;
+
+    const updatedLink = await Link.updateByIdAndNormalize(
+      id,
+      {
+        title,
+        link,
+        position,
+      },
+      { options: { new: true, runValidators: true } }
+    );
+    if (!updatedLink) {
+      res.tempNotFound("link").respond();
+      return;
+    }
+    res
+      .body({ success: updatedLink })
+      .notif(`${updatedLink.title.ellipsis(30)} added`)
+      .respond();
+  } catch (err) {
+    handleError(err, res);
+  }
+};

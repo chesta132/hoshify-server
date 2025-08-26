@@ -6,6 +6,7 @@ import { todoRoutes } from "./todoRoutes";
 import { dummyRoutes } from "./dummyRoutes";
 import { tranRoutes } from "./tranRoutes";
 import { scheduleRoutes } from "./scheduleRoutes";
+import { linkRoutes } from "./linkRoutes";
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -15,6 +16,7 @@ router.use("/user", userRoutes);
 router.use("/todo", todoRoutes);
 router.use("/transaction", tranRoutes);
 router.use("/schedule", scheduleRoutes);
+router.use("/link", linkRoutes);
 
 router.use(requireRole(["DEVELOPER", "OWNER"]));
 router.use("/dummy", dummyRoutes);

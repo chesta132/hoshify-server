@@ -19,7 +19,7 @@ export const restoreOne = async <T extends Record<string, any>>(
 
     const data = await model.restoreById(id);
     if (!data) {
-      res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase());
+      res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond();
       return;
     }
     if (!data.isRecycled) {

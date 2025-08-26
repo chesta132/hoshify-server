@@ -8,7 +8,7 @@ export interface ISchedule {
   title: string;
   details: string;
   start: Date;
-  end?: Date;
+  end: Date;
   userId: ObjectId | string;
   isRecycled: boolean;
   deleteAt?: Date;
@@ -19,8 +19,8 @@ const ScheduleSchema = new Schema(
   {
     title: { type: String, required: true, maxLength: 100 },
     details: { type: String, required: true },
-    start: { type: Date, required: true },
-    end: Date,
+    start: { type: Date, default: Date.now },
+    end: { type: Date, default: Date.now },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     isRecycled: { type: Boolean, default: false },
     deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
