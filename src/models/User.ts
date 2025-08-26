@@ -6,7 +6,6 @@ import { INote } from "./Note";
 import { ITransaction } from "./Transaction";
 import { ISchedule } from "./Schedule";
 import { ILink } from "./Link";
-import { IWidget } from "./Widget";
 import { IMoney } from "./Money";
 
 export const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -33,7 +32,6 @@ export interface UserPopulateField {
   transactions: ITransaction[];
   schedules: ISchedule[];
   links: ILink[];
-  widgets: IWidget[];
   money: IMoney;
 }
 
@@ -115,13 +113,12 @@ const virtualRef = (...ref: (string | [string, string])[]) => {
   }
 };
 
-virtualRef("Todo", "Note", "Transaction", "Schedule", "Link", ["money", "Money"], ["widgets", "Widget"]);
+virtualRef("Todo", "Note", "Transaction", "Schedule", "Link", ["money", "Money"]);
 
 export const USER_CRED: UserCred[] = ["password", "googleId", "currency"];
 
 const sortMap: Partial<Record<keyof UserPopulateField, object>> & { default: object } = {
   schedules: { start: -1 },
-  widgets: { position: 1 },
   links: { position: 1 },
   default: { updatedAt: -1 },
 };

@@ -12,7 +12,6 @@ export const initiateUser = async (req: Request, { res }: Response) => {
       notes: 3,
       links: "all",
       schedules: 3,
-      widgets: "all",
       money: "all",
     };
 
