@@ -31,11 +31,7 @@ export const verifyEmail = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const updatedUser = await User.updateByIdAndNormalize(
-      user.id,
-      { verified: true },
-      { project: userProject(), options: { new: true, runValidators: true } }
-    );
+    const updatedUser = await User.findByIdAndUpdate(user.id, { verified: true }, { projection: userProject(), new: true, runValidators: true });
     if (!updatedUser) {
       res.tempNotFound("user");
       return;

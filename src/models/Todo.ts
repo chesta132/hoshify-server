@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
+import { dummyPlugin, softDeletePlugin } from "@/class/newDB";
 
 const TodoStatus = ["PENDING", "ACTIVE", "COMPLETED", "CANCELED"] as const;
 
@@ -31,8 +31,9 @@ const TodoSchema = new Schema(
   schemaOptions
 );
 
+TodoSchema.plugin(softDeletePlugin);
+TodoSchema.plugin(dummyPlugin);
+
 virtualSchema(TodoSchema);
 
-const TodoRaw = model<ITodo>("Todo", TodoSchema);
-
-export const Todo = new Database(TodoRaw);
+export const Todo = model<ITodo>("Todo", TodoSchema);

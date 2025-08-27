@@ -1,15 +1,14 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
-import { isValidObjectId } from "mongoose";
-import { Database } from "@/class/Database";
-import { NormalizedData } from "@/types/types";
+import { isValidObjectId, Model } from "mongoose";
+import { Normalized } from "@/types/types";
 import { oneWeeks } from "@/utils/token";
 
 export const softDeleteOne = async <T extends { isRecycled: boolean; title: string; deleteAt?: Date }>(
-  model: Database<T>,
+  model: Model<T>,
   req: Request,
   res: Response["res"],
-  funcBeforeRes?: (data: NormalizedData<T>) => Promise<any> | any
+  funcBeforeRes?: (data: Normalized<T>) => Promise<any> | any
 ) => {
   try {
     const { id } = req.params;
@@ -18,10 +17,10 @@ export const softDeleteOne = async <T extends { isRecycled: boolean; title: stri
       return;
     }
 
-    const data = await model.softDeleteById(id);
+    const data = (await model.softDeleteById(id))?.normalize();
     const deleteAt = new Date(Date.now() + oneWeeks);
     if (!data) {
-      res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond()
+      res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond();
       return;
     }
     if (data.isRecycled) {

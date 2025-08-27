@@ -15,7 +15,7 @@ export const initiateUser = async (req: Request, { res }: Response) => {
       money: "all",
     };
 
-    const populatedUser = await User.findByIdAndNormalize(user.id, { populate: buildUserPopulate(populateConfig) });
+    const populatedUser = await User.findById(user.id).populate(buildUserPopulate(populateConfig));
     if (!populatedUser) {
       res.tempNotFound("user");
       return;

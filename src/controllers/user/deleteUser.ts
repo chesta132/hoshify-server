@@ -29,7 +29,7 @@ export const deleteUser = async (req: Request, { res }: Response) => {
     const userId = req.user!.id;
     const { token } = req.query;
 
-    const user = await User.findByIdAndNormalize(userId);
+    const user = await User.findById(userId).normalize();
     if (!user) {
       res.tempNotFound("user").respond();
       return;

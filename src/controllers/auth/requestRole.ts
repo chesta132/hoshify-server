@@ -26,10 +26,10 @@ export const requestRole = async (req: Request, { res }: Response) => {
     });
 
     await sendRequestRole(role, token, user.fullName);
-    const updatedUser = await User.updateByIdAndNormalize(
+    const updatedUser = await User.findByIdAndUpdate(
       user.id,
       { timeToAllowSendEmail: new Date(Date.now() + oneMin * 2) },
-      { project: userProject() }
+      { projection: userProject() }
     );
 
     res.body({ success: updatedUser }).respond();

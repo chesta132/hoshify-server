@@ -1,5 +1,4 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
 import { ITransaction } from "./Transaction";
@@ -24,7 +23,7 @@ const MoneySchema = new Schema(
 
 virtualSchema(MoneySchema);
 
-const MoneyRaw = model<IMoney>("Money", MoneySchema);
+export const Money = model<IMoney>("Money", MoneySchema);
 
 export const getTotal = ({ type, amount }: { type: ITransaction["type"]; amount: number }) => {
   return type === "INCOME" ? amount : -amount;
@@ -39,5 +38,3 @@ export const incremByAmount = (transaction: Pick<ITransaction, "type" | "amount"
 export const updateMoney = async ({ userId, type, amount, reverse }: Pick<ITransaction, "userId" | "type" | "amount"> & { reverse?: boolean }) => {
   await Money.updateOne({ userId }, { $inc: incremByAmount({ type, amount }, reverse) });
 };
-
-export const Money = new Database(MoneyRaw);

@@ -12,7 +12,7 @@ export const createSchedule = async (req: Request, { res }: Response) => {
     }
     if (!end) end = start;
 
-    const schedule = await Schedule.createAndNormalize({
+    const schedule = await Schedule.create({
       title,
       details,
       userId: user.id,

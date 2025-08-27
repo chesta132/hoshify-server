@@ -1,5 +1,4 @@
 import { Schema, SchemaOptions, model, ObjectId, PopulateOptions } from "mongoose";
-import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { ITodo } from "./Todo";
 import { INote } from "./Note";
@@ -133,6 +132,4 @@ export const buildUserPopulate = (config: BuildUserPopulateProps) => {
   });
 };
 
-const UserRaw = model<IUser>("User", UserSchema);
-
-export const User = new Database(UserRaw);
+export const User = model<IUser>("User", UserSchema);

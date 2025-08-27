@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
+import { dummyPlugin, softDeletePlugin } from "@/class/newDB";
 
 export interface ISchedule {
   _id: ObjectId;
@@ -29,8 +29,9 @@ const ScheduleSchema = new Schema(
   schemaOptions
 );
 
+ScheduleSchema.plugin(softDeletePlugin);
+ScheduleSchema.plugin(dummyPlugin);
+
 virtualSchema(ScheduleSchema);
 
-const ScheduleRaw = model<ISchedule>("Schedule", ScheduleSchema);
-
-export const Schedule = new Database(ScheduleRaw);
+export const Schedule = model<ISchedule>("Schedule", ScheduleSchema);

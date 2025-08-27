@@ -8,9 +8,9 @@ const isRefreshSafe = async (refreshToken: string) => {
   const refreshPayload = verifyRefreshToken(refreshToken);
 
   if (!refreshPayload) return;
-  const blacklistedToken = await Revoked.findOne({ value: refreshToken });
-  if (blacklistedToken) return;
-  return { refreshPayload, blacklistedToken };
+  const revoked = await Revoked.findOne({ value: refreshToken });
+  if (revoked) return;
+  return { refreshPayload, revoked };
 };
 
 export const authMiddleware = async (req: Request, { res }: Response, next: NextFunction) => {
@@ -30,7 +30,7 @@ export const authMiddleware = async (req: Request, { res }: Response, next: Next
 
     if (!payload) {
       // Check if refresh token exists in database
-      const user = await User.findByIdAndNormalize(refreshPayload.userId);
+      const user = await User.findById(refreshPayload.userId).normalize();
       if (!user) {
         res.tempInvalidToken().respond();
         return;
@@ -43,7 +43,7 @@ export const authMiddleware = async (req: Request, { res }: Response, next: Next
       return next();
     }
 
-    const user = await User.findByIdAndNormalize(payload.userId);
+    const user = await User.findById(payload.userId).normalize();
     if (!user) {
       res.tempNotFound("user", "please back to dashboard or sign in page").respond();
       return;

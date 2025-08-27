@@ -1,14 +1,13 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
-import { isValidObjectId } from "mongoose";
-import { Database } from "@/class/Database";
-import { NormalizedData } from "@/types/types";
+import { isValidObjectId, Model } from "mongoose";
+import { Normalized } from "@/types/types";
 
-export const restoreOne = async <T extends Record<string, any>>(
-  model: Database<T>,
+export const restoreOne = async <T extends { isRecycled: boolean; title: string; deleteAt?: Date }>(
+  model: Model<T>,
   req: Request,
   res: Response["res"],
-  funcBeforeRes?: (data: NormalizedData<T>) => Promise<any> | any
+  funcBeforeRes?: (data: Normalized<T>) => Promise<any> | any
 ) => {
   try {
     const { id } = req.params;
@@ -17,7 +16,7 @@ export const restoreOne = async <T extends Record<string, any>>(
       return;
     }
 
-    const data = await model.restoreById(id);
+    const data = (await model.restoreById(id))?.normalize();
     if (!data) {
       res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond();
       return;

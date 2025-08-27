@@ -1,5 +1,4 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
 
@@ -23,6 +22,4 @@ const LinkSchema = new Schema(
 
 virtualSchema(LinkSchema);
 
-const LinkRaw = model<ILink>("Link", LinkSchema);
-
-export const Link = new Database(LinkRaw);
+export const Link = model<ILink>("Link", LinkSchema);

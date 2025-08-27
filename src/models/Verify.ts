@@ -1,5 +1,4 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
 
@@ -25,6 +24,4 @@ const VerifySchema = new Schema(
 
 virtualSchema(VerifySchema);
 
-const VerifyRaw = model<IVerify>("Verify", VerifySchema);
-
-export const Verify = new Database(VerifyRaw);
+export const Verify = model<IVerify>("Verify", VerifySchema);

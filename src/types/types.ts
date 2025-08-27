@@ -1,5 +1,6 @@
 import { Document, ObjectId } from "mongoose";
 import { codeErrorAuth, codeErrorClient, codeErrorField, codeErrorServer, CodeErrorValues } from "../class/Response";
+import { UserCred } from "@/models/User";
 
 export type Fields = "password" | "newPassword" | "username" | "email" | "newEmail" | "newFullName" | "token" | "type" | "refreshMoney";
 
@@ -27,3 +28,20 @@ export type NormalizedData<T> = Omit<
 export type EitherWithKeys<Keys extends object, Others extends object> =
   | (Keys & { [K in keyof Others]?: undefined })
   | (Others & { [K in keyof Keys]?: never });
+
+export type NormalizeReturn<T> = NormalizedData<T>;
+// export type NormalizeReturn<T> = NormalizedData<T>;
+// export type NormalizeModelReturn<ResultType, DocType> = NormalizeReturn<DocType> | null;
+// export type NormalizeModelReturn<ResultType, DocType> = IsArray<ResultType, NormalizeReturn<DocType>[], NormalizeReturn<DocType> | null>;
+
+export type NormalizeUserReturn<DocType> = Omit<NormalizedData<DocType>, UserCred>;
+// export type NormalizeUserReturn<DocType> = Omit<NormalizedData<DocType>, UserCred>;
+// export type NormalizeUserModelReturn<ResultType, DocType> = IsArray<ResultType, NormalizeUserReturn<DocType>[], NormalizeUserReturn<DocType> | null>;
+// export type NormalizeUserModelReturn<ResultType, DocType> = NormalizeUserReturn<DocType> | null;
+
+export type Normalized<DocType, ResultType = DocType, IfObject = never> = ResultType extends any[]
+  ? NormalizedData<DocType>[]
+  : NormalizedData<DocType> | IfObject;
+export type NormalizedUser<DocType, ResultType = DocType, IfObject = never> = ResultType extends any[]
+  ? NormalizeUserReturn<DocType>[]
+  : NormalizeUserReturn<DocType> | IfObject;

@@ -28,7 +28,7 @@ export const changePassword = async (req: Request, { res }: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const updatedUser = await User.updateByIdAndNormalize(user.id, { password: hashedPassword }, { project: userProject() });
+    const updatedUser = await User.findByIdAndUpdate(user.id, { password: hashedPassword }, { projection: userProject() });
     if (!updatedUser) {
       res.tempNotFound("user").respond();
       return;

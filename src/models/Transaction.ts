@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
+import { dummyPlugin, softDeletePlugin } from "@/class/newDB";
 
 export const transactionType = ["INCOME", "OUTCOME"] as const;
 
@@ -31,8 +31,9 @@ const TransactionSchema = new Schema(
   schemaOptions
 );
 
+TransactionSchema.plugin(softDeletePlugin);
+TransactionSchema.plugin(dummyPlugin);
+
 virtualSchema(TransactionSchema);
 
-const TransactionRaw = model<ITransaction>("Transaction", TransactionSchema);
-
-export const Transaction = new Database(TransactionRaw);
+export const Transaction = model<ITransaction>("Transaction", TransactionSchema);

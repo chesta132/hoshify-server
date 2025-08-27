@@ -7,7 +7,7 @@ export const editSchedule = async (req: Request, { res }: Response) => {
     const { id } = req.params;
     const { title, details, start, end } = req.body;
 
-    const schedule = await Schedule.updateByIdAndNormalize(
+    const schedule = await Schedule.findByIdAndUpdate(
       id,
       {
         title,
@@ -15,7 +15,7 @@ export const editSchedule = async (req: Request, { res }: Response) => {
         start,
         end,
       },
-      { options: { new: true, runValidators: true } }
+      { new: true, runValidators: true }
     );
     if (!schedule) {
       res.tempNotFound("schedule").respond();

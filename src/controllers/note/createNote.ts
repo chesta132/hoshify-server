@@ -11,7 +11,7 @@ export const createNote = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const note = await Note.createAndNormalize({
+    const note = await Note.create({
       title,
       details,
       userId: user.id,

@@ -24,12 +24,13 @@ export const signup = async (req: Request, { res }: Response) => {
     });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const rawNewUser = await User.create({
-      email,
-      password: hashedPassword,
-      fullName,
-    });
-    const newUser = normalizeUserQuery(rawNewUser);
+    const newUser = (
+      await User.create({
+        email,
+        password: hashedPassword,
+        fullName,
+      })
+    ).normalizeUser();
     await Money.create({ userId: newUser.id });
 
     res.body({ success: newUser }).sendCookie({ template: "REFRESH_ACCESS", rememberMe }).created();

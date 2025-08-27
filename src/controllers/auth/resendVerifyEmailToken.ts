@@ -11,7 +11,7 @@ export const sendVerifyEmail = async (user: Express.User) => {
   const token = encrypt(`verify_${user.id}`);
   await Verify.create({ userId: user.id, value: token, type: "VERIFY_EMAIL", deleteAt: new Date(Date.now() + fiveMin) });
   await sendVerificationEmail(user.email!, token, user.fullName);
-  return await User.updateByIdAndNormalize(user.id, { timeToAllowSendEmail: new Date(Date.now() + oneMin * 2) }, { project: userProject() });
+  return await User.findByIdAndUpdate(user.id, { timeToAllowSendEmail: new Date(Date.now() + oneMin * 2) }, { projection: userProject() });
 };
 
 export const resendVerifyEmail = async (req: Request, { res }: Response) => {

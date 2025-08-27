@@ -23,20 +23,20 @@ export const changeEmail = async (req: Request, { res }: Response) => {
       res.tempClientField("newEmail", "New email and old email can not same").error();
       return;
     }
-    if (await User.find({ email: newEmail })) {
+    if (await User.findOne({ email: newEmail })) {
       res.tempClientField("newEmail", "Email is already in use").error();
       return;
     }
 
     const updateEmail = async () => {
-      const updatedUser = await User.updateByIdAndNormalize(
+      const updatedUser = await User.findByIdAndUpdate(
         user.id,
         {
           email: newEmail,
           // verified comment: new email is auto verified because google mail always valid
           verified: user?.gmail === newEmail,
         },
-        { project: userProject() }
+        { projection: userProject() }
       );
       if (!updatedUser) {
         res.tempNotFound("user").error();

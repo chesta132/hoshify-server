@@ -12,7 +12,7 @@ export const editTodo = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const todo = await Todo.updateByIdAndNormalize(
+    const todo = await Todo.findByIdAndUpdate(
       id,
       {
         title,
@@ -20,7 +20,7 @@ export const editTodo = async (req: Request, { res }: Response) => {
         status,
         dueDate,
       },
-      { options: { new: true, runValidators: true } }
+      { new: true, runValidators: true }
     );
 
     if (!todo) {

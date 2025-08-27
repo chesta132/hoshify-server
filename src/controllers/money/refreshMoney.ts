@@ -14,7 +14,7 @@ export const refreshMoney = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const oldMoney = await Money.findOneAndNormalize({ userId: user.id });
+    const oldMoney = await Money.findOne({ userId: user.id });
     if (!oldMoney) {
       res.tempNotFound("money").respond();
       return;
@@ -34,7 +34,7 @@ export const refreshMoney = async (req: Request, { res }: Response) => {
         break;
     }
 
-    const newMoney = await Money.updateByIdAndNormalize(oldMoney.id, { [toUpdate[0]]: toUpdate[1] }, { options: { new: true, runValidators: true } });
+    const newMoney = await Money.findByIdAndUpdate(oldMoney.id, { [toUpdate[0]]: toUpdate[1] }, { new: true, runValidators: true });
 
     res.body({ success: newMoney }).notif("money management refreshed").respond();
   } catch (err) {

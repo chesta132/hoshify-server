@@ -31,7 +31,7 @@ export const acceptRequestRole = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const user = await User.updateByIdAndNormalize(userId, { role }, { options: { new: true, runValidators: true }, project: userProject() });
+    const user = await User.findByIdAndUpdate(userId, { role }, { new: true, runValidators: true, projection: userProject() });
     if (!user) {
       res.tempInvalidVerifyToken().error();
       return;

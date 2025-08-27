@@ -10,7 +10,7 @@ import { NormalizedData } from "../types/types";
 passport.use(
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
     try {
-      const user = await User.findOneAndNormalize({ email: email.trim() });
+      const user = await User.findOne({ email: email.trim() }).normalize();
       if (!user || !user.password) {
         return done(null, false, { message: "Email not registered", code: "CLIENT_FIELD", field: "email" } as ErrorResponseType);
       }
@@ -38,19 +38,19 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const user = await User.findOneAndNormalize({
+        const user = await User.findOne({
           $or: [{ googleId: profile.id }, { email: profile.emails![0].value }],
-        });
+        }).normalize();
 
         if (user?.googleId === profile.id) {
           return done(null, user);
         }
 
         if (user?.email === profile.emails![0].value) {
-          const updatedUser = await User.updateByIdAndNormalize(user.id, {
+          const updatedUser = await User.findByIdAndUpdate(user.id, {
             googleId: profile.id,
             gmail: profile.emails![0].value,
-          });
+          }).normalize();
           return done(null, updatedUser!);
         }
 
@@ -59,9 +59,8 @@ passport.use(
           gmail: profile.emails![0]?.value,
           fullName: profile.displayName,
         });
-        const normalized = normalizeQuery(newUser) as NormalizedData<IUser>;
 
-        done(null, normalized);
+        done(null, newUser.normalize());
       } catch (err) {
         console.error(err);
         done(err);
@@ -82,10 +81,10 @@ passport.use(
     async (req, accessToken, refreshToken, profile, done) => {
       try {
         const user = req.user!;
-        const updatedUser = await User.updateByIdAndNormalize(user.id, {
+        const updatedUser = await User.findByIdAndUpdate(user.id, {
           googleId: profile.id,
           gmail: profile.emails![0].value,
-        });
+        }).normalize();
         if (!updatedUser) {
           return done(null, false, {
             title: "User not found",
@@ -108,7 +107,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (userId, done) => {
   try {
-    const user = await User.findOneAndNormalize({ id: userId as string });
+    const user = await User.findOne({ id: userId as string }).normalize();
 
     if (!user) {
       return done(new Error("User not found"));

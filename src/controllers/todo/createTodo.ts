@@ -11,7 +11,7 @@ export const createTodo = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const todo = await Todo.createAndNormalize({
+    const todo = await Todo.create({
       title,
       details,
       status,

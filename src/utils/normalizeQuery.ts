@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { omit } from "./manipulate";
 import { NormalizedData } from "../types/types";
-import { IUser } from "../models/User";
+import { IUser, USER_CRED, UserCred } from "../models/User";
 
 const shouldProcessMongo = (data: any): boolean => {
   return data?._id || Array.isArray(data);
@@ -104,9 +104,8 @@ export const normalizeUserQuery = <T extends Partial<IUser> | NormalizedData<IUs
   return data as unknown as NormalizedData<typeof data>;
 };
 
-export const userProject = (isGuest?: boolean) => {
-  const def = { password: false, googleId: false };
-
-  if (isGuest) return { ...def, gmail: false, email: false, verified: false, createdAt: false, timeToAllowSendEmail: false };
-  else return def;
+export const userProject = () => {
+  const def = {} as Record<UserCred, boolean>;
+  USER_CRED.forEach((field) => (def[field] = false));
+  return def;
 };

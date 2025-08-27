@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { Database } from "../class/Database";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
+import { dummyPlugin, softDeletePlugin } from "@/class/newDB";
 
 export interface INote {
   _id: ObjectId;
@@ -25,8 +25,9 @@ const NoteSchema = new Schema(
   schemaOptions
 );
 
+NoteSchema.plugin(softDeletePlugin);
+NoteSchema.plugin(dummyPlugin);
+
 virtualSchema(NoteSchema);
 
-const NoteRaw = model<INote>("Note", NoteSchema);
-
-export const Note = new Database(NoteRaw);
+export const Note = model<INote>("Note", NoteSchema);

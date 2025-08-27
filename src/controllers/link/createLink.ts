@@ -13,7 +13,7 @@ export const createLink = async (req: Request, { res }: Response) => {
     const lastLink = await Link.findOne({ userId: user.id }).sort({ position: -1 });
     const position = (lastLink?.position || 0) + 1;
 
-    const createdLink = await Link.createAndNormalize({
+    const createdLink = await Link.create({
       title,
       link,
       userId: user.id,

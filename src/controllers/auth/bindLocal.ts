@@ -18,13 +18,13 @@ export const bindLocal = async (req: Request, { res }: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const updatedUser = await User.updateByIdAndNormalize(
+    const updatedUser = await User.findByIdAndUpdate(
       user.id,
       {
         email,
         password: hashedPassword,
       },
-      { project: userProject() }
+      { projection: userProject() }
     );
     res.notif("Successfully link to local account").body({ success: updatedUser }).ok();
   } catch (err) {

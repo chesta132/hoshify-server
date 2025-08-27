@@ -20,7 +20,7 @@ export const createTran = async (req: Request, { res }: Response) => {
       amount = Math.abs(amount);
     }
 
-    const tran = await Transaction.createAndNormalize({
+    const tran = await Transaction.create({
       userId: user.id,
       title,
       details,

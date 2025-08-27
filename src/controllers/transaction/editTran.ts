@@ -22,7 +22,7 @@ export const editTran = async (req: Request, { res }: Response) => {
       amount = Math.abs(amount);
     }
 
-    const tran = await Transaction.updateByIdAndNormalize(
+    const tran = await Transaction.findByIdAndUpdate(
       id,
       {
         title,
@@ -30,7 +30,7 @@ export const editTran = async (req: Request, { res }: Response) => {
         type,
         amount,
       },
-      { options: { runValidators: true } }
+      { runValidators: true }
     );
     if (!tran) {
       res.tempNotFound("transaction");

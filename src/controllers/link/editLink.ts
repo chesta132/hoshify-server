@@ -7,14 +7,14 @@ export const editLink = async (req: Request, { res }: Response) => {
     const { id } = req.params;
     let { title, link, position } = req.body;
 
-    const updatedLink = await Link.updateByIdAndNormalize(
+    const updatedLink = await Link.findByIdAndUpdate(
       id,
       {
         title,
         link,
         position,
       },
-      { options: { new: true, runValidators: true } }
+      { new: true, runValidators: true }
     );
     if (!updatedLink) {
       res.tempNotFound("link").respond();

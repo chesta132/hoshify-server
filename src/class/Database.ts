@@ -35,8 +35,6 @@ type SoftDelete<T extends Record<string, any>, FilterType> = IsTruthy<
   <S extends Settings<T>>(filter: FilterType, update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">, settings?: S) => QueryReturn<T, S>
 >;
 
-export const test = "test success";
-
 export class Database<T extends Record<string, any>> {
   private model: Model<T>;
 

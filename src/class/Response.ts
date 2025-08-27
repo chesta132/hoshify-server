@@ -173,13 +173,13 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     if (success && typeof this._body === "object" && this._body !== null) {
       const body = this._body as Record<string, any> | any[];
       const hasId = Array.isArray(body) ? body.some((body) => body?._id) : body?._id;
+      const isUserCred = !Array.isArray(body) && Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number]));
+      type Normalizable = NormalizedData<SuccessType> | NormalizedData<SuccessType>[];
 
-      if (hasId) {
-        type Normalizable = NormalizedData<SuccessType> | NormalizedData<SuccessType>[];
-
-        const isUserCred = !Array.isArray(body) && Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number]));
-
-        this._body = isUserCred ? (normalizeUserQuery(body) as Normalizable) : (normalizeQuery(body) as Normalizable);
+      if (isUserCred) {
+        this._body = normalizeUserQuery(body) as Normalizable;
+      } else if (hasId) {
+        this._body = normalizeQuery(body) as Normalizable;
       }
     }
     this._jsonBody.meta.status = success ? "SUCCESS" : "ERROR";

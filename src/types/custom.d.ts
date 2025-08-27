@@ -89,3 +89,6 @@ type IsFalsy<T, TrueType = T, FalseType = never> = [T] extends [Falsy] ? TrueTyp
 
 /** Returns `TrueType` if `T` is array, otherwise `FalseType`. */
 type IsArray<T, TrueType = T, FalseType = never> = [T] extends [any[]] ? TrueType : FalseType;
+
+/** IsArray but not strict. */
+type IncludeArray<T, TrueType = T, FalseType = never> = T extends any[] ? TrueType : FalseType;
