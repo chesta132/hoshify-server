@@ -8,7 +8,7 @@ const isRefreshSafe = async (refreshToken: string) => {
   const refreshPayload = verifyRefreshToken(refreshToken);
 
   if (!refreshPayload) return;
-  const revoked = await Revoked.findOne({ value: refreshToken });
+  const revoked = await Revoked.findOne({ value: refreshToken }).normalize();
   if (revoked) return;
   return { refreshPayload, revoked };
 };

@@ -22,7 +22,7 @@ export type NormalizedData<T> = Omit<
   {
     [K in keyof T]: T[K] extends ObjectId ? string : T[K];
   },
-  keyof Document
+  keyof Document | "__v"
 > & { id: string };
 
 export type EitherWithKeys<Keys extends object, Others extends object> =
@@ -30,14 +30,7 @@ export type EitherWithKeys<Keys extends object, Others extends object> =
   | (Others & { [K in keyof Keys]?: never });
 
 export type NormalizeReturn<T> = NormalizedData<T>;
-// export type NormalizeReturn<T> = NormalizedData<T>;
-// export type NormalizeModelReturn<ResultType, DocType> = NormalizeReturn<DocType> | null;
-// export type NormalizeModelReturn<ResultType, DocType> = IsArray<ResultType, NormalizeReturn<DocType>[], NormalizeReturn<DocType> | null>;
-
 export type NormalizeUserReturn<DocType> = Omit<NormalizedData<DocType>, UserCred>;
-// export type NormalizeUserReturn<DocType> = Omit<NormalizedData<DocType>, UserCred>;
-// export type NormalizeUserModelReturn<ResultType, DocType> = IsArray<ResultType, NormalizeUserReturn<DocType>[], NormalizeUserReturn<DocType> | null>;
-// export type NormalizeUserModelReturn<ResultType, DocType> = NormalizeUserReturn<DocType> | null;
 
 export type Normalized<DocType, ResultType = DocType, IfObject = never> = ResultType extends any[]
   ? NormalizedData<DocType>[]

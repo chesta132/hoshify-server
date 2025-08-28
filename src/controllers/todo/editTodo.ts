@@ -21,7 +21,7 @@ export const editTodo = async (req: Request, { res }: Response) => {
         dueDate,
       },
       { new: true, runValidators: true }
-    );
+    ).normalize();
 
     if (!todo) {
       res.tempNotFound("to-do");

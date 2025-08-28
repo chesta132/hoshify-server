@@ -31,7 +31,7 @@ export const editTran = async (req: Request, { res }: Response) => {
         amount,
       },
       { runValidators: true }
-    );
+    ).normalize();
     if (!tran) {
       res.tempNotFound("transaction");
       return;

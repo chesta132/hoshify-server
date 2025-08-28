@@ -3,9 +3,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import bcrypt from "bcrypt";
 import { ErrorResponseType } from "../class/Response";
-import { IUser, User } from "../models/User";
-import { normalizeQuery } from "../utils/normalizeQuery";
-import { NormalizedData } from "../types/types";
+import { User } from "../models/User";
 
 passport.use(
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {

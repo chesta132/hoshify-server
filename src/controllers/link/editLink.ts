@@ -15,7 +15,7 @@ export const editLink = async (req: Request, { res }: Response) => {
         position,
       },
       { new: true, runValidators: true }
-    );
+    ).normalize();
     if (!updatedLink) {
       res.tempNotFound("link").respond();
       return;

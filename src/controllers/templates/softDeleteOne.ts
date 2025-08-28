@@ -23,7 +23,7 @@ export const softDeleteOne = <T extends { isRecycled: boolean; title: string; de
         return;
       }
       if (data.isRecycled) {
-        await model.findByIdAndUpdate(data.id, data);
+        await model.findByIdAndUpdate(data.id, data).normalize();
         res.tempIsRecycled(data.title).respond();
         return;
       }

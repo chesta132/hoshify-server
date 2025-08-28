@@ -13,7 +13,7 @@ export const getOne = async <T extends Record<string, any>>(model: Model<T>, fun
         return;
       }
 
-      const data = await model.findById(id).normalize();
+      const data = await model.findById(id).normalize()
       const s = await User.restoreById("");
       if (!data) {
         res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond();

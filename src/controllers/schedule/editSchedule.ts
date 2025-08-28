@@ -16,7 +16,7 @@ export const editSchedule = async (req: Request, { res }: Response) => {
         end,
       },
       { new: true, runValidators: true }
-    );
+    ).normalize();
     if (!schedule) {
       res.tempNotFound("schedule").respond();
       return;

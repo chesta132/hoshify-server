@@ -21,7 +21,7 @@ export const restoreOne = async <T extends { isRecycled: boolean; title: string;
         return;
       }
       if (!data.isRecycled) {
-        await model.findByIdAndUpdate(data.id, data);
+        await model.findByIdAndUpdate(data.id, data).normalize();
         res.tempNotRecycled(data.title).respond();
         return;
       }

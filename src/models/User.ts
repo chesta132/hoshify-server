@@ -124,11 +124,11 @@ const sortMap: Partial<Record<keyof UserPopulateField, object>> & { default: obj
 
 export type BuildUserPopulateProps = Partial<Record<keyof UserPopulateField, number | "all">>;
 
-export const buildUserPopulate = (config: BuildUserPopulateProps) => {
+export const buildUserPopulate = (config: BuildUserPopulateProps): PopulateOptions[] => {
   return Object.entries(config).map(([f, l]) => {
     const field = f as keyof UserPopulateField;
     const limit = l === "all" ? undefined : l;
-    return { path: field, options: { limit, sort: sortMap[field] || sortMap.default } } as PopulateOptions;
+    return { path: field, options: { limit, sort: sortMap[field] || sortMap.default } };
   });
 };
 

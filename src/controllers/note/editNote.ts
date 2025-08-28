@@ -12,7 +12,7 @@ export const editNote = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const note = await Note.findByIdAndUpdate(id, { title, details }, { new: true, runValidators: true });
+    const note = await Note.findByIdAndUpdate(id, { title, details }, { new: true, runValidators: true }).normalize();
     if (!note) {
       res.tempNotFound("note");
       return;

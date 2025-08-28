@@ -25,7 +25,7 @@ export const resendOTP = async (req: Request, { res }: Response) => {
         user.id,
         { timeToAllowSendEmail: new Date(Date.now() + 1000 * 60 * 2) },
         { projection: userProject() }
-      );
+      ).normalize();
       res.body({ success: updatedUser }).created();
     };
 

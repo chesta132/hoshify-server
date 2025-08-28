@@ -3,29 +3,16 @@ import { omit } from "./manipulate";
 import { NormalizedData } from "../types/types";
 import { IUser, USER_CRED, UserCred } from "../models/User";
 
-const shouldProcessMongo = (data: any): boolean => {
+const shouldProcess = (data: any): boolean => {
   return data?._id || Array.isArray(data);
 };
 
-const isPrimitive = (data: any): boolean => {
-  return data === null || typeof data !== "object" || data instanceof Date;
-};
-
 const objecting = (data: any) => {
-  if (data.lean) {
-    return data.lean();
-  } else if (data.toObject) {
-    return data.toObject();
-  }
-  return data;
+  return data.toObject ? data.toObject() : data;
 };
 
-export const traverseAndNormalize = (data: any, mongo = true): any => {
-  if (mongo && !shouldProcessMongo(data)) {
-    return data;
-  }
-
-  if (!mongo && isPrimitive(data)) {
+export const traverseAndNormalize = (data: any): any => {
+  if (!shouldProcess(data)) {
     return data;
   }
 
@@ -34,36 +21,32 @@ export const traverseAndNormalize = (data: any, mongo = true): any => {
   }
 
   if (Array.isArray(data)) {
-    return data.map((item) => traverseAndNormalize(item, mongo));
+    return data.map((item) => traverseAndNormalize(item));
   }
 
   const normalizedObject: { [key: string]: any } = {};
   for (const key in data) {
     if (data?.hasOwnProperty(key)) {
-      normalizedObject[key] = traverseAndNormalize(data[key], mongo);
+      normalizedObject[key] = traverseAndNormalize(data[key]);
     }
   }
 
   return normalizedObject;
 };
 
-export const traverseHandleIdAndV = (data: any, mongo = true): any => {
-  if (mongo && !shouldProcessMongo(data)) {
-    return data;
-  }
-
-  if (!mongo && isPrimitive(data)) {
+export const traverseHandleField = (data: any): any => {
+  if (!shouldProcess(data)) {
     return data;
   }
 
   if (Array.isArray(data)) {
-    return data.map((item) => traverseHandleIdAndV(item, mongo));
+    return data.map((item) => traverseHandleField(item));
   }
 
   const processedData = objecting(data);
   for (const key in processedData) {
     if (processedData?.hasOwnProperty(key)) {
-      processedData[key] = traverseHandleIdAndV(processedData[key], mongo);
+      processedData[key] = traverseHandleField(processedData[key]);
     }
   }
 
@@ -80,18 +63,18 @@ export const normalizeQuery = <T extends Record<string, any> | Record<string, an
   if (Array.isArray(queryData)) {
     const normalizedData = queryData.map((dat) => {
       const data = objecting(dat);
-      return traverseHandleIdAndV(traverseAndNormalize(data));
+      return traverseHandleField(traverseAndNormalize(data));
     });
     return normalizedData as NormalizedData<T>[];
   }
 
   const data = objecting(queryData);
-  const normalizedData = traverseHandleIdAndV(traverseAndNormalize(data));
+  const normalizedData = traverseHandleField(traverseAndNormalize(data));
   return normalizedData as NormalizedData<T>;
 };
 
 export const normalizeUserQuery = <T extends Partial<IUser> | NormalizedData<IUser>>(queryData: T, options?: { isGuest?: boolean }) => {
-  let data = omit(queryData, ["password", "googleId", "currency"]);
+  let data = omit(queryData, USER_CRED);
   if ((queryData as Partial<IUser>)._id instanceof mongoose.Types.ObjectId) {
     data = normalizeQuery(data as Record<string, any>) as typeof data;
   }

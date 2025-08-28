@@ -32,12 +32,12 @@ export const resetPassword = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const verifyOtp = await Verify.findOne({ value: token, type: "RESET_PASSWORD_OTP", userId: user.id });
+    const verifyOtp = await Verify.findOne({ value: token, type: "RESET_PASSWORD_OTP", userId: user.id }).normalize();
     if (!verifyOtp) {
       res.tempInvalidOTP().respond();
       return;
     }
-    const updatedUser = await User.findByIdAndUpdate(user.id, { password }, { projection: userProject() });
+    const updatedUser = await User.findByIdAndUpdate(user.id, { password }, { projection: userProject() }).normalize();
     if (!updatedUser) {
       res.tempNotFound("user").respond();
       return;

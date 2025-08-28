@@ -45,7 +45,7 @@ export const deleteUser = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const otp = await Verify.findOne({ value: token, type: "DELETE_ACCOUNT_OTP", userId: user.id });
+    const otp = await Verify.findOne({ value: token, type: "DELETE_ACCOUNT_OTP", userId: user.id }).normalize();
     if (!otp) {
       res.tempInvalidOTP().respond();
       return;

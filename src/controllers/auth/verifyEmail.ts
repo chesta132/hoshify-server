@@ -15,7 +15,7 @@ export const verifyEmail = async (req: Request, { res }: Response) => {
 
     const tokenDecrypted = decrypt(token?.toString());
     const userId = tokenDecrypted.slice(tokenDecrypted.indexOf("verify_") + 7);
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).normalize();
     if (!user) {
       res.tempInvalidVerifyToken().error();
       return;
@@ -25,13 +25,17 @@ export const verifyEmail = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const verification = await Verify.findOne({ value: token, type: "VERIFY_EMAIL", userId: user.id });
+    const verification = await Verify.findOne({ value: token, type: "VERIFY_EMAIL", userId: user.id }).normalize();
     if (!verification) {
       res.tempInvalidVerifyToken().error();
       return;
     }
 
-    const updatedUser = await User.findByIdAndUpdate(user.id, { verified: true }, { projection: userProject(), new: true, runValidators: true });
+    const updatedUser = await User.findByIdAndUpdate(
+      user.id,
+      { verified: true },
+      { projection: userProject(), new: true, runValidators: true }
+    ).normalize();
     if (!updatedUser) {
       res.tempNotFound("user");
       return;

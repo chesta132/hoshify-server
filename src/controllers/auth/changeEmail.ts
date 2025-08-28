@@ -37,7 +37,7 @@ export const changeEmail = async (req: Request, { res }: Response) => {
           verified: user?.gmail === newEmail,
         },
         { projection: userProject() }
-      );
+      ).normalize();
       if (!updatedUser) {
         res.tempNotFound("user").error();
         return;
@@ -57,7 +57,7 @@ export const changeEmail = async (req: Request, { res }: Response) => {
       return;
     }
 
-    const VerifyOtp = await Verify.findOne({ value: token, type: "CHANGE_EMAIL_OTP", userId: user.id });
+    const VerifyOtp = await Verify.findOne({ value: token, type: "CHANGE_EMAIL_OTP", userId: user.id }).normalize();
     if (!VerifyOtp) {
       res.tempInvalidOTP().error();
       return;

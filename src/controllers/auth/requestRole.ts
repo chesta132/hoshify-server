@@ -30,7 +30,7 @@ export const requestRole = async (req: Request, { res }: Response) => {
       user.id,
       { timeToAllowSendEmail: new Date(Date.now() + oneMin * 2) },
       { projection: userProject() }
-    );
+    ).normalize();
 
     res.body({ success: updatedUser }).respond();
   } catch (err) {

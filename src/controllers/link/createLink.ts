@@ -10,7 +10,7 @@ export const createLink = async (req: Request, { res }: Response) => {
       res.tempMissingFields("title, details").respond();
       return;
     }
-    const lastLink = await Link.findOne({ userId: user.id }).sort({ position: -1 });
+    const lastLink = await Link.findOne({ userId: user.id }).sort({ position: -1 }).normalize();
     const position = (lastLink?.position || 0) + 1;
 
     const createdLink = await Link.create({
