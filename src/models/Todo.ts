@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
 import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
-import { dummyPlugin, softDeletePlugin } from "@/class/newDB";
+import { dummyPlugin, softDeletePlugin } from "@/utils/database";
 
 export const todoStatus = ["PENDING", "ACTIVE", "COMPLETED", "CANCELED"];
 export type TodoStatus = "PENDING" | "ACTIVE" | "COMPLETED" | "CANCELED";
