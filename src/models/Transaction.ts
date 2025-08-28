@@ -3,18 +3,19 @@ import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
 import { dummyPlugin, softDeletePlugin } from "@/class/newDB";
 
-export const transactionType = ["INCOME", "OUTCOME"] as const;
+export const transactionType = ["INCOME", "OUTCOME"];
+export type TransactionType = "INCOME" | "OUTCOME";
 
 export interface ITransaction {
   _id: ObjectId;
   amount: number;
-  type: (typeof transactionType)[number];
+  type: TransactionType;
   title: string;
   details: string;
   userId: ObjectId | string;
   isRecycled: boolean;
-  deleteAt?: Date;
-  dummy: boolean;
+  deleteAt: Date | null;
+  dummy?: boolean;
 }
 
 const TransactionSchema = new Schema(
@@ -25,8 +26,8 @@ const TransactionSchema = new Schema(
     details: { type: String, default: "" },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     isRecycled: { type: Boolean, default: false },
-    deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
-    dummy: { type: Boolean, default: false },
+    deleteAt: { type: Date, default: null, index: { expireAfterSeconds: 0 } },
+    dummy: Boolean,
   },
   schemaOptions
 );

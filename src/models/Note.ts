@@ -9,18 +9,18 @@ export interface INote {
   details: string;
   userId: ObjectId | string;
   isRecycled: boolean;
-  deleteAt?: Date;
-  dummy: boolean;
+  deleteAt: Date | null;
+  dummy?: boolean;
 }
 
 const NoteSchema = new Schema(
   {
-    title: { type: String, required: true, maxLength: 150 },
-    details: { type: String, required: true },
+    title: { type: String, required: true },
+    details: { type: String, required: true, default: "" },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     isRecycled: { type: Boolean, default: false },
-    deleteAt: { type: Date, default: undefined, index: { expireAfterSeconds: 0 } },
-    dummy: { type: Boolean, default: false },
+    deleteAt: { type: Date, default: null, index: { expireAfterSeconds: 0 } },
+    dummy: Boolean,
   },
   schemaOptions
 );
