@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
-import { Database } from "@/class/Database";
 import { oneWeeks } from "@/utils/token";
 import { NODE_ENV } from "@/app";
+import { Model } from "mongoose";
+import { todoStatus as enumTodoStatus } from "@/models/Todo";
+import { transactionType as enumTranType } from "@/models/Transaction";
 
-export const createDummy = async <T extends { dummy: boolean }>(model: Database<T>, name: string, req: Request, { res }: Response) => {
+export const createDummy = async <T extends { dummy: boolean }>(model: Model<T>, name: string, req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { length } = req.query;
@@ -17,13 +19,12 @@ export const createDummy = async <T extends { dummy: boolean }>(model: Database<
     const dummys = await model.generateDummy(parseInt(length?.toString() || "0") || 0, {
       userId: { fixed: user.id },
       title: { dynamicString: `Dummy ${name.capitalEach()}` },
-      details: { fixed: new Date().toFormattedString({ includeHour: true }) },
-      date: { fixed: new Date() },
-      start: { fixed: new Date() },
-      dueDate: { fixed: new Date(Date.now() + oneWeeks) },
-      type: { fixed: transactionType || "INCOME" },
-      status: { fixed: todoStatus },
-    } as any);
+      details: { fixed: `Dummy created At ${new Date().toFormattedString({ includeHour: true })}` },
+      start: { dynamicDate: { end: new Date(Date.now() + oneWeeks * 2) } },
+      dueDate: { dynamicDate: { end: new Date(Date.now() + oneWeeks * 2) } },
+      type: transactionType ? { fixed: transactionType } : { enum: enumTranType },
+      status: todoStatus ? { fixed: todoStatus } : { enum: enumTodoStatus },
+    });
     console.warn(`${dummys?.length} created by ${user.fullName}:\n`, dummys);
 
     res

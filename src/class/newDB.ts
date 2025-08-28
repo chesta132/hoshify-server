@@ -1,6 +1,7 @@
 import { NODE_ENV } from "@/app";
 import { OneFieldOnly } from "@/types/types";
 import { normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
+import { randomDate, randomNumber } from "@/utils/random";
 import { oneWeeks } from "@/utils/token";
 import { Document, Model, ObjectId, Query, QueryOptions, RootFilterQuery, UpdateQuery, Schema, InsertManyOptions } from "mongoose";
 
@@ -61,9 +62,20 @@ export function softDeleteOne<T>(
 }
 
 export async function generateDummy<T>(
-  this: any,
+  this: Model<T>,
   length: number,
-  document?: Partial<Record<keyof T, OneFieldOnly<{ dynamicString: string; fixed: T[keyof T] }>>>,
+  document?: Partial<
+    Record<
+      string,
+      OneFieldOnly<{
+        dynamicString: string;
+        fixed: any;
+        dynamicDate: { start?: Date; end?: Date };
+        dynamicNumber: { min?: number; max?: number };
+        enum: any[];
+      }>
+    >
+  >,
   settings?: { options?: InsertManyOptions; raw?: boolean }
 ) {
   if (NODE_ENV !== "development") return;
@@ -71,32 +83,44 @@ export async function generateDummy<T>(
   const dummys = Array.from(new Array(length));
 
   for (const [idx] of dummys.entries()) {
-    const customized: [string, string][] = [];
+    const customized: [string, any][] = [];
     for (const doc in document) {
       const val = document[doc];
-      if (val?.dynamicString) {
+      if (val?.fixed) {
+        customized.push([doc, val.fixed]);
+      } else if (val?.dynamicString) {
         const dynamiced = `${val.dynamicString}_${crypto.randomUUID()}`;
         customized.push([doc, dynamiced]);
-      } else if (val?.fixed) {
-        customized.push([doc, val.fixed as string]);
+      } else if (val?.dynamicNumber) {
+        const { max, min } = val.dynamicNumber;
+        const rand = randomNumber(min, max);
+        customized.push([doc, rand]);
+      } else if (val?.dynamicDate) {
+        const { start, end } = val.dynamicDate;
+        const rand = randomDate(start, end);
+        customized.push([doc, rand]);
+      } else if (val?.enum) {
+        const rand = randomNumber(0, val.enum.length - 1);
+        const choosen = val.enum[rand];
+        customized.push([doc, choosen]);
       }
     }
-    const ret = { dummy: true } as Record<string, any>;
+    const data = { dummy: true } as Record<string, any>;
     customized.forEach(([key, val]) => {
-      ret[key] = val;
+      data[key] = val;
     });
 
-    const modelInstance = new this.model(ret);
+    const modelInstance = new this(data);
     try {
       await modelInstance.validate();
       dummys[idx] = modelInstance.toObject();
     } catch (err) {
-      console.error("Invalid doc model", ret);
+      console.error("Invalid doc model", data);
       throw err;
     }
   }
 
-  const rawQuery = await this.model.insertMany(dummys, settings?.options ?? {});
+  const rawQuery = await this.insertMany(dummys, settings?.options || {});
   if (settings?.raw) return rawQuery;
   return normalizeQuery(rawQuery);
 }
