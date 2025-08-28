@@ -5,6 +5,8 @@ import { NODE_ENV } from "@/app";
 import { Model } from "mongoose";
 import { todoStatus as enumTodoStatus } from "@/models/Todo";
 import { transactionType as enumTranType } from "@/models/Transaction";
+import pluralize from "pluralize";
+import { capitalEach, formatDate } from "@/utils/manipulate";
 
 export const createDummy = async <T extends { dummy: boolean }>(model: Model<T>, name: string, req: Request, { res }: Response) => {
   try {
@@ -18,8 +20,8 @@ export const createDummy = async <T extends { dummy: boolean }>(model: Model<T>,
 
     const dummys = await model.generateDummy(parseInt(length?.toString() || "0") || 0, {
       userId: { fixed: user.id },
-      title: { dynamicString: `Dummy ${name.capitalEach()}` },
-      details: { fixed: `Dummy created At ${new Date().toFormattedString({ includeHour: true })}` },
+      title: { dynamicString: `Dummy ${capitalEach(name)}` },
+      details: { fixed: `Dummy created At ${formatDate(new Date(), { includeHour: true })}` },
       start: { dynamicDate: { end: new Date(Date.now() + oneWeeks * 2) } },
       dueDate: { dynamicDate: { end: new Date(Date.now() + oneWeeks * 2) } },
       type: transactionType ? { fixed: transactionType } : { enum: enumTranType },
@@ -29,7 +31,7 @@ export const createDummy = async <T extends { dummy: boolean }>(model: Model<T>,
 
     res
       .body({ success: dummys })
-      .notif(`${length} ${name} ${dummys?.plural("dummy")} added`)
+      .notif(`${length} ${name} ${pluralize("dummy", dummys?.length)} added`)
       .respond();
   } catch (err) {
     handleError(err, res);

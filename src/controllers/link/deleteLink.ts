@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId } from "mongoose";
 import { Link } from "@/models/Link";
+import { ellipsis } from "@/utils/manipulate";
 
 export const deleteLink = async (req: Request, { res }: Response) => {
   try {
@@ -19,7 +20,7 @@ export const deleteLink = async (req: Request, { res }: Response) => {
 
     res
       .body({ success: deletedLink })
-      .notif(`${deletedLink.title.ellipsis(30)} deleted`)
+      .notif(`${ellipsis(deletedLink.title, 30)} deleted`)
       .respond();
   } catch (err) {
     handleError(err, res);

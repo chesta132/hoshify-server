@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Schedule } from "@/models/Schedule";
+import { ellipsis } from "@/utils/manipulate";
 
 export const createSchedule = async (req: Request, { res }: Response) => {
   try {
@@ -21,7 +22,7 @@ export const createSchedule = async (req: Request, { res }: Response) => {
     });
     res
       .body({ success: schedule })
-      .notif(`${schedule.title.ellipsis(30)} added`)
+      .notif(`${ellipsis(schedule.title, 30)} added`)
       .created();
   } catch (err) {
     handleError(err, res);

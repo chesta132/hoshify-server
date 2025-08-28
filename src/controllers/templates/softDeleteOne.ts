@@ -3,6 +3,7 @@ import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
 import { Normalized } from "@/types/types";
 import { oneWeeks } from "@/utils/token";
+import { ellipsis } from "@/utils/manipulate";
 
 export const softDeleteOne = <T extends { isRecycled: boolean; title: string; deleteAt: Date | null }>(
   model: Model<T>,
@@ -31,7 +32,7 @@ export const softDeleteOne = <T extends { isRecycled: boolean; title: string; de
 
       res
         .body({ success: { ...data, isRecycled: true, deleteAt } })
-        .notif(`${data.title.ellipsis(30)} deleted`)
+        .notif(`${ellipsis(data.title, 30)} deleted`)
         .respond();
     } catch (err) {
       handleError(err, res);

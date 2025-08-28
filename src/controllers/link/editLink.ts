@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Link } from "@/models/Link";
+import { ellipsis } from "@/utils/manipulate";
 
 export const editLink = async (req: Request, { res }: Response) => {
   try {
@@ -22,7 +23,7 @@ export const editLink = async (req: Request, { res }: Response) => {
     }
     res
       .body({ success: updatedLink })
-      .notif(`${updatedLink.title.ellipsis(30)} added`)
+      .notif(`${ellipsis(updatedLink.title, 30)} added`)
       .respond();
   } catch (err) {
     handleError(err, res);

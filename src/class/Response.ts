@@ -12,6 +12,7 @@ import {
 import { USER_CRED, UserRole } from "@/models/User";
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "@/app";
 import { normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
+import { capital } from "@/utils/manipulate";
 
 /**
  * Authentication-related error codes.
@@ -450,7 +451,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    * @returns this
    */
   tempMissingFields(fields: string, restErr?: RestError) {
-    const body = this.body({ error: { ...restErr, title: "Missing Fields", message: `${fields.capital()} is required`, code: "MISSING_FIELDS" } });
+    const body = this.body({ error: { ...restErr, title: "Missing Fields", message: `${capital(fields)} is required`, code: "MISSING_FIELDS" } });
     return body;
   }
 
@@ -572,7 +573,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    * @returns typeof .body({ error })
    */
   tempInvalidRole(role: string) {
-    const body = this.body({ error: { code: "INVALID_ROLE", message: `${role.toLowerCase().capital()} role needed`, title: "Invalid Role" } });
+    const body = this.body({ error: { code: "INVALID_ROLE", message: `${capital(role.toLowerCase())} role needed`, title: "Invalid Role" } });
     return body;
   }
 
@@ -617,7 +618,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
       error: {
         ...restErr,
         title: "Not Found",
-        message: `${item.capital()} not found${desc ? `. ${desc.capital()}` : ""}`,
+        message: `${capital(item)} not found${desc ? `. ${capital(desc)}` : ""}`,
         code: "NOT_FOUND",
       },
     });
@@ -684,7 +685,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
       error: {
         ...restErr,
         title: "Too many requests",
-        message: `Too many requests. ${desc?.capital() ?? "Please try again later"}`,
+        message: `Too many requests. ${capital(desc || "") || "Please try again later"}`,
         code: "TOO_MUCH_REQUEST",
       },
     });
@@ -792,7 +793,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     const body = this.body({
       error: {
         ...restErr,
-        message: `${name.capital()} is recycled, please restore first`,
+        message: `${capital(name)} is recycled, please restore first`,
         code: "IS_RECYCLED",
       },
     });
@@ -815,7 +816,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     const body = this.body({
       error: {
         ...restErr,
-        message: `${name.capital()} is not recycled, please recycle first`,
+        message: `${capital(name)} is not recycled, please recycle first`,
         code: "NOT_RECYCLED",
       },
     });

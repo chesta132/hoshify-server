@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
 import { NormalizedData } from "@/types/types";
-import { User } from "@/models/User";
 
 export const getOne = async <T extends Record<string, any>>(model: Model<T>, funcBeforeRes?: (data: NormalizedData<T>) => Promise<any> | any) => {
   return async (req: Request, { res }: Response) => {
@@ -14,7 +13,6 @@ export const getOne = async <T extends Record<string, any>>(model: Model<T>, fun
       }
 
       const data = await model.findById(id).normalize()
-      const s = await User.restoreById("");
       if (!data) {
         res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond();
         return;

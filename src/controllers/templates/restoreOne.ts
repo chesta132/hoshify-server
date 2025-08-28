@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
 import { Normalized } from "@/types/types";
+import { ellipsis } from "@/utils/manipulate";
 
 export const restoreOne = async <T extends { isRecycled: boolean; title: string; deleteAt: Date | null }>(
   model: Model<T>,
@@ -29,7 +30,7 @@ export const restoreOne = async <T extends { isRecycled: boolean; title: string;
 
       res
         .body({ success: { ...data, isRecycled: false, deleteAt: null } })
-        .notif(`${data.title.ellipsis(30)} restored`)
+        .notif(`${ellipsis(data.title, 30)} restored`)
         .respond();
     } catch (err) {
       handleError(err, res);

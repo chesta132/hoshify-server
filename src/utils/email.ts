@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import { CLIENT_URL } from "../app";
 import { emailTemplate } from "./emailTemplate";
 import { UserRole } from "@/models/User";
+import { capital, capitalEach } from "./manipulate";
 
 export const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -27,7 +28,7 @@ export const sendOTPEmail = async (email: string, otpCode: string, name: string)
       html: emailTemplate({
         title: "Your One-Time Password (OTP)",
         message: `You have requested a One-Time Password (OTP) to complete your action on Hoshify. Please use the following code to proceed:\n\nFor your security, please do not share this OTP with anyone, including Hoshify employees.`,
-        name: name.capitalEach(),
+        name: capitalEach(name),
         infoMessage: `<p style="font-weight: bold; font-size: 18px;">${otpCode}</p>`,
       }),
     });
@@ -46,7 +47,7 @@ export const sendVerificationEmail = async (email: string, token: string, name: 
       html: emailTemplate({
         title: "Verify your email",
         message: "",
-        name: name.capitalEach(),
+        name: capitalEach(name),
         infoMessage: `You have requested to verify your email address for your Hoshify account. To complete this action, please click the button below.\n\nFor your security, please do not share this email or its link with anyone, including Hoshify employees.`,
         button: {
           buttonText: "Verify your email",
@@ -68,12 +69,14 @@ export const sendCredentialChanges = async (email: string, name: string, credent
     await transporter.sendMail({
       from: "Hoshify Team",
       to: email,
-      subject: `Hoshify ${credentials.capitalEach()} Has Been Changed`,
+      subject: `Hoshify ${capitalEach(credentials)} Has Been Changed`,
       html: emailTemplate({
-        title: `${credentials.capital()} change`,
+        title: `${capital(credentials)} change`,
         message: "",
         name,
-        infoMessage: `Dear ${name.capitalEach()},\n\nYour Hoshify account ${credentials.toLowerCase()} has been successfully updated. If you did not make this change, please contact Hoshify support immediately.\n\nFor your security, please do not share your login credentials with anyone, including Hoshify employees.`,
+        infoMessage: `Dear ${capitalEach(
+          name
+        )},\n\nYour Hoshify account ${credentials.toLowerCase()} has been successfully updated. If you did not make this change, please contact Hoshify support immediately.\n\nFor your security, please do not share your login credentials with anyone, including Hoshify employees.`,
       }),
     });
   } catch (error) {
@@ -92,7 +95,9 @@ export const sendRequestRole = async (role: UserRole, token: string, name: strin
         title: `Someone is requesting ${role.toLowerCase()} role`,
         message: "",
         name: "Chesta Ardiona",
-        infoMessage: `${name.capitalEach()} is requesting ${role.toLowerCase()} role in Hoshify. To complete this action, please click the button below.\n\nFor your security, please do not share this email or its link with anyone, including Hoshify employees.`,
+        infoMessage: `${capitalEach(
+          name
+        )} is requesting ${role.toLowerCase()} role in Hoshify. To complete this action, please click the button below.\n\nFor your security, please do not share this email or its link with anyone, including Hoshify employees.`,
         button: {
           buttonText: `Allow ${name} to access ${role.toLowerCase()} role`,
           buttonHref: `${CLIENT_URL}/verify/role/?token=${token}`,
@@ -112,7 +117,7 @@ export const sendRoleGranted = async (role: UserRole, email: string, name: strin
       to: email,
       subject: "Hoshify Role Granted",
       html: emailTemplate({
-        title: `${role.toLowerCase().capital()} role granted`,
+        title: `${capital(role.toLowerCase())} role granted`,
         message: "",
         name,
         infoMessage: `You have been promoted to ${role.toLowerCase()} role in Hoshify.`,

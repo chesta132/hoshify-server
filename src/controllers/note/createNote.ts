@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Note } from "@/models/Note";
+import { ellipsis } from "@/utils/manipulate";
 
 export const createNote = async (req: Request, { res }: Response) => {
   try {
@@ -18,7 +19,7 @@ export const createNote = async (req: Request, { res }: Response) => {
     });
     res
       .body({ success: note })
-      .notif(`${note.title.ellipsis(30)} added`)
+      .notif(`${ellipsis(note.title, 30)} added`)
       .created();
   } catch (err) {
     handleError(err, res);
