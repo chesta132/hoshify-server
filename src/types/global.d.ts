@@ -97,7 +97,7 @@ declare module "mongoose" {
 
     /**
      *
-     * Generate name of collection
+     * Get name of collection
      */
     getName: () => string;
   }

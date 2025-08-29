@@ -7,7 +7,7 @@ import pluralize from "pluralize";
 
 export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(
   model: Model<T>,
-  funcBeforeRes?: (data: Normalized<T>[]) => any
+  funcBeforeRes?: (data: Normalized<T>[], body: any, req: Request, res: Response["res"]) => any
 ) => {
   return async (req: Request, { res }: Response) => {
     try {
@@ -27,7 +27,7 @@ export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date |
       await model.updateMany({ _id: { $in: ids } }, { isRecycled: true, deleteAt }, { runValidators: true });
 
       const updatedData = unUpdated.map((data) => ({ ...data.normalize(), isRecycled: true, deleteAt }));
-      if (funcBeforeRes) await funcBeforeRes(updatedData);
+      if (funcBeforeRes) await funcBeforeRes(updatedData, req.body, req, res);
 
       res
         .body({ success: updatedData })

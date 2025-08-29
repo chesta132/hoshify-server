@@ -3,7 +3,10 @@ import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
 import { NormalizedData } from "@/types/types";
 
-export const getOne = <T extends Record<string, any>>(model: Model<T>, funcBeforeRes?: (data: NormalizedData<T>) => any) => {
+export const getOne = <T extends Record<string, any>>(
+  model: Model<T>,
+  funcBeforeRes?: (data: NormalizedData<T>, req: Request, res: Response["res"]) => any
+) => {
   return async (req: Request, { res }: Response) => {
     try {
       const { id } = req.params;
@@ -17,7 +20,7 @@ export const getOne = <T extends Record<string, any>>(model: Model<T>, funcBefor
         res.tempNotFound(model.getName()).respond();
         return;
       }
-      if (funcBeforeRes) await funcBeforeRes(data);
+      if (funcBeforeRes) await funcBeforeRes(data, req, res);
 
       res.body({ success: data }).respond();
     } catch (err) {

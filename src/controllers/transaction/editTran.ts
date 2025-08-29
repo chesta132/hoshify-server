@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Transaction, transactionType } from "@/models/Transaction";
 import { isValidObjectId } from "mongoose";
-import { getTotal, Money } from "@/models/Money";
+import { getTotal, Money, updateMoneyMany } from "@/models/Money";
+import { editMany } from "../templates/editMany";
 
 export const editTran = async (req: Request, { res }: Response) => {
   try {
@@ -56,4 +57,22 @@ export const editTran = async (req: Request, { res }: Response) => {
   } catch (err) {
     handleError(err, res);
   }
+};
+
+export const editTrans = () => {
+  return editMany(
+    Transaction,
+    [],
+    () => {},
+    (data) => {
+      const { amount, type } = data;
+      if (amount < 0) {
+        data.type = type === "INCOME" ? "OUTCOME" : "INCOME";
+        data.amount = Math.abs(amount);
+      }
+    },
+    async (data, body, req) => {
+      await updateMoneyMany(data, req.user!.id);
+    }
+  );
 };

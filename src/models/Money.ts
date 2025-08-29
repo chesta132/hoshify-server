@@ -41,11 +41,26 @@ export const updateMoney = async ({ userId, type, amount, reverse }: UpdateMoney
 };
 
 export const updateMoneyMany = async (transactions: Omit<UpdateMoneyProps, "reverse">[], userId: string, reverse?: boolean) => {
-  const income: UpdateMoneyProps = { amount: 0, type: "INCOME", userId };
-  transactions.filter((data) => data.type === "INCOME").forEach((data) => (income.amount += data.amount));
-  await updateMoney({ ...income, reverse });
+  const toUpdate = { total: 0, income: 0, outcome: 0 };
 
-  const outcome: UpdateMoneyProps = { amount: 0, type: "OUTCOME", userId };
-  transactions.filter((data) => data.type === "OUTCOME").forEach((data) => (outcome.amount += data.amount));
-  await updateMoney({ ...outcome, reverse });
+  transactions
+    .filter((data) => data.type === "INCOME")
+    .forEach((data) => {
+      if (reverse) {
+        toUpdate.income -= data.amount;
+        toUpdate.total -= data.amount;
+      } else toUpdate.income += data.amount;
+      toUpdate.total += data.amount;
+    });
+  transactions
+    .filter((data) => data.type === "INCOME")
+    .forEach((data) => {
+      if (reverse) {
+        toUpdate.outcome -= data.amount;
+        toUpdate.total += data.amount;
+      } else toUpdate.outcome += data.amount;
+      toUpdate.total -= data.amount;
+    });
+
+  await Money.updateOne({ userId }, { $inc: toUpdate });
 };

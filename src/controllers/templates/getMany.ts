@@ -3,7 +3,10 @@ import handleError from "@/utils/handleError";
 import { NormalizedData } from "@/types/types";
 import { Model } from "mongoose";
 
-export const getMany = <T extends Record<string, any>>(model: Model<T>, funcBeforeRes?: (data: NormalizedData<T>[]) => any) => {
+export const getMany = <T extends Record<string, any>>(
+  model: Model<T>,
+  funcBeforeRes?: (data: NormalizedData<T>[], req: Request, res: Response["res"]) => any
+) => {
   return async (req: Request, { res }: Response) => {
     try {
       const user = req.user!;
@@ -13,7 +16,7 @@ export const getMany = <T extends Record<string, any>>(model: Model<T>, funcBefo
 
       const data = await model.find({ userId: user.id, isRecycled: false }, undefined, { sort: { createdAt: -1 }, limit, skip }).normalize();
       if (funcBeforeRes) {
-        await funcBeforeRes(data);
+        await funcBeforeRes(data, req, res);
       }
       res
         .body({ success: data })

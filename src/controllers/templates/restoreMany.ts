@@ -6,7 +6,7 @@ import pluralize from "pluralize";
 
 export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(
   model: Model<T>,
-  funcBeforeRes?: (data: Normalized<T>[]) => any
+  funcBeforeRes?: (data: Normalized<T>[], body: any, req: Request, res: Response["res"]) => any
 ) => {
   return async (req: Request, { res }: Response) => {
     try {
@@ -25,7 +25,7 @@ export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | nu
       await model.updateMany({ _id: { $in: ids } }, { isRecycled: false, deleteAt: null }, { runValidators: true });
 
       const updatedData = unUpdated.map((data) => ({ ...data.normalize(), isRecycled: false, deleteAt: null }));
-      if (funcBeforeRes) await funcBeforeRes(updatedData);
+      if (funcBeforeRes) await funcBeforeRes(updatedData, req.body, req, res);
 
       res
         .body({ success: updatedData })
