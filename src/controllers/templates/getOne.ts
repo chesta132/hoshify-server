@@ -3,7 +3,7 @@ import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
 import { NormalizedData } from "@/types/types";
 
-export const getOne = async <T extends Record<string, any>>(model: Model<T>, funcBeforeRes?: (data: NormalizedData<T>) => Promise<any> | any) => {
+export const getOne = <T extends Record<string, any>>(model: Model<T>, funcBeforeRes?: (data: NormalizedData<T>) => any) => {
   return async (req: Request, { res }: Response) => {
     try {
       const { id } = req.params;

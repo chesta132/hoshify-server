@@ -35,6 +35,17 @@ export const incremByAmount = (transaction: Pick<ITransaction, "type" | "amount"
   return { [type.toLowerCase()]: amount, total: getTotal({ ...transaction, amount }) };
 };
 
-export const updateMoney = async ({ userId, type, amount, reverse }: Pick<ITransaction, "userId" | "type" | "amount"> & { reverse?: boolean }) => {
+export type UpdateMoneyProps = Pick<ITransaction, "userId" | "type" | "amount"> & { reverse?: boolean };
+export const updateMoney = async ({ userId, type, amount, reverse }: UpdateMoneyProps) => {
   await Money.updateOne({ userId }, { $inc: incremByAmount({ type, amount }, reverse) });
+};
+
+export const updateMoneyMany = async (transactions: Omit<UpdateMoneyProps, "reverse">[], userId: string, reverse?: boolean) => {
+  const income: UpdateMoneyProps = { amount: 0, type: "INCOME", userId };
+  transactions.filter((data) => data.type === "INCOME").forEach((data) => (income.amount += data.amount));
+  await updateMoney({ ...income, reverse });
+
+  const outcome: UpdateMoneyProps = { amount: 0, type: "OUTCOME", userId };
+  transactions.filter((data) => data.type === "OUTCOME").forEach((data) => (outcome.amount += data.amount));
+  await updateMoney({ ...outcome, reverse });
 };

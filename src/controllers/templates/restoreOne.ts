@@ -4,9 +4,9 @@ import { isValidObjectId, Model } from "mongoose";
 import { Normalized } from "@/types/types";
 import { ellipsis } from "@/utils/manipulate";
 
-export const restoreOne = async <T extends { isRecycled: boolean; title: string; deleteAt: Date | null }>(
+export const restoreOne = <T extends { isRecycled: boolean; title: string; deleteAt: Date | null }>(
   model: Model<T>,
-  funcBeforeRes?: (data: Normalized<T>) => Promise<any> | any
+  funcBeforeRes?: (data: Normalized<T>) => any
 ) => {
   return async (req: Request, { res }: Response) => {
     try {

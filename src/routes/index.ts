@@ -14,14 +14,14 @@ router.use("/auth", authRoutes);
 
 router.use(authMiddleware);
 router.use("/user", userRoutes);
-router.use("/todo", todoRoutes);
-router.use("/transaction", tranRoutes);
-router.use("/schedule", scheduleRoutes);
-router.use("/link", linkRoutes);
-router.use("/money", moneyRoutes);
+router.use("/todos", todoRoutes);
+router.use("/transactions", tranRoutes);
+router.use("/schedules", scheduleRoutes);
+router.use("/links", linkRoutes);
+router.use("/moneys", moneyRoutes);
 
 router.use(requireRole(["DEVELOPER", "OWNER"]));
-router.use("/dummy", dummyRoutes);
+router.use("/dummys", dummyRoutes);
 
 router.get("/health", (req, res) => {
   res.json("OK");

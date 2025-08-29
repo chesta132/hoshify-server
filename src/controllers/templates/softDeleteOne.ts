@@ -4,10 +4,11 @@ import { isValidObjectId, Model } from "mongoose";
 import { Normalized } from "@/types/types";
 import { oneWeeks } from "@/utils/token";
 import { ellipsis } from "@/utils/manipulate";
+import { getDeleteTTL } from "@/utils/database";
 
 export const softDeleteOne = <T extends { isRecycled: boolean; title: string; deleteAt: Date | null }>(
   model: Model<T>,
-  funcBeforeRes?: (data: Normalized<T>) => Promise<any> | any
+  funcBeforeRes?: (data: Normalized<T>) => any
 ) => {
   return async (req: Request, { res }: Response) => {
     try {
@@ -18,7 +19,7 @@ export const softDeleteOne = <T extends { isRecycled: boolean; title: string; de
       }
 
       const data = (await model.softDeleteById(id))?.normalize();
-      const deleteAt = new Date(Date.now() + oneWeeks);
+      const deleteAt = getDeleteTTL();
       if (!data) {
         res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond();
         return;
