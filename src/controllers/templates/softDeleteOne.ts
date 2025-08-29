@@ -21,7 +21,7 @@ export const softDeleteOne = <T extends { isRecycled: boolean; title: string; de
       const data = (await model.softDeleteById(id))?.normalize();
       const deleteAt = getDeleteTTL();
       if (!data) {
-        res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond();
+        res.tempNotFound(model.getName()).respond();
         return;
       }
       if (data.isRecycled) {

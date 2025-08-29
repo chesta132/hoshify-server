@@ -18,7 +18,7 @@ export const restoreOne = <T extends { isRecycled: boolean; title: string; delet
 
       const data = (await model.restoreById(id))?.normalize();
       if (!data) {
-        res.tempNotFound(model.collection.name.slice(0, -1).toLowerCase()).respond();
+        res.tempNotFound(model.getName()).respond();
         return;
       }
       if (!data.isRecycled) {

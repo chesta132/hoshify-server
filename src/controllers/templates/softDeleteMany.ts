@@ -17,10 +17,9 @@ export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date |
         return;
       }
 
-      const name = model.collection.name.slice(0, -1).toLowerCase();
       const unUpdated = await model.find({ _id: { $in: ids } });
       if (unUpdated.some((data) => data.isRecycled)) {
-        res.tempNotFound(name).respond();
+        res.tempNotFound(model.getName()).respond();
         return;
       }
 
@@ -32,7 +31,7 @@ export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date |
 
       res
         .body({ success: updatedData })
-        .notif(`${updatedData.length} ${pluralize(name, updatedData.length)} deleted`)
+        .notif(`${updatedData.length} ${pluralize(model.getName(), updatedData.length)} deleted`)
         .respond();
     } catch (err) {
       handleError(err, res);

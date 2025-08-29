@@ -26,6 +26,10 @@ Query.prototype.normalizeUser = async function () {
   return normalizeUserQuery(query);
 };
 
+Model.getName = function () {
+  return this.collection.name.slice(0, -1).toLowerCase();
+};
+
 export function restoreById<T>(
   this: Model<T>,
   id: string | ObjectId,

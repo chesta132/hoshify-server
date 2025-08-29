@@ -94,5 +94,11 @@ declare module "mongoose" {
      * Generate dummy documents for testing purposes.
      */
     generateDummy: typeof generateDummy;
+
+    /**
+     *
+     * Generate name of collection
+     */
+    getName: () => string;
   }
 }

@@ -15,7 +15,6 @@ export const getMany = <T extends Record<string, any>>(model: Model<T>, funcBefo
       if (funcBeforeRes) {
         await funcBeforeRes(data);
       }
-      console.debug(offset);
       res
         .body({ success: data })
         .paginate({

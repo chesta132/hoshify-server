@@ -8,13 +8,14 @@ type RefreshConfig = (typeof refreshConfig)[number];
 export const refreshMoney = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
+    const { id } = req.params;
     const { refresh }: { refresh?: RefreshConfig } = req.query;
     if (!refresh || !refreshConfig.includes(refresh)) {
       res.tempClientField("refreshMoney", 'invalid refresh type, please select between "income", "outcome" or "total"').respond();
       return;
     }
 
-    const oldMoney = await Money.findOne({ userId: user.id }).normalize();
+    const oldMoney = await Money.findOneAndUpdate({ _id: id, userId: user.id }).normalize();
     if (!oldMoney) {
       res.tempNotFound("money").respond();
       return;
