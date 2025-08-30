@@ -3,6 +3,8 @@ import handleError from "@/utils/handleError";
 import { isValidObjectId } from "mongoose";
 import { Link } from "@/models/Link";
 import { ellipsis } from "@/utils/manipulate";
+import { validateIds } from "@/utils/database";
+import pluralize from "pluralize";
 
 export const deleteLink = async (req: Request, { res }: Response) => {
   try {
@@ -19,8 +21,24 @@ export const deleteLink = async (req: Request, { res }: Response) => {
     }
 
     res
-      .body({ success: deletedLink })
+      .body({ success: {} })
       .notif(`${ellipsis(deletedLink.title, 30)} deleted`)
+      .respond();
+  } catch (err) {
+    handleError(err, res);
+  }
+};
+
+export const deleteLinks = async (req: Request, { res }: Response) => {
+  try {
+    const ids: any[] = req.body;
+    validateIds(ids, res);
+
+    const deletedLink = await Link.deleteMany({ _id: { $in: ids } });
+
+    res
+      .body({ success: {} })
+      .notif(`${deletedLink.deletedCount} ${pluralize("link", deletedLink.deletedCount)} deleted`)
       .respond();
   } catch (err) {
     handleError(err, res);

@@ -4,6 +4,7 @@ import {
   createSchedules,
   deleteSchedule,
   deleteSchedules,
+  editSchedules,
   getSchedule,
   getSchedules,
   restoreSchedule,
@@ -18,6 +19,7 @@ scheduleRoutes.post("/", polyBody(createSchedule, createSchedules));
 scheduleRoutes.get("/", getSchedules);
 scheduleRoutes.get("/:id", getSchedule);
 scheduleRoutes.put("/:id", editSchedule);
+scheduleRoutes.put('/', editSchedules)
 scheduleRoutes.delete("/", deleteSchedules);
 scheduleRoutes.delete("/:id", deleteSchedule);
 scheduleRoutes.patch("/restores/", restoreSchedules);

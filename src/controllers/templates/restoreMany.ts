@@ -1,18 +1,17 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
-import { isValidObjectId, Model } from "mongoose";
+import { Model } from "mongoose";
 import { ControllerTemplateOptions, Normalized } from "@/types/types";
 import pluralize from "pluralize";
+import { validateIds } from "@/utils/database";
 
 export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(model: Model<T>, options?: ControllerTemplateOptions<T[]>) => {
   return async (req: Request, { res }: Response) => {
     try {
-      const { ids }: { ids?: string[] } = req.body;
+      const ids: string[] = req.body;
+      validateIds(ids, res);
+
       if (options?.funcInitiator) await options.funcInitiator(req, res);
-      if (!ids || ids.some((id) => !isValidObjectId(id))) {
-        res.tempClientType("Object ID").respond();
-        return;
-      }
 
       const unUpdated = await model.find({ _id: { $in: ids } });
       if (unUpdated.some((data) => data.isRecycled)) {

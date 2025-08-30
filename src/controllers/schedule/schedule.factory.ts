@@ -6,6 +6,7 @@ import { restoreMany } from "../templates/restoreMany";
 import { restoreOne } from "../templates/restoreOne";
 import { softDeleteOne } from "../templates/softDeleteOne";
 import { softDeleteMany } from "../templates/softDeleteMany";
+import { editMany } from "../templates/editMany";
 
 export const createSchedules = createMany(Schedule, ["title", "details"], {
   funcInitiator(req) {
@@ -26,3 +27,5 @@ export const restoreSchedules = restoreMany(Schedule);
 export const deleteSchedule = softDeleteOne(Schedule);
 
 export const deleteSchedules = softDeleteMany(Schedule);
+
+export const editSchedules = editMany(Schedule, []);

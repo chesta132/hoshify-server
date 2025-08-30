@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
-import { Model } from "mongoose";
+import { isValidObjectId, Model } from "mongoose";
 import { ControllerTemplateOptions, Normalized, NormalizedData } from "@/types/types";
 import { omit } from "@/utils/manipulate";
 
@@ -10,6 +10,20 @@ export const editMany = <T>(model: Model<T>, neededField: string[], options?: Co
     try {
       const datas: any[] = req.body;
       if (options?.funcInitiator) await options.funcInitiator(req, res);
+      let invalidDatas: string[] = [];
+
+      const isObjectId = datas.every((data, idx) => {
+        if (isValidObjectId(data._id) || isValidObjectId(data.id)) return true;
+        else {
+          invalidDatas.push(data?.title || `Index ${idx}`);
+          return false;
+        }
+      });
+
+      if (!isObjectId) {
+        res.tempClientType("Object ID", `${invalidDatas.join(", ")} is not ObjectId.`).respond();
+        return;
+      }
 
       const missingFields: string[] = [];
       const isValidField = datas.every((data) => {

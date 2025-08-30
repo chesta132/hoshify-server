@@ -32,14 +32,17 @@ export const editTrans = editMany(Transaction, [], {
   funcInitiator(req) {
     (req.body as any[]).forEach((data) => {
       const { amount, type } = data;
+      if (!amount || !type) return;
       if (amount < 0) {
         data.type = type === "INCOME" ? "OUTCOME" : "INCOME";
         data.amount = Math.abs(amount);
       }
     });
   },
-  async funcBeforeRes(data, req) {
-    await updateMoneyMany(data, req.user!.id);
+  async funcBeforeRes(datas, req) {
+    const body = req.body as any[];
+    const normalizedBody = datas.map((data) => ({ ...data, ...body.find((d) => d.id === data.id || d._id === data.id) }));
+    await updateMoneyMany(normalizedBody, req.user!.id);
   },
 });
 

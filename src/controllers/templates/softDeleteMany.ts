@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
-import { isValidObjectId, Model } from "mongoose";
-import { ControllerTemplateOptions, Normalized } from "@/types/types";
-import { getDeleteTTL } from "@/utils/database";
+import { Model } from "mongoose";
+import { ControllerTemplateOptions } from "@/types/types";
+import { getDeleteTTL, validateIds } from "@/utils/database";
 import pluralize from "pluralize";
 
 export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(
@@ -11,12 +11,10 @@ export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date |
 ) => {
   return async (req: Request, { res }: Response) => {
     try {
-      const { ids }: { ids?: string[] } = req.body;
+      const ids: string[] = req.body;
+      validateIds(ids, res);
+
       if (options?.funcInitiator) await options.funcInitiator(req, res);
-      if (!ids || ids.some((id) => !isValidObjectId(id))) {
-        res.tempClientType("Object ID").respond();
-        return;
-      }
 
       const unUpdated = await model.find({ _id: { $in: ids } });
       if (unUpdated.some((data) => data.isRecycled)) {

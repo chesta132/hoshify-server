@@ -1,5 +1,5 @@
 import { createLink } from "@/controllers/link/createLink";
-import { deleteLink } from "@/controllers/link/deleteLink";
+import { deleteLink, deleteLinks } from "@/controllers/link/deleteLink";
 import { editLink } from "@/controllers/link/editLink";
 import { createLinks, getLinks } from "@/controllers/link/link.factory";
 import { polyBody } from "@/utils/polyBody";
@@ -11,3 +11,4 @@ linkRoutes.post("/", polyBody(createLink, createLinks));
 linkRoutes.get("/", getLinks);
 linkRoutes.put("/:id", editLink);
 linkRoutes.delete("/:id", deleteLink);
+linkRoutes.delete("/", deleteLinks);

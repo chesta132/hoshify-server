@@ -22,5 +22,5 @@ tranRoutes.put("/:id", editTran);
 tranRoutes.put("/", editTrans);
 tranRoutes.delete("/", deleteTrans);
 tranRoutes.delete("/:id", deleteTran);
-tranRoutes.patch("/", restoreTrans);
-tranRoutes.patch("/:id", restoreTran);
+tranRoutes.patch("/restores/", restoreTrans);
+tranRoutes.patch("/restores/:id", restoreTran);
