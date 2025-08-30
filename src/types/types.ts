@@ -41,5 +41,5 @@ export type NormalizedUser<DocType, ResultType = DocType, IfObject = never> = Re
 
 export type ControllerTemplateOptions<T> = {
   funcBeforeRes?: (data: Normalized<T>, req: Request, res: Response["res"]) => any;
-  funcInitiator?: (req: Request, res: Response["res"]) => any;
+  funcInitiator?: (req: Request, res: Response["res"]) => Promise<"stop"> | "stop" | Promise<void> | void;
 };

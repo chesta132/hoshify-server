@@ -138,7 +138,7 @@ export const dummyPlugin = (schema: Schema) => {
 export const validateIds = (ids: string[], res: Response["res"]) => {
   if (!Array.isArray(ids)) {
     res.tempClientType("invalid body type. Array only").respond();
-    return;
+    return false;
   }
   let invalidIds: string[] = [];
 
@@ -152,6 +152,35 @@ export const validateIds = (ids: string[], res: Response["res"]) => {
 
   if (!isObjectId) {
     res.tempClientType("Object ID", `${invalidIds.join(", ")} is not ObjectId.`).respond();
-    return;
+    return false;
   }
+  return true;
+};
+
+export const validateRequires = (neededField: string[], from: any, res: Response["res"]) => {
+  const missingFields: string[] = [];
+  let isValid = true;
+  if (Array.isArray(from)) {
+    from.forEach((data) => {
+      neededField.forEach((field) => {
+        if (data[field] === undefined) {
+          missingFields.push(field);
+          isValid = false;
+        }
+      });
+    });
+  } else {
+    neededField.forEach((field) => {
+      if (from[field] === undefined) {
+        missingFields.push(field);
+        isValid = false;
+      }
+    });
+  }
+
+  if (!isValid) {
+    res.tempMissingFields(missingFields.join(", ")).respond();
+    return false;
+  }
+  return true;
 };

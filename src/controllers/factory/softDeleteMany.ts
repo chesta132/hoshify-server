@@ -12,9 +12,9 @@ export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date |
   return async (req: Request, { res }: Response) => {
     try {
       const ids: string[] = req.body;
-      validateIds(ids, res);
+      if (!validateIds(ids, res)) return;
 
-      if (options?.funcInitiator) await options.funcInitiator(req, res);
+      if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
       const unUpdated = await model.find({ _id: { $in: ids } });
       if (unUpdated.some((data) => data.isRecycled)) {

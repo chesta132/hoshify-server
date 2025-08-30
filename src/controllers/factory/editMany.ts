@@ -2,14 +2,14 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
 import { isValidObjectId, Model } from "mongoose";
-import { ControllerTemplateOptions, Normalized, NormalizedData } from "@/types/types";
+import { ControllerTemplateOptions, NormalizedData } from "@/types/types";
 import { omit } from "@/utils/manipulate";
 
 export const editMany = <T>(model: Model<T>, neededField: string[], options?: ControllerTemplateOptions<T[]>) => {
   return async (req: Request, { res }: Response) => {
     try {
       const datas: any[] = req.body;
-      if (options?.funcInitiator) await options.funcInitiator(req, res);
+      if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
       let invalidDatas: string[] = [];
 
       const isObjectId = datas.every((data, idx) => {

@@ -1,6 +1,6 @@
-import { createTran } from "@/controllers/transaction/createTran";
 import { editTran } from "@/controllers/transaction/editTran";
 import {
+  createTran,
   createTrans,
   deleteTran,
   deleteTrans,

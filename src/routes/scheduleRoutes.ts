@@ -1,6 +1,6 @@
-import { createSchedule } from "@/controllers/schedule/createSchedule";
 import { editSchedule } from "@/controllers/schedule/editSchedule";
 import {
+  createSchedule,
   createSchedules,
   deleteSchedule,
   deleteSchedules,
@@ -19,7 +19,7 @@ scheduleRoutes.post("/", polyBody(createSchedule, createSchedules));
 scheduleRoutes.get("/", getSchedules);
 scheduleRoutes.get("/:id", getSchedule);
 scheduleRoutes.put("/:id", editSchedule);
-scheduleRoutes.put('/', editSchedules)
+scheduleRoutes.put("/", editSchedules);
 scheduleRoutes.delete("/", deleteSchedules);
 scheduleRoutes.delete("/:id", deleteSchedule);
 scheduleRoutes.patch("/restores/", restoreSchedules);

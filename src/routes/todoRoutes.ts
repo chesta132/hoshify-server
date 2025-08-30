@@ -1,6 +1,5 @@
-import { createTodo } from "@/controllers/todo/createTodo";
 import { editTodo } from "@/controllers/todo/editTodo";
-import { createTodos, deleteTodo, deleteTodos, editTodos, getTodo, getTodos, restoreTodo, restoreTodos } from "@/controllers/todo/todo.factory";
+import { createTodo, createTodos, deleteTodo, deleteTodos, editTodos, getTodo, getTodos, restoreTodo, restoreTodos } from "@/controllers/todo/todo.factory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
 

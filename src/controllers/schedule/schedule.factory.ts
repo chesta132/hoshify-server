@@ -1,12 +1,13 @@
-import { createMany } from "../templates/createMany";
+import { createMany } from "../factory/createMany";
 import { Schedule } from "@/models/Schedule";
-import { getMany } from "../templates/getMany";
-import { getOne } from "../templates/getOne";
-import { restoreMany } from "../templates/restoreMany";
-import { restoreOne } from "../templates/restoreOne";
-import { softDeleteOne } from "../templates/softDeleteOne";
-import { softDeleteMany } from "../templates/softDeleteMany";
-import { editMany } from "../templates/editMany";
+import { getMany } from "../factory/getMany";
+import { getOne } from "../factory/getOne";
+import { restoreMany } from "../factory/restoreMany";
+import { restoreOne } from "../factory/restoreOne";
+import { softDeleteOne } from "../factory/softDeleteOne";
+import { softDeleteMany } from "../factory/softDeleteMany";
+import { editMany } from "../factory/editMany";
+import { createOne } from "../factory/createOne";
 
 export const createSchedules = createMany(Schedule, ["title", "details"], {
   funcInitiator(req) {
@@ -29,3 +30,10 @@ export const deleteSchedule = softDeleteOne(Schedule);
 export const deleteSchedules = softDeleteMany(Schedule);
 
 export const editSchedules = editMany(Schedule, []);
+
+export const createSchedule = createOne(Schedule, ["title", "details"], {
+  funcInitiator(req) {
+    const { end, start } = req.body;
+    if (!end) req.body.end = start;
+  },
+});

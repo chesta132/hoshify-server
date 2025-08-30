@@ -1,6 +1,5 @@
-import { createNote } from "@/controllers/note/createNote";
 import { editNote } from "@/controllers/note/editNote";
-import { createNotes, deleteNote, deleteNotes, editNotes, getNote, getNotes, restoreNote, restoreNotes } from "@/controllers/note/note.factory";
+import { createNote, createNotes, deleteNote, deleteNotes, editNotes, getNote, getNotes, restoreNote, restoreNotes } from "@/controllers/note/note.factory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
 

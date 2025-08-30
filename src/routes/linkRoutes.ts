@@ -1,7 +1,6 @@
-import { createLink } from "@/controllers/link/createLink";
 import { deleteLink, deleteLinks } from "@/controllers/link/deleteLink";
 import { editLink } from "@/controllers/link/editLink";
-import { createLinks, getLinks } from "@/controllers/link/link.factory";
+import { createLink, createLinks, getLinks } from "@/controllers/link/link.factory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
 
