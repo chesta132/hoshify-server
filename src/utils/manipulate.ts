@@ -128,7 +128,7 @@ export const capitalEach = (string: string, start?: string | number, end?: strin
 type FormatDateOptions = { includeThisYear?: boolean; includeHour?: boolean };
 /**
  * Returns a string representation of a date. The format of the string is en-US locale.
- * 
+ *
  * @param date - Original date
  * @param options - Options for date format
  * @returns Formatted date in type of string
@@ -162,4 +162,27 @@ export const formatDate = (date: Date, options: FormatDateOptions = { includeThi
     console.error(error);
     return "Invalid Date";
   }
+};
+
+/**
+ * Give spaces to original string.
+ *
+ * @param string - Original string.
+ * @returns The string with spaces.
+ * 
+ * @example
+ * spacing("newUser") // new user
+ */
+export const spacing = (string: string) => {
+  let spaced = "";
+  for (const letter of string) {
+    if (new RegExp("[A-Z]").test(letter)) {
+      spaced = `${spaced} ${letter.toLowerCase()}`;
+      continue;
+    } else if (letter === "_") {
+      spaced = `${spaced} `;
+      continue;
+    }
+  }
+  return spaced;
 };

@@ -3,7 +3,7 @@ import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
 import { Model } from "mongoose";
 import { ControllerTemplateOptions, NormalizedData } from "@/types/types";
-import { validateRequires } from "@/utils/database";
+import { validateRequires } from "@/utils/validate";
 
 export const createMany = <T>(model: Model<T>, neededField: string[], options?: ControllerTemplateOptions<T[]>) => {
   return async (req: Request, { res }: Response) => {

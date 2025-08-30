@@ -3,7 +3,7 @@ import handleError from "@/utils/handleError";
 import { ellipsis } from "@/utils/manipulate";
 import { Model } from "mongoose";
 import { ControllerTemplateOptions } from "@/types/types";
-import { validateRequires } from "@/utils/database";
+import { validateRequires } from "@/utils/validate";
 
 export const createOne = <T>(model: Model<T>, neededField: string[], options?: ControllerTemplateOptions<T>) => {
   return async (req: Request, { res }: Response) => {

@@ -3,7 +3,7 @@ import handleError from "@/utils/handleError";
 import { Model } from "mongoose";
 import { ControllerTemplateOptions, Normalized } from "@/types/types";
 import pluralize from "pluralize";
-import { validateIds } from "@/utils/database";
+import { validateIds } from "@/utils/validate";
 
 export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(model: Model<T>, options?: ControllerTemplateOptions<T[]>) => {
   return async (req: Request, { res }: Response) => {

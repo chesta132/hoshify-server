@@ -3,8 +3,8 @@ import handleError from "@/utils/handleError";
 import { isValidObjectId } from "mongoose";
 import { Link } from "@/models/Link";
 import { ellipsis } from "@/utils/manipulate";
-import { validateIds } from "@/utils/database";
 import pluralize from "pluralize";
+import { validateIds } from "@/utils/validate";
 
 export const deleteLink = async (req: Request, { res }: Response) => {
   try {

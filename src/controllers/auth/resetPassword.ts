@@ -5,16 +5,14 @@ import { userProject } from "../../utils/normalizeQuery";
 import { sendCredentialChanges } from "../../utils/email";
 import { Verify } from "../../models/Verify";
 import { User } from "../../models/User";
+import { validateRequires } from "@/utils/validate";
 
 export const resetPassword = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { token } = req.query;
     const { newPassword } = req.body;
-    if (!newPassword || !token) {
-      res.tempMissingFields("New password, token").respond();
-      return;
-    }
+    if (!validateRequires(["newPassword"], req.body, res) || !validateRequires(["token"], req.query, res)) return;
     if (!user.password || !user.email) {
       res.tempNotBound().respond();
       return;

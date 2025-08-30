@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
 import { ControllerTemplateOptions, Normalized } from "@/types/types";
-import { unEditableField, validateRequires } from "@/utils/database";
+import { unEditableField } from "@/utils/database";
 import { omit } from "@/utils/manipulate";
+import { validateRequires } from "@/utils/validate";
 
 export const editOne = <T>(model: Model<T>, neededField?: string[], options?: ControllerTemplateOptions<T>) => {
   return async (req: Request, { res }: Response) => {

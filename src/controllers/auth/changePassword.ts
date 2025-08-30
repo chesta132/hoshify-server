@@ -4,15 +4,13 @@ import bcrypt from "bcrypt";
 import { userProject } from "../../utils/normalizeQuery";
 import { sendCredentialChanges } from "../../utils/email";
 import { User } from "../../models/User";
+import { validateRequires } from "@/utils/validate";
 
 export const changePassword = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { newPassword, password } = req.body;
-    if (!newPassword || !password) {
-      res.tempMissingFields("new password, old password").respond();
-      return;
-    }
+    if (!validateRequires(["newPassword", "password"], req.body, res)) return;
     if (!user.email) {
       res.tempNotBound().respond();
       return;

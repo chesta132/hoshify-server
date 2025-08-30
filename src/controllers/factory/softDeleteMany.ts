@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Model } from "mongoose";
 import { ControllerTemplateOptions } from "@/types/types";
-import { getDeleteTTL, validateIds } from "@/utils/database";
+import { getDeleteTTL } from "@/utils/database";
 import pluralize from "pluralize";
+import { validateIds } from "@/utils/validate";
 
 export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(
   model: Model<T>,

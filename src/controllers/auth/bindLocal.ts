@@ -3,15 +3,13 @@ import handleError from "../../utils/handleError";
 import { userProject } from "../../utils/normalizeQuery";
 import bcrypt from "bcrypt";
 import { User } from "../../models/User";
+import { validateRequires } from "@/utils/validate";
 
 export const bindLocal = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { email, password } = req.body;
-    if (!email || !password) {
-      res.tempMissingFields("email, password").error();
-      return;
-    }
+    if (!validateRequires(["email", "password"], req.body, res)) return;
     if (user.email) {
       res.tempIsBound().error();
       return;

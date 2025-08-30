@@ -4,7 +4,6 @@ import { normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
 import { randomDate, randomNumber } from "@/utils/random";
 import { oneWeeks } from "@/utils/token";
 import { Document, Model, ObjectId, Query, QueryOptions, RootFilterQuery, UpdateQuery, Schema, CreateOptions, isValidObjectId } from "mongoose";
-import { Response, Request } from "express";
 
 export const getDeleteTTL = () => new Date(Date.now() + oneWeeks);
 
@@ -133,56 +132,6 @@ export const dummyPlugin = (schema: Schema) => {
   fns.forEach((fn) => {
     schema.statics[fn.name] = fn;
   });
-};
-
-export const validateIds = (ids: string[], res: Response["res"]) => {
-  if (!Array.isArray(ids)) {
-    res.tempClientType("invalid body type. Array only").respond();
-    return false;
-  }
-  let invalidIds: string[] = [];
-
-  const isObjectId = ids?.every((id) => {
-    if (isValidObjectId(id)) return true;
-    else {
-      invalidIds.push(id);
-      return false;
-    }
-  });
-
-  if (!isObjectId) {
-    res.tempClientType("Object ID", `${invalidIds.join(", ")} is not ObjectId.`).respond();
-    return false;
-  }
-  return true;
-};
-
-export const validateRequires = (neededField: string[], from: any, res: Response["res"]) => {
-  const missingFields: string[] = [];
-  let isValid = true;
-  if (Array.isArray(from)) {
-    from.forEach((data) => {
-      neededField.forEach((field) => {
-        if (data[field] === undefined) {
-          missingFields.push(field);
-          isValid = false;
-        }
-      });
-    });
-  } else {
-    neededField.forEach((field) => {
-      if (from[field] === undefined) {
-        missingFields.push(field);
-        isValid = false;
-      }
-    });
-  }
-
-  if (!isValid) {
-    res.tempMissingFields(missingFields.join(", ")).respond();
-    return false;
-  }
-  return true;
 };
 
 export const unEditableField = ["userId", "id", "_id", "deleteAt", "isRecycled", "__v", "dummy"];

@@ -1,18 +1,14 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
 import bcrypt from "bcrypt";
-import { normalizeUserQuery } from "../../utils/normalizeQuery";
 import { User } from "../../models/User";
 import { Money } from "@/models/Money";
+import { validateRequires } from "@/utils/validate";
 
 export const signup = async (req: Request, { res }: Response) => {
   try {
-    const { username, email, password, fullName, rememberMe } = req.body;
-
-    if (!username || !email || !password || !fullName) {
-      res.tempMissingFields("username, email, password, and full name").respond();
-      return;
-    }
+    const { email, password, fullName, rememberMe } = req.body;
+    if (!validateRequires(["email", "password", "fullName"], req.body, res)) return;
 
     const potentialUser = await User.find({ $or: [{ email }, { gmail: email }] });
     potentialUser.forEach((potential) => {
