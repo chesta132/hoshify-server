@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId } from "mongoose";
 import { Link } from "@/models/Link";
-import { ellipsis } from "@/utils/manipulate";
-import pluralize from "pluralize";
 import { validateIds } from "@/utils/validate";
 
 export const deleteLink = async (req: Request, { res }: Response) => {
@@ -20,10 +18,7 @@ export const deleteLink = async (req: Request, { res }: Response) => {
       return;
     }
 
-    res
-      .body({ success: {} })
-      .notif(`${ellipsis(deletedLink.title, 30)} deleted`)
-      .respond();
+    res.noContent();
   } catch (err) {
     handleError(err, res);
   }
@@ -34,12 +29,9 @@ export const deleteLinks = async (req: Request, { res }: Response) => {
     const ids: any[] = req.body;
     if (!validateIds(ids, res)) return;
 
-    const deletedLink = await Link.deleteMany({ _id: { $in: ids } });
+    await Link.deleteMany({ _id: { $in: ids } });
 
-    res
-      .body({ success: {} })
-      .notif(`${deletedLink.deletedCount} ${pluralize("link", deletedLink.deletedCount)} deleted`)
-      .respond();
+    res.noContent();
   } catch (err) {
     handleError(err, res);
   }

@@ -43,3 +43,8 @@ console.debugTable = function (message?: any, ...optionalParams: any[]) {
   this.log("Called by: ", callerLine);
   return this.table(message, ...optionalParams);
 };
+
+Object.isObject = function <T>(object: T) {
+  if (typeof object === "object" && object !== null && !(object instanceof Date)) return true;
+  return false;
+};

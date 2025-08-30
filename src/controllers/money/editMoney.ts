@@ -19,7 +19,7 @@ export const editMoney = async (req: Request, { res }: Response) => {
 
     const total = income - outcome;
 
-    const money = Money.findOneAndUpdate({ _id: id, userId: user.id }, { income, outcome, total }).normalize();
+    const money = Money.findOneAndUpdate({ _id: id, userId: user.id }, { income, outcome, total }).normalizeCurrency(user.currency);
 
     res.body({ success: money }).respond();
   } catch (err) {

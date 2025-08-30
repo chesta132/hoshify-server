@@ -25,6 +25,15 @@ interface ObjectConstructor {
    * Object.compare({a:1,b:2},{a:1,b:3}) // false
    */
   compare<T extends object>(...objects: T[]): boolean;
+
+  /**
+   * Check prop is it object or not.
+   *
+   * @param object - Original object.
+   *
+   * @returns Boolean of prop is object or not
+   */
+  isObject<T extends object>(object: T): boolean;
 }
 
 /** Type representing all falsy values. */
@@ -46,3 +55,5 @@ type IsArray<T, TrueType = T, FalseType = never> = [T] extends [any[]] ? TrueTyp
 type IncludeArray<T, TrueType = T, FalseType = never> = T extends any[] ? TrueType : FalseType;
 
 type ExtractArray<T> = T extends (infer U)[] ? U : T;
+
+type ConditionalField<T, Key extends string, ExtraKey extends string, ExtraType> = IsFalsy<T[Key], T, T & { [K in ExtraKey]: ExtraType }>;

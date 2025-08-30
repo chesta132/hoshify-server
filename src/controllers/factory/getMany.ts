@@ -5,7 +5,7 @@ import { Model } from "mongoose";
 
 export const getMany = <T extends Record<string, any>>(
   model: Model<T>,
-  options?: Omit<ControllerTemplateOptions<T[]>, "funcInitiator"> & { isRecycled: boolean }
+  options?: Omit<ControllerTemplateOptions<T[]>, "funcInitiator"> & { isRecycled?: boolean }
 ) => {
   return async (req: Request, { res }: Response) => {
     try {

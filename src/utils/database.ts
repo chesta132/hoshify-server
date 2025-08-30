@@ -1,6 +1,6 @@
 import { NODE_ENV } from "@/app";
 import { OneFieldOnly } from "@/types/types";
-import { normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
+import { normalizeCurrency, normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
 import { randomDate, randomNumber } from "@/utils/random";
 import { oneWeeks } from "@/utils/token";
 import { Document, Model, ObjectId, Query, QueryOptions, RootFilterQuery, UpdateQuery, Schema, CreateOptions, isValidObjectId } from "mongoose";
@@ -15,6 +15,10 @@ Document.prototype.normalizeUser = function () {
   return normalizeUserQuery(this);
 };
 
+Document.prototype.normalizeCurrency = function (currency) {
+  return normalizeCurrency(this as any, currency);
+};
+
 Query.prototype.normalize = async function () {
   const query = await this.exec();
   if (!query) return null;
@@ -25,6 +29,12 @@ Query.prototype.normalizeUser = async function () {
   const query = await this.exec();
   if (!query) return null;
   return normalizeUserQuery(query);
+};
+
+Query.prototype.normalizeCurrency = async function (currency) {
+  const query = await this.exec();
+  if (!query) return null;
+  return normalizeCurrency(query, currency);
 };
 
 Model.getName = function () {

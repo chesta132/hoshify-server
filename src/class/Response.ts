@@ -11,8 +11,9 @@ import {
 } from "../utils/token";
 import { USER_CRED, UserRole } from "@/models/User";
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "@/app";
-import { normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
+import { normalizeCurrency, normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
 import { capital } from "@/utils/manipulate";
+import { currencyFields } from "@/utils/money";
 
 /**
  * Authentication-related error codes.
@@ -174,11 +175,15 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     if (success && typeof this._body === "object" && this._body !== null) {
       const body = this._body as Record<string, any> | any[];
       const hasId = Array.isArray(body) ? body.some((body) => body?._id) : body?._id;
-      const isUserCred = !Array.isArray(body) && Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number]));
+      const isUserCred = !Array.isArray(body)
+        ? Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number]))
+        : body.some((body) => Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number])));
       type Normalizable = NormalizedData<SuccessType> | NormalizedData<SuccessType>[];
 
       if (isUserCred) {
-        this._body = normalizeUserQuery(body) as Normalizable;
+        if (Array.isArray(body)) {
+          body.forEach((body, idx) => ((this._body as any[])[idx] = normalizeUserQuery(body) as Normalizable));
+        } else this._body = normalizeUserQuery(body) as Normalizable;
       } else if (hasId) {
         this._body = normalizeQuery(body) as Normalizable;
       }

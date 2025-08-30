@@ -1,4 +1,4 @@
-import { Money } from "@/models/Money";
+import { RequireAtLeastOne } from "@/types/types";
 
 const currencyLocales: Record<string, Intl.LocalesArgument> = {
   IDR: "id-ID",
@@ -14,3 +14,7 @@ export const formatCurrency = (amount: number, currency: string): string => {
     currency,
   }).format(amount);
 };
+
+export const currencyFields: CurrencyFields[] = ["amount", "income", "outcome", "total"];
+export type CurrencyFields = "amount" | "income" | "outcome" | "total";
+export type ModifiedCurrency<T extends RequireAtLeastOne<Record<CurrencyFields, any>>> = ConditionalField<T, CurrencyFields, CurrencyFields, string>;

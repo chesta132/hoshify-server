@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
 import { omit } from "./manipulate";
-import { NormalizedData } from "../types/types";
+import { Normalized, NormalizedData, RequireAtLeastOne } from "../types/types";
 import { IUser, USER_CRED, UserCred } from "../models/User";
+import { currencyFields, CurrencyFields, formatCurrency, ModifiedCurrency } from "./money";
 
 const shouldProcess = (data: any): boolean => {
   return data?._id || Array.isArray(data);
 };
 
-const objecting = (data: any) => {
-  return data.toObject ? data.toObject() : data;
+const objecting = <T extends Record<string, any>>(data: T) => {
+  return (data.toObject ? data.toObject() : data) as T;
 };
 
 export const traverseAndNormalize = (data: any): any => {
@@ -91,4 +92,25 @@ export const userProject = () => {
   const def = {} as Record<UserCred, boolean>;
   USER_CRED.forEach((field) => (def[field] = false));
   return def;
+};
+
+
+
+type NormalizeCurrecyData = RequireAtLeastOne<Record<CurrencyFields, number>>;
+export const normalizeCurrency = <T extends NormalizeCurrecyData | NormalizeCurrecyData[]>(
+  queryData: T,
+  currency: string
+): Normalized<ModifiedCurrency<T extends any[] ? T[number] : T>> => {
+  if (Array.isArray(queryData)) {
+    return queryData.map((data) => normalizeCurrency(data, currency)) as Normalized<ModifiedCurrency<T extends any[] ? T[number] : T>>;
+  }
+
+  let data: Normalized<T> | T = objecting(queryData) as T;
+  for (const [key, value] of Object.entries(data) as [string, number][]) {
+    if (currencyFields.includes(key as any)) (data as any)[key] = formatCurrency(value, currency);
+  }
+  if ((data as any)?._id) {
+    data = normalizeQuery(data) as Normalized<T>;
+  }
+  return data as Normalized<ModifiedCurrency<T extends any[] ? T[number] : T>>;
 };

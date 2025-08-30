@@ -5,7 +5,7 @@ import { Money } from "@/models/Money";
 export const createMoney = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const money = await Money.create({ userId: user.id });
+    const money = (await Money.create({ userId: user.id })).normalizeCurrency(user.currency);
 
     res.body({ success: money }).notif("Money management created").respond();
   } catch (err) {

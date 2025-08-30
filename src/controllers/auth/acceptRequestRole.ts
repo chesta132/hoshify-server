@@ -40,10 +40,7 @@ export const acceptRequestRole = async (req: Request, { res }: Response) => {
     await Verify.deleteOne({ value: token, type: "REQUEST_ROLE", userId });
     await sendRoleGranted(role, user.email || user.gmail!, user.fullName);
 
-    res
-      .body({ success: normalizeUserQuery(user) })
-      .notif(`You has been promoted to ${role.toLowerCase()} role`)
-      .respond();
+    res.body({ success: normalizeUserQuery(user) }).respond();
   } catch (err) {
     handleError(err, res);
   }

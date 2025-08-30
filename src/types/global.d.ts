@@ -3,6 +3,7 @@ import { Respond } from "../class/Response";
 import { IUser, UserCred, UserRole } from "../models/User";
 import { Normalized, NormalizedData, NormalizedUser } from "./types";
 import jwt from "jsonwebtoken";
+import { ModifiedCurrency } from "@/utils/money";
 
 declare global {
   namespace Express {
@@ -50,6 +51,13 @@ declare module "mongoose" {
      * @returns Normalized user query result
      */
     normalizeUser(): Promise<NormalizedUser<DocType, ResultType, null>>;
+
+    /**
+     * Specialized normalization for transaction documents.
+     * Sets amount, income, outcome to currency.
+     * @returns Normalized currency query result
+     */
+    normalizeCurrency(currency: string): Promise<Normalized<ModifiedCurrency<DocType>, ResultType, null>>;
   }
 
   interface Document<T = any, TQueryHelpers = any, DocType = any> {
@@ -67,6 +75,13 @@ declare module "mongoose" {
      * @returns Normalized user document
      */
     normalizeUser(): NormalizedUser<DocType>;
+
+    /**
+     * Specialized normalization for transaction documents.
+     * Sets amount, income, outcome to currency.
+     * @returns Normalized currency query result
+     */
+    normalizeCurrency(currency: string): Normalized<ModifiedCurrency<DocType>>;
   }
 
   interface Model {
@@ -96,7 +111,6 @@ declare module "mongoose" {
     generateDummy: typeof generateDummy;
 
     /**
-     *
      * Get name of collection
      */
     getName: () => string;
