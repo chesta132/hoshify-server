@@ -3,6 +3,7 @@ import handleError from "../utils/handleError";
 import { verifyAccessToken, verifyRefreshToken } from "../utils/token";
 import { Revoked } from "../models/Revoked";
 import { User, UserRole } from "../models/User";
+import { Respond } from "@/class/Response";
 
 const isRefreshSafe = async (refreshToken: string) => {
   const refreshPayload = verifyRefreshToken(refreshToken);
@@ -13,7 +14,8 @@ const isRefreshSafe = async (refreshToken: string) => {
   return { refreshPayload, revoked };
 };
 
-export const authMiddleware = async (req: Request, { res }: Response, next: NextFunction) => {
+export const authMiddleware = async (req: Request, response: Response, next: NextFunction) => {
+  const { res } = response;
   try {
     const { refreshToken, accessToken } = req.cookies;
 
@@ -40,6 +42,8 @@ export const authMiddleware = async (req: Request, { res }: Response, next: Next
       res.sendCookie({ template: "ACCESS", user });
 
       req.user = user;
+      response.res = undefined as any;
+      response.res = new Respond(req, response);
       return next();
     }
 
@@ -55,6 +59,8 @@ export const authMiddleware = async (req: Request, { res }: Response, next: Next
     }
 
     req.user = user;
+    response.res = undefined as any;
+    response.res = new Respond(req, response);
     next();
   } catch (error) {
     handleError(error, res);

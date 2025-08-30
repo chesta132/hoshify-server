@@ -1,5 +1,5 @@
 import { CodeError, EitherWithKeys, Fields, NormalizedData, OneFieldOnly } from "../types/types";
-import { CookieOptions, Response } from "express";
+import { CookieOptions, Response, Request } from "express";
 import {
   createAccessToken,
   createRefreshToken,
@@ -143,14 +143,16 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   private _accessToken?: string;
   private _refreshToken?: string;
   private _res: Response;
+  private _req: Request;
   private _rememberMe?: boolean;
 
   /**
    * Initialize Template of the original Response.
    * Uses Proxy to fallback to the underlying Express Response methods and properties.
    */
-  constructor(res: Response) {
+  constructor(req: Request, res: Response) {
     this._res = res;
+    this._req = req;
     return new Proxy(this, {
       get: (target, prop, receiver) => {
         if (prop in target) {
@@ -174,16 +176,22 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   private finalize<S extends boolean>(success: S) {
     if (success && typeof this._body === "object" && this._body !== null) {
       const body = this._body as Record<string, any> | any[];
+      const checkCurrencyField = (body: any) => currencyFields.some((field) => typeof body[field] === "number");
+      const checkUserCred = (body: any) => Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number]));
+
       const hasId = Array.isArray(body) ? body.some((body) => body?._id) : body?._id;
-      const isUserCred = !Array.isArray(body)
-        ? Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number]))
-        : body.some((body) => Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number])));
+      const isUserCred = Array.isArray(body) ? body.some((body) => checkUserCred(body)) : checkUserCred(body);
+      const hasCurrencyField = Array.isArray(body) ? body.some((body) => checkCurrencyField(body)) : checkCurrencyField(body);
       type Normalizable = NormalizedData<SuccessType> | NormalizedData<SuccessType>[];
 
       if (isUserCred) {
         if (Array.isArray(body)) {
-          body.forEach((body, idx) => ((this._body as any[])[idx] = normalizeUserQuery(body) as Normalizable));
+          this._body = body.map((body) => normalizeUserQuery(body)) as Normalizable;
         } else this._body = normalizeUserQuery(body) as Normalizable;
+      } else if (hasCurrencyField && this._req.user) {
+        if (Array.isArray(body)) {
+          this._body = body.map((body) => normalizeCurrency(body, this._req.user!.currency)) as Normalizable;
+        } else this._body = normalizeCurrency(body as any, this._req.user.currency);
       } else if (hasId) {
         this._body = normalizeQuery(body) as Normalizable;
       }
