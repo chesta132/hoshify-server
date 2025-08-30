@@ -12,7 +12,7 @@ export const formatCurrency = (amount: number, currency: string): string => {
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
-  }).format(amount);
+  }).format(amount === 0 ? 0 : amount);
 };
 
 export const currencyFields: CurrencyFields[] = ["amount", "income", "outcome", "total"];

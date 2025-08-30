@@ -1,7 +1,8 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
-import { normalizeUserQuery } from "../../utils/normalizeQuery";
-import { buildUserPopulate, BuildUserPopulateProps, User } from "../../models/User";
+import { normalizeCurrency, normalizeUserQuery } from "../../utils/normalizeQuery";
+import { buildUserPopulate, BuildUserPopulateProps, PopulatedUser, User } from "../../models/User";
+import { Normalized } from "@/types/types";
 
 export const initiateUser = async (req: Request, { res }: Response) => {
   try {
@@ -15,11 +16,15 @@ export const initiateUser = async (req: Request, { res }: Response) => {
       money: "all",
     };
 
-    const populatedUser = await User.findById(user.id).populate(buildUserPopulate(populateConfig)).normalize();
+    const populatedUser = (await User.findById(user.id).populate(buildUserPopulate(populateConfig)).normalize()) as Normalized<
+      PopulatedUser<keyof typeof populateConfig>
+    >;
     if (!populatedUser) {
       res.tempNotFound("user");
       return;
     }
+    (populatedUser.money as any) = normalizeCurrency(populatedUser.money, user.currency);
+    (populatedUser.transactions as any) = normalizeCurrency(populatedUser.transactions, user.currency);
 
     const normalized = normalizeUserQuery(populatedUser);
     res.body({ success: normalized }).ok();
