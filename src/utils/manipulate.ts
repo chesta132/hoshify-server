@@ -169,7 +169,7 @@ export const formatDate = (date: Date, options: FormatDateOptions = { includeThi
  *
  * @param string - Original string.
  * @returns The string with spaces.
- * 
+ *
  * @example
  * spacing("newUser") // new user
  */
@@ -182,7 +182,7 @@ export const spacing = (string: string) => {
     } else if (letter === "_") {
       spaced = `${spaced} `;
       continue;
-    }
+    } else spaced = spaced + letter;
   }
   return spaced;
 };
