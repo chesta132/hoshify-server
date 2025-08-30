@@ -8,7 +8,7 @@ import { transactionType as enumTranType } from "@/models/Transaction";
 import pluralize from "pluralize";
 import { capitalEach, formatDate } from "@/utils/manipulate";
 
-export const createDummy = async <T extends { dummy: boolean }>(model: Model<T>, name: string, req: Request, { res }: Response) => {
+export const createDummy = async <T extends { dummy: boolean }>(model: Model<T>, req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { length } = req.query;
@@ -17,6 +17,7 @@ export const createDummy = async <T extends { dummy: boolean }>(model: Model<T>,
       res.body({ error: { code: "SERVER_ERROR", message: "ENV is not in development" } }).respond();
       return;
     }
+    const name = model.getName();
 
     const dummys = await model.generateDummy(parseInt(length?.toString() || "0") || 0, {
       userId: { fixed: user.id },

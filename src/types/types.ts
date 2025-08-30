@@ -1,6 +1,7 @@
 import { Document, ObjectId } from "mongoose";
 import { codeErrorAuth, codeErrorClient, codeErrorField, codeErrorServer, CodeErrorValues } from "../class/Response";
 import { UserCred } from "@/models/User";
+import { Response, Request } from "express";
 
 export type Fields = "password" | "newPassword" | "username" | "email" | "newEmail" | "newFullName" | "token" | "type" | "refreshMoney";
 
@@ -29,12 +30,16 @@ export type EitherWithKeys<Keys extends object, Others extends object> =
   | (Keys & { [K in keyof Others]?: undefined })
   | (Others & { [K in keyof Keys]?: never });
 
-export type NormalizeReturn<T> = NormalizedData<T>;
 export type NormalizeUserReturn<DocType> = Omit<NormalizedData<DocType>, UserCred>;
 
 export type Normalized<DocType, ResultType = DocType, IfObject = never> = ResultType extends any[]
-  ? NormalizedData<DocType>[]
+  ? NormalizedData<ExtractArray<DocType>>[]
   : NormalizedData<DocType> | IfObject;
 export type NormalizedUser<DocType, ResultType = DocType, IfObject = never> = ResultType extends any[]
-  ? NormalizeUserReturn<DocType>[]
+  ? NormalizeUserReturn<ExtractArray<DocType>>[]
   : NormalizeUserReturn<DocType> | IfObject;
+
+export type ControllerTemplateOptions<T> = {
+  funcBeforeRes?: (data: Normalized<T>, req: Request, res: Response["res"]) => any;
+  funcInitiator?: (req: Request, res: Response["res"]) => any;
+};

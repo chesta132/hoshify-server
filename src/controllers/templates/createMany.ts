@@ -2,20 +2,14 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
 import { Model } from "mongoose";
-import { Normalized } from "@/types/types";
+import { ControllerTemplateOptions, NormalizedData } from "@/types/types";
 
-export const createMany = <T>(
-  model: Model<T>,
-  neededField: string[],
-  customValidation?: (body: any[], req: Request, res: Response["res"]) => any,
-  funcManipBody?: (body: any, req: Request, res: Response["res"]) => void,
-  funcBeforeRes?: (data: Normalized<T>[], body: any[], req: Request, res: Response["res"]) => any
-) => {
+export const createMany = <T>(model: Model<T>, neededField: string[], options?: ControllerTemplateOptions<T[]>) => {
   return async (req: Request, { res }: Response) => {
     try {
       const user = req.user!;
       const datas: any[] = req.body;
-      if (customValidation) await customValidation(datas, req, res);
+      if (options?.funcInitiator) await options.funcInitiator(req, res);
 
       const missingFields: string[] = [];
       const isValidField = datas.every((data) => {
@@ -34,11 +28,10 @@ export const createMany = <T>(
 
       datas.forEach((data) => {
         data.userId = user.id;
-        if (funcManipBody) funcManipBody(data, req, res);
       });
 
-      const createdDatas = (await model.create(datas)).map((data) => data.normalize());
-      if (funcBeforeRes) await funcBeforeRes(createdDatas, datas, req, res);
+      const createdDatas = (await model.create(datas)).map((data) => data.normalize()) as NormalizedData<T>[];
+      if (options?.funcBeforeRes) await options.funcBeforeRes(createdDatas, req, res);
 
       res
         .body({ success: createdDatas })

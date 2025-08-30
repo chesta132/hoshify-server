@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
-import { Normalized } from "@/types/types";
+import { ControllerTemplateOptions } from "@/types/types";
 import { ellipsis } from "@/utils/manipulate";
 
 export const restoreOne = <T extends { isRecycled: boolean; title: string; deleteAt: Date | null }>(
   model: Model<T>,
-  funcBeforeRes?: (data: Normalized<T>) => any
+  options?: ControllerTemplateOptions<T>
 ) => {
   return async (req: Request, { res }: Response) => {
     try {
       const { id } = req.params;
+      if (options?.funcInitiator) await options.funcInitiator(req, res);
       if (!isValidObjectId(id)) {
         res.tempClientType("Object ID").respond();
         return;
@@ -26,7 +27,7 @@ export const restoreOne = <T extends { isRecycled: boolean; title: string; delet
         res.tempNotRecycled(data.title).respond();
         return;
       }
-      if (funcBeforeRes) await funcBeforeRes(data);
+      if (options?.funcBeforeRes) await options.funcBeforeRes(data, req, res);
 
       res
         .body({ success: { ...data, isRecycled: false, deleteAt: null } })

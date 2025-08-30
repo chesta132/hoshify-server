@@ -1,17 +1,18 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
-import { Normalized } from "@/types/types";
+import { ControllerTemplateOptions, Normalized } from "@/types/types";
 import { getDeleteTTL } from "@/utils/database";
 import pluralize from "pluralize";
 
 export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(
   model: Model<T>,
-  funcBeforeRes?: (data: Normalized<T>[], body: any, req: Request, res: Response["res"]) => any
+  options?: ControllerTemplateOptions<T[]>
 ) => {
   return async (req: Request, { res }: Response) => {
     try {
       const { ids }: { ids?: string[] } = req.body;
+      if (options?.funcInitiator) await options.funcInitiator(req, res);
       if (!ids || ids.some((id) => !isValidObjectId(id))) {
         res.tempClientType("Object ID").respond();
         return;
@@ -27,7 +28,7 @@ export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date |
       await model.updateMany({ _id: { $in: ids } }, { isRecycled: true, deleteAt }, { runValidators: true });
 
       const updatedData = unUpdated.map((data) => ({ ...data.normalize(), isRecycled: true, deleteAt }));
-      if (funcBeforeRes) await funcBeforeRes(updatedData, req.body, req, res);
+      if (options?.funcBeforeRes) await options.funcBeforeRes(updatedData, req, res);
 
       res
         .body({ success: updatedData })

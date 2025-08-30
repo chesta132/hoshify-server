@@ -44,3 +44,5 @@ type IsArray<T, TrueType = T, FalseType = never> = [T] extends [any[]] ? TrueTyp
 
 /** IsArray but not strict. */
 type IncludeArray<T, TrueType = T, FalseType = never> = T extends any[] ? TrueType : FalseType;
+
+type ExtractArray<T> = T extends (infer U)[] ? U : T;

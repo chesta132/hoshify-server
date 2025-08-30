@@ -2,20 +2,14 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
 import { Model } from "mongoose";
-import { Normalized } from "@/types/types";
+import { ControllerTemplateOptions, Normalized, NormalizedData } from "@/types/types";
 import { omit } from "@/utils/manipulate";
 
-export const editMany = <T>(
-  model: Model<T>,
-  neededField: string[],
-  customValidation?: (body: any[], req: Request, res: Response["res"]) => any,
-  funcManipBody?: (body: any, req: Request, res: Response["res"]) => void,
-  funcBeforeRes?: (data: Normalized<T>[], body: any[], req: Request, res: Response["res"]) => any
-) => {
+export const editMany = <T>(model: Model<T>, neededField: string[], options?: ControllerTemplateOptions<T[]>) => {
   return async (req: Request, { res }: Response) => {
     try {
       const datas: any[] = req.body;
-      if (customValidation) await customValidation(datas, req, res);
+      if (options?.funcInitiator) await options.funcInitiator(req, res);
 
       const missingFields: string[] = [];
       const isValidField = datas.every((data) => {
@@ -32,9 +26,6 @@ export const editMany = <T>(
         return;
       }
 
-      datas.forEach((data) => {
-        if (funcManipBody) funcManipBody(data, req, res);
-      });
       const dataIds = datas.map((data) => data._id || data.id);
 
       await model.bulkWrite(
@@ -46,8 +37,8 @@ export const editMany = <T>(
         }))
       );
 
-      const updatedDatas = (await model.find({ _id: { $in: dataIds } })).map((data) => data.normalize());
-      if (funcBeforeRes) await funcBeforeRes(updatedDatas, datas, req, res);
+      const updatedDatas = (await model.find({ _id: { $in: dataIds } })).map((data) => data.normalize()) as NormalizedData<T>[];
+      if (options?.funcBeforeRes) await options.funcBeforeRes(updatedDatas, req, res);
 
       res
         .body({ success: updatedDatas })

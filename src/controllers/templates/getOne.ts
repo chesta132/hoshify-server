@@ -1,12 +1,9 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
-import { NormalizedData } from "@/types/types";
+import { ControllerTemplateOptions, Normalized } from "@/types/types";
 
-export const getOne = <T extends Record<string, any>>(
-  model: Model<T>,
-  funcBeforeRes?: (data: NormalizedData<T>, req: Request, res: Response["res"]) => any
-) => {
+export const getOne = <T extends Record<string, any>>(model: Model<T>, options?: Omit<ControllerTemplateOptions<T>, "funcInitiator">) => {
   return async (req: Request, { res }: Response) => {
     try {
       const { id } = req.params;
@@ -15,12 +12,12 @@ export const getOne = <T extends Record<string, any>>(
         return;
       }
 
-      const data = await model.findById(id).normalize();
+      const data = (await model.findById(id).normalize()) as Normalized<T>;
       if (!data) {
         res.tempNotFound(model.getName()).respond();
         return;
       }
-      if (funcBeforeRes) await funcBeforeRes(data, req, res);
+      if (options?.funcBeforeRes) await options.funcBeforeRes(data, req, res);
 
       res.body({ success: data }).respond();
     } catch (err) {

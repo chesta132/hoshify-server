@@ -1,16 +1,14 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
-import { Normalized } from "@/types/types";
+import { ControllerTemplateOptions, Normalized } from "@/types/types";
 import pluralize from "pluralize";
 
-export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(
-  model: Model<T>,
-  funcBeforeRes?: (data: Normalized<T>[], body: any, req: Request, res: Response["res"]) => any
-) => {
+export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(model: Model<T>, options?: ControllerTemplateOptions<T[]>) => {
   return async (req: Request, { res }: Response) => {
     try {
       const { ids }: { ids?: string[] } = req.body;
+      if (options?.funcInitiator) await options.funcInitiator(req, res);
       if (!ids || ids.some((id) => !isValidObjectId(id))) {
         res.tempClientType("Object ID").respond();
         return;
@@ -24,8 +22,8 @@ export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | nu
 
       await model.updateMany({ _id: { $in: ids } }, { isRecycled: false, deleteAt: null }, { runValidators: true });
 
-      const updatedData = unUpdated.map((data) => ({ ...data.normalize(), isRecycled: false, deleteAt: null }));
-      if (funcBeforeRes) await funcBeforeRes(updatedData, req.body, req, res);
+      const updatedData = unUpdated.map((data) => ({ ...data.normalize(), isRecycled: false, deleteAt: null })) as Normalized<T>[];
+      if (options?.funcBeforeRes) await options.funcBeforeRes(updatedData, req, res);
 
       res
         .body({ success: updatedData })

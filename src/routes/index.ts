@@ -18,7 +18,7 @@ router.use("/todos", todoRoutes);
 router.use("/transactions", tranRoutes);
 router.use("/schedules", scheduleRoutes);
 router.use("/links", linkRoutes);
-router.use("/moneys", moneyRoutes);
+router.use("/money", moneyRoutes);
 
 router.use(requireRole(["DEVELOPER", "OWNER"]));
 router.use("/dummys", dummyRoutes);
