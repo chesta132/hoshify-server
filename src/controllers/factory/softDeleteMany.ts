@@ -31,7 +31,7 @@ export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date |
 
       res
         .body({ success: updatedData })
-        .notif(`${updatedData.length} ${pluralize(model.getName(), updatedData.length)} deleted`)
+        .info(`${updatedData.length} ${pluralize(model.getName(), updatedData.length)} deleted`)
         .respond();
     } catch (err) {
       handleError(err, res);

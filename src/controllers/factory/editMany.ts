@@ -60,7 +60,7 @@ export const editMany = <T>(model: Model<T>, neededField?: string[], options?: C
 
       res
         .body({ success: updatedDatas })
-        .notif(`${updatedDatas.length} ${pluralize(model.getName(), updatedDatas.length)} updated`)
+        .info(`${updatedDatas.length} ${pluralize(model.getName(), updatedDatas.length)} updated`)
         .created();
     } catch (err) {
       handleError(err, res);

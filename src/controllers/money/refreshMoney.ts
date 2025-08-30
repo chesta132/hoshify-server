@@ -35,9 +35,11 @@ export const refreshMoney = async (req: Request, { res }: Response) => {
         break;
     }
 
-    const newMoney = await Money.findByIdAndUpdate(oldMoney.id, { [toUpdate[0]]: toUpdate[1] }, { new: true, runValidators: true }).normalizeCurrency(user.currency);
+    const newMoney = await Money.findByIdAndUpdate(oldMoney.id, { [toUpdate[0]]: toUpdate[1] }, { new: true, runValidators: true }).normalizeCurrency(
+      user.currency
+    );
 
-    res.body({ success: newMoney }).notif("money management refreshed").respond();
+    res.body({ success: newMoney }).info("money management refreshed").respond();
   } catch (err) {
     handleError(err, res);
   }

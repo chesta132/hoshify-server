@@ -95,8 +95,8 @@ export interface DataToResponse<T> {
     hasNext?: boolean;
     /** Next offset for pagination */
     nextOffset?: number | null;
-    /** Optional notification message */
-    notification?: string;
+    /** Optional information message */
+    information?: string;
   };
   /** Response payload data */
   data: T;
@@ -228,20 +228,20 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
-   * Add a notification message to the response metadata.
+   * Add a information message to the response metadata.
    *
    * @example
    * ```ts
-   * res.notif("Profile updated successfully")
+   * res.info("Profile updated successfully")
    *    .body({ success: user })
    *    .ok();
    * ```
    *
-   * @param notification Notification message
+   * @param information Information message
    * @returns this
    */
-  notif(notification: string) {
-    this._jsonBody.meta.notification = notification;
+  info(information: string) {
+    this._jsonBody.meta.information = information;
     return this;
   }
 
@@ -350,7 +350,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    *
    * @example
    * ```ts
-   * res.notif("User has been updated").body({ success: updatedUser }).respond();
+   * res.info("User has been updated").body({ success: updatedUser }).respond();
    * res.body({ error: formattedError }).respond();
    * ```
    *
@@ -372,7 +372,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    *
    * @example
    * ```ts
-   * res.notif("Fetched user data").body({ success: user }).ok();
+   * res.info("Fetched user data").body({ success: user }).ok();
    * ```
    *
    * @returns this

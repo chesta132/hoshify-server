@@ -24,7 +24,7 @@ export const editUser = async (req: Request, { res }: Response) => {
       res.tempNotFound("user").respond();
       return;
     }
-    res.notif("Your profile successfully updated").body({ success: updatedUser }).ok();
+    res.info("Your profile successfully updated").body({ success: updatedUser }).ok();
   } catch (err) {
     handleError(err, res);
   }

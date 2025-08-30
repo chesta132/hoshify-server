@@ -43,7 +43,7 @@ export const resetPassword = async (req: Request, { res }: Response) => {
     await Verify.deleteOne({ value: token, type: "RESET_PASSWORD_OTP", userId: user.id });
     await sendCredentialChanges(user.email, user.fullName);
 
-    res.body({ success: updatedUser }).notif("Successfully reset and update new password").ok();
+    res.body({ success: updatedUser }).info("Successfully reset and update new password").ok();
   } catch (err) {
     handleError(err, res);
   }

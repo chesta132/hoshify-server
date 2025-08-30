@@ -17,7 +17,7 @@ export const createOne = <T>(model: Model<T>, neededField: string[], options?: C
       if (options?.funcBeforeRes) await options.funcBeforeRes(data, req, res);
       res
         .body({ success: data })
-        .notif(`${ellipsis((data as any).title || model.getName(), 30)} added`)
+        .info(`${ellipsis((data as any).title || model.getName(), 30)} added`)
         .created();
     } catch (err) {
       handleError(err, res);

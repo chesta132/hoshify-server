@@ -10,7 +10,7 @@ export const deleteDummy = async <T extends { dummy: boolean }>(model: Model<T>,
 
     res
       .body({ success: dummys })
-      .notif(`${dummys.deletedCount} ${name} ${dummys.deletedCount === 1 ? "dummy" : "dummys"} deleted`)
+      .info(`${dummys.deletedCount} ${name} ${dummys.deletedCount === 1 ? "dummy" : "dummys"} deleted`)
       .respond();
   } catch (err) {
     handleError(err, res);

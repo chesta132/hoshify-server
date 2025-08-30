@@ -30,7 +30,7 @@ export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | nu
 
       res
         .body({ success: updatedData })
-        .notif(`${updatedData.length} ${pluralize(model.getName(), updatedData.length)} deleted`)
+        .info(`${updatedData.length} ${pluralize(model.getName(), updatedData.length)} deleted`)
         .respond();
     } catch (err) {
       handleError(err, res);

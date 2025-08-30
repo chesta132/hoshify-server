@@ -30,7 +30,7 @@ export const editOne = <T>(model: Model<T>, neededField?: string[], options?: Co
 
       res
         .body({ success: data })
-        .notif(`${(data as any).title || model.getName()}`)
+        .info(`${(data as any).title || model.getName()}`)
         .respond();
     } catch (err) {
       handleError(err, res);

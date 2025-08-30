@@ -33,7 +33,7 @@ export const softDeleteOne = <T extends { isRecycled: boolean; title: string; de
 
       res
         .body({ success: { ...data, isRecycled: true, deleteAt } })
-        .notif(`${ellipsis(data.title, 30)} deleted`)
+        .info(`${ellipsis(data.title, 30)} deleted`)
         .respond();
     } catch (err) {
       handleError(err, res);

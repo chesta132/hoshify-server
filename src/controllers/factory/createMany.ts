@@ -23,7 +23,7 @@ export const createMany = <T>(model: Model<T>, neededField: string[], options?: 
 
       res
         .body({ success: createdDatas })
-        .notif(`${createdDatas.length} ${pluralize(model.getName(), createdDatas.length)} added`)
+        .info(`${createdDatas.length} ${pluralize(model.getName(), createdDatas.length)} added`)
         .created();
     } catch (err) {
       handleError(err, res);

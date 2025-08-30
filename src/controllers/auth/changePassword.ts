@@ -32,7 +32,7 @@ export const changePassword = async (req: Request, { res }: Response) => {
       return;
     }
     await sendCredentialChanges(user.email, user.fullName);
-    res.body({ success: updatedUser }).notif("Successfully update new password").ok();
+    res.body({ success: updatedUser }).info("Successfully update new password").ok();
   } catch (err) {
     handleError(err, res);
   }

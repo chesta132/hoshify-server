@@ -24,7 +24,7 @@ export const bindLocal = async (req: Request, { res }: Response) => {
       },
       { projection: userProject() }
     ).normalize();
-    res.notif("Successfully link to local account").body({ success: updatedUser }).ok();
+    res.info("Successfully link to local account").body({ success: updatedUser }).ok();
   } catch (err) {
     handleError(err, res);
   }

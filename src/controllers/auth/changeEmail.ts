@@ -48,7 +48,7 @@ export const changeEmail = async (req: Request, { res }: Response) => {
     if (!user.verified) {
       const updatedUser = await updateEmail();
       await sendCredentialChanges(user.email, user.fullName, "email");
-      res.body({ success: updatedUser }).notif("Local email successfully updated").ok();
+      res.body({ success: updatedUser }).info("Local email successfully updated").ok();
       return;
     }
 
@@ -67,7 +67,7 @@ export const changeEmail = async (req: Request, { res }: Response) => {
     await Verify.deleteOne({ value: token, type: "CHANGE_EMAIL_OTP", userId: user.id });
     await sendCredentialChanges(user.email, user.fullName, "email");
 
-    res.body({ success: updatedUser }).notif("Local email successfully updated").ok();
+    res.body({ success: updatedUser }).info("Local email successfully updated").ok();
   } catch (err) {
     handleError(err, res);
   }

@@ -7,7 +7,7 @@ export const createMoney = async (req: Request, { res }: Response) => {
     const user = req.user!;
     const money = (await Money.create({ userId: user.id })).normalizeCurrency(user.currency);
 
-    res.body({ success: money }).notif("Money management created").respond();
+    res.body({ success: money }).info("Money management created").respond();
   } catch (err) {
     if ((err as any)?.code === 11000) {
       res.tempClientType("money management is already created").respond();

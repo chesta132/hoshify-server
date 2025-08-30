@@ -32,7 +32,7 @@ export const createDummy = async <T extends { dummy: boolean }>(model: Model<T>,
 
     res
       .body({ success: dummys })
-      .notif(`${length} ${name} ${pluralize("dummy", dummys?.length)} added`)
+      .info(`${length} ${name} ${pluralize("dummy", dummys?.length)} added`)
       .respond();
   } catch (err) {
     handleError(err, res);

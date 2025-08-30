@@ -31,7 +31,7 @@ export const restoreOne = <T extends { isRecycled: boolean; title: string; delet
 
       res
         .body({ success: { ...data, isRecycled: false, deleteAt: null } })
-        .notif(`${ellipsis(data.title, 30)} restored`)
+        .info(`${ellipsis(data.title, 30)} restored`)
         .respond();
     } catch (err) {
       handleError(err, res);
