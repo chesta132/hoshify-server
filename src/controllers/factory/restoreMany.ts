@@ -13,13 +13,17 @@ export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | nu
 
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
-      const unUpdated = await model.find({ _id: { $in: ids } });
+      const unUpdated = await model.find({ _id: { $in: ids }, userId: req.user!.id, isRecycled: true });
       if (unUpdated.some((data) => data.isRecycled)) {
         res.tempNotFound(model.getName()).respond();
         return;
       }
 
-      await model.updateMany({ _id: { $in: ids } }, { isRecycled: false, deleteAt: null }, { runValidators: true });
+      await model.updateMany(
+        { _id: { $in: ids }, userId: req.user!.id, isRecycled: true },
+        { isRecycled: false, deleteAt: null },
+        { runValidators: true }
+      );
 
       const updatedData = unUpdated.map((data) => ({ ...data.normalize(), isRecycled: false, deleteAt: null })) as Normalized<T>[];
       if (options?.funcBeforeRes) await options.funcBeforeRes(updatedData, req, res);

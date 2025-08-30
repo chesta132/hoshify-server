@@ -7,7 +7,7 @@ export const polyBody = (fObject: (req: Request, res: Response) => any, fArray: 
       const body = req.body;
       if (Array.isArray(body)) return await fArray(req, res);
       else if (typeof body === "object") return await fObject(req, res);
-      res.res.tempClientType("Invalid body. Body is not array or object").respond();
+      res.res.tempClientType("body", "Body is not array or object").respond();
     } catch (err) {
       handleError(err, res.res);
     }

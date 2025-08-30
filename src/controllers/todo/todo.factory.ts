@@ -8,6 +8,7 @@ import { softDeleteMany } from "../factory/softDeleteMany";
 import { softDeleteOne } from "../factory/softDeleteOne";
 import { editMany } from "../factory/editMany";
 import { createOne } from "../factory/createOne";
+import { editOne } from "../factory/editOne";
 
 export const createTodos = createMany(Todo, ["title", "details", "dueDate"]);
 
@@ -23,6 +24,8 @@ export const deleteTodo = softDeleteOne(Todo);
 
 export const deleteTodos = softDeleteMany(Todo);
 
-export const editTodos = editMany(Todo, []);
+export const editTodos = editMany(Todo);
 
 export const createTodo = createOne(Todo, ["title", "details", "dueDate"]);
+
+export const editTodo = editOne(Todo);

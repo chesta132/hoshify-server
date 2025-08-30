@@ -4,7 +4,6 @@ import {
   createTrans,
   deleteTran,
   deleteTrans,
-  editTrans,
   getTran,
   getTrans,
   restoreTran,
@@ -19,7 +18,6 @@ tranRoutes.post("/", polyBody(createTran, createTrans));
 tranRoutes.get("/", getTrans);
 tranRoutes.get("/:id", getTran);
 tranRoutes.put("/:id", editTran);
-tranRoutes.put("/", editTrans);
 tranRoutes.delete("/", deleteTrans);
 tranRoutes.delete("/:id", deleteTran);
 tranRoutes.patch("/restores/", restoreTrans);

@@ -18,7 +18,7 @@ export const softDeleteOne = <T extends { isRecycled: boolean; title: string; de
         return;
       }
 
-      const data = (await model.softDeleteById(id))?.normalize();
+      const data = (await model.softDeleteOne({ _id: id, userId: req.user!.id, isRecycled: false }))?.normalize();
       const deleteAt = getDeleteTTL();
       if (!data) {
         res.tempNotFound(model.getName()).respond();

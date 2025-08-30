@@ -487,7 +487,12 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    */
   tempClientType(field: string, details?: string, restErr?: RestError) {
     const body = this.body({
-      error: { ...restErr, code: "INVALID_CLIENT_TYPE", message: `Invalid ${field} type. ${details || ""}`.trim(), title: "Invalid Type" },
+      error: {
+        ...restErr,
+        code: "INVALID_CLIENT_TYPE",
+        message: `Invalid ${field} type. ${capital(details || "")}`.trim(),
+        title: "Invalid Type",
+      },
     });
     return body;
   }

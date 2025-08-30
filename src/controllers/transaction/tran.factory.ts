@@ -1,7 +1,6 @@
 import { Transaction, transactionType } from "@/models/Transaction";
 import { updateMoney, updateMoneyMany } from "@/models/Money";
 import { createMany } from "../factory/createMany";
-import { editMany } from "../factory/editMany";
 import { getMany } from "../factory/getMany";
 import { getOne } from "../factory/getOne";
 import { restoreOne } from "../factory/restoreOne";
@@ -26,24 +25,12 @@ export const createTrans = createMany(Transaction, ["type", "title", "amount"], 
       return "stop";
     }
     body.forEach((data) => {
-      isLowerThanZero(data);
+      const { amount, type } = data;
+      if (amount !== 0 && type) isLowerThanZero(data);
     });
   },
   async funcBeforeRes(data) {
     await updateMoneyMany(data, data[0].userId.toString());
-  },
-});
-
-export const editTrans = editMany(Transaction, [], {
-  funcInitiator(req) {
-    (req.body as any[]).forEach((data) => {
-      isLowerThanZero(data);
-    });
-  },
-  async funcBeforeRes(datas, req) {
-    const body = req.body as any[];
-    const normalizedBody = datas.map((data) => ({ ...data, ...body.find((d) => d.id === data.id || d._id === data.id) }));
-    await updateMoneyMany(normalizedBody, req.user!.id);
   },
 });
 
@@ -71,18 +58,18 @@ export const deleteTran = softDeleteOne(Transaction, {
 
 export const deleteTrans = softDeleteMany(Transaction, {
   async funcBeforeRes(data) {
-    await updateMoneyMany(data, data[0].userId.toString(), true);
+    if (data[0]) await updateMoneyMany(data, data[0].userId.toString(), true);
   },
 });
 
 export const createTran = createOne(Transaction, ["title", "type", "amount"], {
   funcInitiator(req, res) {
-    const { type } = req.body;
+    const { type, amount } = req.body;
     if (!transactionType.includes(type)) {
       res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
       return "stop";
     }
-    isLowerThanZero(req.body);
+    if (amount !== 0 && type) isLowerThanZero(req.body);
   },
   async funcBeforeRes(data) {
     await updateMoney(data);

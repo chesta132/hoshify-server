@@ -184,3 +184,5 @@ export const validateRequires = (neededField: string[], from: any, res: Response
   }
   return true;
 };
+
+export const unEditableField = ["userId", "id", "_id", "deleteAt", "isRecycled", "__v", "dummy"];

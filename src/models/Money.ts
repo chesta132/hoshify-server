@@ -49,17 +49,22 @@ export const updateMoneyMany = async (transactions: Omit<UpdateMoneyProps, "reve
       if (reverse) {
         toUpdate.income -= data.amount;
         toUpdate.total -= data.amount;
-      } else toUpdate.income += data.amount;
-      toUpdate.total += data.amount;
+      } else {
+        toUpdate.income += data.amount;
+        toUpdate.total += data.amount;
+      }
     });
+
   transactions
-    .filter((data) => data.type === "INCOME")
+    .filter((data) => data.type === "OUTCOME")
     .forEach((data) => {
       if (reverse) {
         toUpdate.outcome -= data.amount;
         toUpdate.total += data.amount;
-      } else toUpdate.outcome += data.amount;
-      toUpdate.total -= data.amount;
+      } else {
+        toUpdate.outcome += data.amount;
+        toUpdate.total -= data.amount;
+      }
     });
 
   await Money.updateOne({ userId }, { $inc: toUpdate });

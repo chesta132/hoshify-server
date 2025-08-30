@@ -1,9 +1,9 @@
-import { editSchedule } from "@/controllers/schedule/editSchedule";
 import {
   createSchedule,
   createSchedules,
   deleteSchedule,
   deleteSchedules,
+  editSchedule,
   editSchedules,
   getSchedule,
   getSchedules,

@@ -12,7 +12,7 @@ export const getOne = <T extends Record<string, any>>(model: Model<T>, options?:
         return;
       }
 
-      const data = (await model.findById(id).normalize()) as Normalized<T>;
+      const data = (await model.findOne({ _id: id, userId: req.user!.id }).normalize()) as Normalized<T>;
       if (!data) {
         res.tempNotFound(model.getName()).respond();
         return;

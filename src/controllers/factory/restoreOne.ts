@@ -17,7 +17,7 @@ export const restoreOne = <T extends { isRecycled: boolean; title: string; delet
         return;
       }
 
-      const data = (await model.restoreById(id))?.normalize();
+      const data = (await model.restoreOne({ _id: id, userId: req.user!.id, isRecycled: true }))?.normalize();
       if (!data) {
         res.tempNotFound(model.getName()).respond();
         return;
