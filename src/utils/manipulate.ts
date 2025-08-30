@@ -65,23 +65,24 @@ export const ellipsis = (string: string, max: number) => {
  * Capitalizes the first letter of a word in a string.
  *
  * @param string - Original string.
- * @param scissors - The word or index to capitalize. If not provided, the first word of the string will be capitalized.
  * @returns The string with the specified word capitalized.
  */
-export const capital = (string: string, scissors?: string | number) => {
-  let scissorsIndex: number | undefined;
-  if (typeof scissors === "string") {
-    const indexof = string.indexOf(scissors);
-    if (indexof !== -1) scissorsIndex = indexof;
-  } else if (typeof scissors === "number") scissorsIndex = scissors;
-
-  const sliceString = string.slice(scissorsIndex ?? 0);
-  const sliceStringEarly = string.slice(0, scissorsIndex ?? 0);
-  const restOfWord = string.slice(scissorsIndex ? scissorsIndex + 1 : 1);
+export const capital = (string: string) => {
+  const sliceString = string.slice(0);
+  const restOfWord = string.slice(1);
 
   const firstLetter = sliceString.charAt(0).toUpperCase();
 
-  const resultString = sliceStringEarly + firstLetter + restOfWord;
+  let resultString = firstLetter + restOfWord;
+
+  const nextDot = resultString.indexOf(".");
+  if (nextDot !== -1) {
+    const sliced = resultString.slice(nextDot + 1);
+    const trimmed = sliced.trimStart();
+    const spacesDeleted = sliced.length - trimmed.length;
+    const deletedSpaces = spacesDeleted === 0 ? "" : " ".repeat(spacesDeleted);
+    resultString = resultString.slice(0, nextDot + 1) + deletedSpaces + capital(trimmed);
+  }
 
   return resultString;
 };
@@ -94,35 +95,34 @@ export const capital = (string: string, scissors?: string | number) => {
  * @param end - The end to split words.
  * @returns The string with the specified word capitalized.
  */
-export const capitalEach = (string: string, start?: string | number, end?: string | number) => {
-  let firstUn = "";
-  let lastUn = "";
+export const capitalEach = (str: string, start?: string | number, end?: string | number) => {
+  let startIndex = 0;
+  let endIndex = str.length;
 
-  switch (typeof start) {
-    case "string":
-      firstUn = string.slice(0, string.indexOf(start));
-      break;
-    case "number":
-      firstUn = string.slice(0, start);
-      break;
+  if (typeof start === "string") {
+    const idx = str.indexOf(start);
+    if (idx !== -1) startIndex = idx;
+  } else if (typeof start === "number") {
+    startIndex = start;
   }
 
-  switch (typeof end) {
-    case "string":
-      lastUn = string.slice(string.indexOf(end));
-      break;
-    case "number":
-      lastUn = string.slice(end);
-      break;
+  if (typeof end === "string") {
+    const idx = str.indexOf(end);
+    if (idx !== -1) endIndex = idx;
+  } else if (typeof end === "number") {
+    endIndex = end;
   }
 
-  const capitalized = string
-    .slice(firstUn.length, string.length - lastUn.length)
+  const prefix = str.slice(0, startIndex);
+  const suffix = str.slice(endIndex);
+
+  const capitalized = str
+    .slice(startIndex, endIndex)
     .split(" ")
-    .map((letter) => letter[0] && letter[0].toUpperCase() + letter.slice(1));
+    .map((word) => (word[0] ? word[0].toUpperCase() + word.slice(1) : ""))
+    .join(" ");
 
-  const resultString = firstUn + capitalized.join(" ") + lastUn;
-  return resultString;
+  return prefix + capitalized + suffix;
 };
 
 type FormatDateOptions = { includeThisYear?: boolean; includeHour?: boolean };
