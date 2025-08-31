@@ -1,45 +1,12 @@
 import { NODE_ENV } from "@/app";
 import { OneFieldOnly } from "@/types/types";
-import { normalizeCurrency, normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
+import { normalizeQuery } from "@/utils/manipulate/normalize";
 import { randomDate, randomNumber } from "@/utils/random";
 import { oneWeeks } from "@/utils/token";
-import { Document, Model, ObjectId, Query, QueryOptions, RootFilterQuery, UpdateQuery, Schema, CreateOptions, isValidObjectId } from "mongoose";
+import { Model, ObjectId, QueryOptions, RootFilterQuery, UpdateQuery, Schema, CreateOptions, isValidObjectId } from "mongoose";
 
 export const getDeleteTTL = () => new Date(Date.now() + oneWeeks);
-
-Document.prototype.normalize = function () {
-  return normalizeQuery(this);
-};
-
-Document.prototype.normalizeUser = function () {
-  return normalizeUserQuery(this);
-};
-
-Document.prototype.normalizeCurrency = function (currency) {
-  return normalizeCurrency(this as any, currency);
-};
-
-Query.prototype.normalize = async function () {
-  const query = await this.exec();
-  if (!query) return null;
-  return normalizeQuery(query);
-};
-
-Query.prototype.normalizeUser = async function () {
-  const query = await this.exec();
-  if (!query) return null;
-  return normalizeUserQuery(query);
-};
-
-Query.prototype.normalizeCurrency = async function (currency) {
-  const query = await this.exec();
-  if (!query) return null;
-  return normalizeCurrency(query, currency);
-};
-
-Model.getName = function () {
-  return this.collection.name.slice(0, -1).toLowerCase();
-};
+export const unEditableField = ["userId", "id", "_id", "deleteAt", "isRecycled", "__v", "dummy"];
 
 export function restoreById<T>(
   this: Model<T>,
@@ -144,4 +111,13 @@ export const dummyPlugin = (schema: Schema) => {
   });
 };
 
-export const unEditableField = ["userId", "id", "_id", "deleteAt", "isRecycled", "__v", "dummy"];
+export const virtualSchema = (schema: Schema) => {
+  schema.virtual("id").get(function () {
+    return (this._id as string).toString();
+  });
+  schema.set("toObject", { virtuals: true });
+  schema.set("toJSON", { virtuals: true });
+  schema.statics.getName = function () {
+    return this.collection.name.slice(0, -1).toLowerCase();
+  };
+};

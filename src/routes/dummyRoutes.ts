@@ -8,9 +8,9 @@ import { Router } from "express";
 
 export const dummyRoutes = Router();
 
-const supportDummy = [Note, Todo, Schedule, Transaction] as const;
+const supportDummy = [Note, Todo, Schedule, Transaction];
 
 supportDummy.forEach((model) => {
-  dummyRoutes.post(`/${model.getName()}`, (req, res) => createDummy(model as any, req, res));
-  dummyRoutes.delete(`/${model.getName()}`, (req, res) => deleteDummy(model as any, req, res));
+  dummyRoutes.post(`/${model.getName()}`, createDummy(model as any));
+  dummyRoutes.delete(`/${model.getName()}`, deleteDummy(model as any));
 });

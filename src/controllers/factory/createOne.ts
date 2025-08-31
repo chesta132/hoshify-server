@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
-import { ellipsis } from "@/utils/manipulate";
+import { ellipsis } from "@/utils/manipulate/string";
 import { Model } from "mongoose";
 import { ControllerTemplateOptions } from "@/types/types";
 import { validateRequires } from "@/utils/validate";

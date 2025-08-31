@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import { omit } from "./manipulate";
-import { Normalized, NormalizedData, RequireAtLeastOne } from "../types/types";
-import { IUser, USER_CRED, UserCred } from "../models/User";
-import { currencyFields, CurrencyFields, formatCurrency, ModifiedCurrency } from "./money";
+import { omit } from "./object";
+import { Normalized, NormalizedData, RequireAtLeastOne } from "@/types/types";
+import { IUser, USER_CRED, UserCred } from "@/models/User";
+import { currencyFields, CurrencyFields, formatCurrency, ModifiedCurrency } from "../money";
 
 const shouldProcess = (data: any): boolean => {
   return data?._id || Array.isArray(data);
@@ -93,8 +93,6 @@ export const userProject = () => {
   USER_CRED.forEach((field) => (def[field] = false));
   return def;
 };
-
-
 
 type NormalizeCurrecyData = RequireAtLeastOne<Record<CurrencyFields, number>>;
 export const normalizeCurrency = <T extends NormalizeCurrecyData | NormalizeCurrecyData[]>(

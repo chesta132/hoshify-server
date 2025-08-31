@@ -1,7 +1,7 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
 import { ITransaction } from "./Transaction";
+import { virtualSchema } from "@/utils/database/plugin";
 
 export interface IMoney {
   _id: ObjectId;

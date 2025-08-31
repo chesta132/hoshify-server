@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Model } from "mongoose";
 import { ControllerTemplateOptions } from "@/types/types";
-import { getDeleteTTL } from "@/utils/database";
+import { getDeleteTTL } from "@/utils/database/plugin";
 import pluralize from "pluralize";
 import { validateIds } from "@/utils/validate";
 

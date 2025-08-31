@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
-import { normalizeCurrency, normalizeUserQuery } from "../../utils/normalizeQuery";
+import { normalizeCurrency, normalizeUserQuery } from "../../utils/manipulate/normalize";
 import { buildUserPopulate, BuildUserPopulateProps, PopulatedUser, User } from "../../models/User";
 import { Normalized } from "@/types/types";
 

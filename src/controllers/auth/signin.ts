@@ -2,7 +2,7 @@ import { Response, Request, NextFunction } from "express";
 import passport from "passport";
 import { ErrorResponseType } from "../../class/Response";
 import handleError from "../../utils/handleError";
-import { normalizeUserQuery } from "../../utils/normalizeQuery";
+import { normalizeUserQuery } from "../../utils/manipulate/normalize";
 import { IUser } from "../../models/User";
 import { NormalizedData } from "../../types/types";
 

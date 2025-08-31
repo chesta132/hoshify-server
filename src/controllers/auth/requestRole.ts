@@ -3,9 +3,9 @@ import handleError from "@/utils/handleError";
 import { User, UserRole, userRole } from "@/models/User";
 import { Verify } from "@/models/Verify";
 import { encrypt } from "@/utils/crypto";
-import { sendRequestRole } from "@/utils/email";
+import { sendRequestRole } from "@/utils/email/send";
 import { oneMin } from "@/utils/token";
-import { userProject } from "@/utils/normalizeQuery";
+import { userProject } from "@/utils/manipulate/normalize";
 
 export const requestRole = async (req: Request, { res }: Response) => {
   try {

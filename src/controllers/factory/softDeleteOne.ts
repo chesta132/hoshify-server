@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
 import { ControllerTemplateOptions } from "@/types/types";
-import { ellipsis } from "@/utils/manipulate";
-import { getDeleteTTL } from "@/utils/database";
+import { ellipsis } from "@/utils/manipulate/string";
+import { getDeleteTTL } from "@/utils/database/plugin";
 
 export const softDeleteOne = <T extends { isRecycled: boolean; title: string; deleteAt: Date | null }>(
   model: Model<T>,

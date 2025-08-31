@@ -8,7 +8,7 @@ import { restoreMany } from "../factory/restoreMany";
 import { softDeleteOne } from "../factory/softDeleteOne";
 import { softDeleteMany } from "../factory/softDeleteMany";
 import { createOne } from "../factory/createOne";
-import { normalizeCurrency } from "@/utils/normalizeQuery";
+import { normalizeCurrency } from "@/utils/manipulate/normalize";
 import { Normalized } from "@/types/types";
 import { Request } from "express";
 

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import handleError from "../../utils/handleError";
-import { userProject } from "../../utils/normalizeQuery";
+import { userProject } from "../../utils/manipulate/normalize";
 import bcrypt from "bcrypt";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";

@@ -11,8 +11,8 @@ import {
 } from "../utils/token";
 import { USER_CRED, UserRole } from "@/models/User";
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "@/app";
-import { normalizeCurrency, normalizeQuery, normalizeUserQuery } from "@/utils/normalizeQuery";
-import { capital } from "@/utils/manipulate";
+import { normalizeCurrency, normalizeQuery, normalizeUserQuery } from "@/utils/manipulate/normalize";
+import { capital } from "@/utils/manipulate/string";
 import { currencyFields } from "@/utils/money";
 
 /**
@@ -67,7 +67,7 @@ export interface ErrorResponseType {
   status?: number;
 }
 
-interface RestError extends Omit<ErrorResponseType, "title" | "message" | "code"> {}
+export interface RestError extends Omit<ErrorResponseType, "title" | "message" | "code"> {}
 
 const statusAlias: {
   code: CodeError[];
@@ -592,8 +592,10 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    * @param role Role to access
    * @returns typeof .body({ error })
    */
-  tempInvalidRole(role: string) {
-    const body = this.body({ error: { code: "INVALID_ROLE", message: `${capital(role.toLowerCase())} role needed`, title: "Invalid Role" } });
+  tempInvalidRole(role: string, restErr?: RestError) {
+    const body = this.body({
+      error: { ...restErr, code: "INVALID_ROLE", message: `${capital(role.toLowerCase())} role needed`, title: "Invalid Role" },
+    });
     return body;
   }
 

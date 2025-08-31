@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
-import { normalizeUserQuery } from "../../utils/normalizeQuery";
+import { normalizeUserQuery } from "../../utils/manipulate/normalize";
 
 export const getUser = async (req: Request, { res }: Response) => {
   try {

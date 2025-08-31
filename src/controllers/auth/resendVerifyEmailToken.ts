@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import handleError from "../../utils/handleError";
-import { sendVerificationEmail } from "../../utils/email";
+import { sendVerificationEmail } from "../../utils/email/send";
 import { encrypt } from "../../utils/crypto";
 import { fiveMin, oneMin } from "../../utils/token";
 import { Verify } from "../../models/Verify";
 import { User } from "../../models/User";
-import { userProject } from "../../utils/normalizeQuery";
+import { userProject } from "../../utils/manipulate/normalize";
 
 export const sendVerifyEmail = async (user: Express.User) => {
   const token = encrypt(`verify_${user.id}`);

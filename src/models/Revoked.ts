@@ -1,6 +1,6 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
+import { virtualSchema } from "@/utils/database/plugin";
 
 const Revoke = ["TOKEN", "OTP"] as const;
 

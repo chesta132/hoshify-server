@@ -1,5 +1,5 @@
 import { Schema, SchemaOptions, model, ObjectId, PopulateOptions } from "mongoose";
-import { virtualSchema } from "../utils/manipulate";
+import { virtualSchema } from "../utils/database/plugin";
 import { ITodo } from "./Todo";
 import { INote } from "./Note";
 import { ITransaction } from "./Transaction";

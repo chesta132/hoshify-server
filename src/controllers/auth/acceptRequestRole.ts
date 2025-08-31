@@ -3,8 +3,8 @@ import handleError from "@/utils/handleError";
 import { Verify } from "@/models/Verify";
 import { decrypt } from "@/utils/crypto";
 import { User, UserRole } from "@/models/User";
-import { normalizeUserQuery, userProject } from "@/utils/normalizeQuery";
-import { sendRoleGranted } from "@/utils/email";
+import { normalizeUserQuery, userProject } from "@/utils/manipulate/normalize";
+import { sendRoleGranted } from "@/utils/email/send";
 
 export const acceptRequestRole = async (req: Request, { res }: Response) => {
   try {

@@ -1,4 +1,4 @@
-import { generateDummy, restoreById, restoreOne, softDeleteById, softDeleteOne } from "@/utils/database";
+import { generateDummy, restoreById, restoreOne, softDeleteById, softDeleteOne } from "@/utils/database/plugin";
 import { Respond } from "../class/Response";
 import { IUser, UserCred, UserRole } from "../models/User";
 import { Normalized, NormalizedData, NormalizedUser } from "./types";

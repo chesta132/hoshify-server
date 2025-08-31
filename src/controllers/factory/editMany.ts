@@ -3,8 +3,8 @@ import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
 import { isValidObjectId, Model } from "mongoose";
 import { ControllerTemplateOptions, NormalizedData } from "@/types/types";
-import { omit } from "@/utils/manipulate";
-import { unEditableField } from "@/utils/database";
+import { omit } from "@/utils/manipulate/object";
+import { unEditableField } from "@/utils/database/plugin";
 
 export const editMany = <T>(model: Model<T>, neededField?: string[], options?: ControllerTemplateOptions<T[]>) => {
   return async (req: Request, { res }: Response) => {

@@ -1,7 +1,6 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { virtualSchema } from "../utils/manipulate";
 import { schemaOptions } from "./User";
-import { dummyPlugin, softDeletePlugin } from "@/utils/database";
+import { dummyPlugin, softDeletePlugin, virtualSchema } from "@/utils/database/plugin";
 
 export interface ISchedule {
   _id: ObjectId;

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import handleError from "../../utils/handleError";
-import { userProject } from "../../utils/normalizeQuery";
-import { sendCredentialChanges } from "../../utils/email";
+import { userProject } from "../../utils/manipulate/normalize";
+import { sendCredentialChanges } from "../../utils/email/send";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
 

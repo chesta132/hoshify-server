@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import handleError from "../../utils/handleError";
-import { generateOTP, sendOTPEmail } from "../../utils/email";
+import { generateOTP, sendOTPEmail } from "../../utils/email/send";
 import { oneMin } from "../../utils/token";
 import { IVerify, Verify } from "../../models/Verify";
 import { User } from "../../models/User";
-import { userProject } from "../../utils/normalizeQuery";
+import { userProject } from "../../utils/manipulate/normalize";
 
 type TypeOTP = "CHANGE_EMAIL" | "CHANGE_PASSWORD" | "DELETE_ACCOUNT";
 

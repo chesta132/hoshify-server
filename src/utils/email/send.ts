@@ -1,8 +1,8 @@
 import nodemailer from "nodemailer";
-import { CLIENT_URL } from "../app";
+import { CLIENT_URL } from "@/app";
 import { emailTemplate } from "./emailTemplate";
 import { UserRole } from "@/models/User";
-import { capital, capitalEach } from "./manipulate";
+import { capital, capitalEach } from "../manipulate/string";
 
 export const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",

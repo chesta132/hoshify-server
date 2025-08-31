@@ -1,5 +1,5 @@
-import { HOSHIFY_ICON } from "../app";
-import { capitalEach } from "./manipulate";
+import { HOSHIFY_ICON } from "@/app";
+import { capitalEach } from "../manipulate/string";
 
 export function emailTemplate(props: {
   title: string;

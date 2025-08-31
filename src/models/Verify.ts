@@ -1,5 +1,5 @@
 import { ObjectId, Schema, model } from "mongoose";
-import { virtualSchema } from "../utils/manipulate";
+import { virtualSchema } from "../utils/database/plugin";
 import { schemaOptions } from "./User";
 
 const VerifyType = ["CHANGE_EMAIL_OTP", "RESET_PASSWORD_OTP", "DELETE_ACCOUNT_OTP", "VERIFY_EMAIL", "REQUEST_ROLE"] as const;
