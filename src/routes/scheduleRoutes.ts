@@ -9,7 +9,7 @@ import {
   getSchedules,
   restoreSchedule,
   restoreSchedules,
-} from "@/controllers/schedule/schedule.factory";
+} from "@/controllers/schedule/scheduleFactory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
 

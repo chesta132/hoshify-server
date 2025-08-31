@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
-import { ControllerTemplateOptions, Normalized } from "@/types/types";
+import { ControllerOptions, Normalized } from "@/types/types";
+import { getOne } from "@/services/crud/read";
 
-export const getOne = <T extends Record<string, any>>(model: Model<T>, options?: Omit<ControllerTemplateOptions<T>, "funcInitiator">) => {
+export const getOneFactory = <T extends Record<string, any>>(model: Model<T>, options?: Omit<ControllerOptions<T>, "funcInitiator">) => {
   return async (req: Request, { res }: Response) => {
     try {
       const { id } = req.params;
@@ -12,11 +13,8 @@ export const getOne = <T extends Record<string, any>>(model: Model<T>, options?:
         return;
       }
 
-      const data = (await model.findOne({ _id: id, userId: req.user!.id }).normalize()) as Normalized<T>;
-      if (!data) {
-        res.tempNotFound(model.getName()).respond();
-        return;
-      }
+      const data = (await getOne(model, { _id: id, userId: req.user!.id })) as Normalized<T>;
+
       if (options?.funcBeforeRes) await options.funcBeforeRes(data, req, res);
 
       res.body({ success: data }).respond();

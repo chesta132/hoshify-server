@@ -9,7 +9,7 @@ import {
   getNotes,
   restoreNote,
   restoreNotes,
-} from "@/controllers/note/note.factory";
+} from "@/controllers/note/noteFactory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
 

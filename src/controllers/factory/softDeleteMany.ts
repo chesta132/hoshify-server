@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Model } from "mongoose";
-import { ControllerTemplateOptions } from "@/types/types";
+import { ControllerOptions } from "@/types/types";
 import { getDeleteTTL } from "@/utils/database/plugin";
 import pluralize from "pluralize";
 import { validateIds } from "@/utils/validate";
 
-export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(
+export const softDeleteManyFactory = <T extends { isRecycled: boolean; deleteAt: Date | null }>(
   model: Model<T>,
-  options?: ControllerTemplateOptions<T[]>
+  options?: ControllerOptions<T[]>
 ) => {
   return async (req: Request, { res }: Response) => {
     try {
@@ -18,13 +18,13 @@ export const softDeleteMany = <T extends { isRecycled: boolean; deleteAt: Date |
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
       const unUpdated = await model.find({ _id: { $in: ids }, userId: req.user!.id, isRecycled: false });
-      if (unUpdated.some((data) => data.isRecycled)) {
-        res.tempNotFound(model.getName()).respond();
-        return;
-      }
 
       const deleteAt = getDeleteTTL();
-      await model.updateMany({ _id: { $in: ids }, userId: req.user!.id, isRecycled: false }, { isRecycled: true, deleteAt }, { runValidators: true });
+      await model.updateMany(
+        { _id: { $in: ids }, userId: req.user!.id, isRecycled: false },
+        { isRecycled: true, deleteAt },
+        { runValidators: true }
+      );
 
       const updatedData = unUpdated.map((data) => ({ ...data.normalize(), isRecycled: true, deleteAt }));
       if (options?.funcBeforeRes) await options.funcBeforeRes(updatedData, req, res);

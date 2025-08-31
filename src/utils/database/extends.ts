@@ -1,4 +1,4 @@
-import { Document, Model, Query } from "mongoose";
+import { Document, Query } from "mongoose";
 import { normalizeCurrency, normalizeQuery, normalizeUserQuery } from "../manipulate/normalize";
 
 Document.prototype.normalize = function () {

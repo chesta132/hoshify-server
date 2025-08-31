@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
 import { Model } from "mongoose";
-import { ControllerTemplateOptions, NormalizedData } from "@/types/types";
+import { ControllerOptions } from "@/types/types";
 import { validateRequires } from "@/utils/validate";
+import { create } from "@/services/crud/create";
 
-export const createMany = <T>(model: Model<T>, neededField: string[], options?: ControllerTemplateOptions<T[]>) => {
+export const createManyFactory = <T>(model: Model<T>, neededField: string[], options?: ControllerOptions<T, []>) => {
   return async (req: Request, { res }: Response) => {
     try {
       const user = req.user!;
@@ -18,7 +19,7 @@ export const createMany = <T>(model: Model<T>, neededField: string[], options?: 
         data.userId = user.id;
       });
 
-      const createdDatas = (await model.create(datas)).map((data) => data.normalize()) as NormalizedData<T>[];
+      const createdDatas = await create(model, datas);
       if (options?.funcBeforeRes) await options.funcBeforeRes(createdDatas, req, res);
 
       res

@@ -9,9 +9,10 @@ import cookieParser from "cookie-parser";
 import router from "./routes";
 import { connectDB } from "./utils/database/connectDB";
 import passport from "passport";
+import { resMiddleware } from "./middlewares/res";
 import "./services/auth/passport";
 import "./utils/extends";
-import { resMiddleware } from "./middlewares/res";
+import "./utils/database/extends";
 
 export const { NODE_ENV, HOSHIFY_ICON, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } = process.env;
 export const CLIENT_URL = NODE_ENV === "development" ? process.env.CLIENT_URL_DEV : process.env.CLIENT_URL;

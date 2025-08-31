@@ -8,7 +8,7 @@ import {
   getTrans,
   restoreTran,
   restoreTrans,
-} from "@/controllers/transaction/tran.factory";
+} from "@/controllers/transaction/tranFactory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
 

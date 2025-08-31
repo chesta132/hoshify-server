@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Model } from "mongoose";
-import { ControllerTemplateOptions, Normalized } from "@/types/types";
+import { ControllerOptions } from "@/types/types";
 import pluralize from "pluralize";
 import { validateIds } from "@/utils/validate";
+import { getMany } from "@/services/crud/read";
+import { updateMany } from "@/services/crud/update";
 
-export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | null }>(model: Model<T>, options?: ControllerTemplateOptions<T[]>) => {
+export const restoreManyFactory = <T extends { isRecycled: boolean; deleteAt: Date | null }>(model: Model<T>, options?: ControllerOptions<T[]>) => {
   return async (req: Request, { res }: Response) => {
     try {
       const ids: string[] = req.body;
@@ -13,19 +15,16 @@ export const restoreMany = <T extends { isRecycled: boolean; deleteAt: Date | nu
 
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
-      const unUpdated = await model.find({ _id: { $in: ids }, userId: req.user!.id, isRecycled: true });
-      if (unUpdated.some((data) => data.isRecycled)) {
-        res.tempNotFound(model.getName()).respond();
-        return;
-      }
+      const unUpdated = await getMany(model, { _id: { $in: ids }, userId: req.user!.id, isRecycled: true });
 
-      await model.updateMany(
+      await updateMany(
+        model,
         { _id: { $in: ids }, userId: req.user!.id, isRecycled: true },
         { isRecycled: false, deleteAt: null },
-        { runValidators: true }
+        { options: { runValidators: true } }
       );
 
-      const updatedData = unUpdated.map((data) => ({ ...data.normalize(), isRecycled: false, deleteAt: null })) as Normalized<T>[];
+      const updatedData = unUpdated.map((data) => ({ ...data, isRecycled: false, deleteAt: null }));
       if (options?.funcBeforeRes) await options.funcBeforeRes(updatedData, req, res);
 
       res

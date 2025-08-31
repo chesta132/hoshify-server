@@ -1,0 +1,31 @@
+import { createManyFactory } from "../factory/createMany";
+import { getManyFactory } from "../factory/getMany";
+import { Note } from "@/models/Note";
+import { getOneFactory } from "../factory/getOne";
+import { restoreManyFactory } from "../factory/restoreMany";
+import { restoreOneFactory } from "../factory/restoreOne";
+import { softDeleteManyFactory } from "../factory/softDeleteMany";
+import { softDeleteOneFactory } from "../factory/softDeleteOne";
+import { updateManyFactory } from "../factory/updateMany";
+import { createOneFactory } from "../factory/createOne";
+import { updateOneFactory } from "../factory/updateOne";
+
+export const createNotes = createManyFactory(Note, ["title", "details"]);
+
+export const getNotes = getManyFactory(Note);
+
+export const getNote = getOneFactory(Note);
+
+export const restoreNote = restoreOneFactory(Note);
+
+export const restoreNotes = restoreManyFactory(Note);
+
+export const deleteNote = softDeleteOneFactory(Note);
+
+export const deleteNotes = softDeleteManyFactory(Note);
+
+export const updateNotes = updateManyFactory(Note);
+
+export const createNote = createOneFactory(Note, ["title", "details"]);
+
+export const updateNote = updateOneFactory(Note);

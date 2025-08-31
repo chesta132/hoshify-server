@@ -9,7 +9,7 @@ import {
   getTodos,
   restoreTodo,
   restoreTodos,
-} from "@/controllers/todo/todo.factory";
+} from "@/controllers/todo/todoFactory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
 

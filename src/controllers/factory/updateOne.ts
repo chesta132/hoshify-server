@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
-import { ControllerTemplateOptions, Normalized } from "@/types/types";
+import { ControllerOptions, Normalized } from "@/types/types";
 import { unEditableField } from "@/utils/database/plugin";
 import { omit } from "@/utils/manipulate/object";
 import { validateRequires } from "@/utils/validate";
+import { updateOne } from "@/services/crud/update";
 
-export const updateOne = <T>(model: Model<T>, neededField?: string[], options?: ControllerTemplateOptions<T>) => {
+export const updateOneFactory = <T>(model: Model<T>, neededField?: string[], options?: ControllerOptions<T>) => {
   return async (req: Request, { res }: Response) => {
     try {
       const { id } = req.params;
@@ -19,13 +20,10 @@ export const updateOne = <T>(model: Model<T>, neededField?: string[], options?: 
 
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
-      const data = (await model
-        .findOneAndUpdate({ _id: id, userId: req.user!.id }, omit(req.body, unEditableField), { new: true, runValidators: true })
-        .normalize()) as Normalized<T>;
-      if (!data) {
-        res.tempNotFound(model.getName()).respond();
-        return;
-      }
+      const data = (await updateOne(model, { _id: id, userId: req.user!.id }, omit(req.body, unEditableField), {
+        options: { new: true, runValidators: true },
+      })) as Normalized<T>;
+
       if (options?.funcBeforeRes) await options.funcBeforeRes(data, req, res);
 
       res
