@@ -21,7 +21,7 @@ export const createDummy = <T extends { dummy: boolean }>(model: Model<T>) => {
       }
       const name = model.getName();
 
-      const dummys = await model.generateDummy(parseInt(length?.toString() || "0") || 0, {
+      const dummys = await model.generateDummy(parseInt(length?.toString() || "0"), {
         userId: { fixed: user.id },
         title: { dynamicString: `Dummy ${capitalEach(name)}` },
         details: { fixed: `Dummy created At ${formatDate(new Date(), { includeHour: true })}` },

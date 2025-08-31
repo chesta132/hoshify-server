@@ -2,22 +2,25 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
 import { Model } from "mongoose";
-import { ControllerOptions } from "@/types/types";
+import { ControllerConfig, ControllerOptions } from "@/types/types";
 import { validateRequires } from "@/utils/validate";
 import { create } from "@/services/crud/create";
+import { pick } from "@/utils/manipulate/object";
 
-export const createManyFactory = <T>(model: Model<T>, neededField: string[], options?: ControllerOptions<T, []>) => {
+export const createManyFactory = <T, F extends Partial<keyof T>>(
+  model: Model<T>,
+  { neededField, acceptableField }: ControllerConfig<T, F>,
+  options?: ControllerOptions<T, []>
+) => {
   return async (req: Request, { res }: Response) => {
     try {
       const user = req.user!;
-      const datas: any[] = req.body;
+      const body: any[] = req.body;
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
-      if (!validateRequires(neededField, datas, res)) return;
+      if (neededField) validateRequires(neededField as string[], req.body);
 
-      datas.forEach((data) => {
-        data.userId = user.id;
-      });
+      const datas = body.map((b) => ({ ...pick(b, [...(neededField || []), ...(acceptableField || [])]), userId: user.id })) as T[];
 
       const createdDatas = await create(model, datas);
       if (options?.funcBeforeRes) await options.funcBeforeRes(createdDatas, req, res);

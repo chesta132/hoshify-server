@@ -10,7 +10,7 @@ import { updateManyFactory } from "../factory/updateMany";
 import { createOneFactory } from "../factory/createOne";
 import { updateOneFactory } from "../factory/updateOne";
 
-export const createTodos = createManyFactory(Todo, ["title", "details", "dueDate"]);
+export const createTodos = createManyFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
 export const getTodos = getManyFactory(Todo);
 
@@ -26,6 +26,6 @@ export const deleteTodos = softDeleteManyFactory(Todo);
 
 export const updateTodos = updateManyFactory(Todo);
 
-export const createTodo = createOneFactory(Todo, ["title", "details", "dueDate"]);
+export const createTodo = createOneFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
 export const updateTodo = updateOneFactory(Todo);

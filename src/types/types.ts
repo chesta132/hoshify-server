@@ -48,5 +48,7 @@ export interface ControllerOptions<T, Z = T> {
   funcBeforeRes?: (data: Normalized<T, Z>, req: Request, res: Response["res"]) => any;
   funcInitiator?: (req: Request, res: Response["res"]) => Promise<"stop"> | "stop" | Promise<void> | void;
 }
-
-export interface ServiceOptions<T> extends ControllerOptions<T> {}
+export interface ControllerConfig<T, F> {
+  neededField?: F[];
+  acceptableField?: Exclude<keyof T, F>[];
+}

@@ -25,25 +25,29 @@ const amountToCurrency = (data: Normalized<ITransaction>, req: Request) => {
   data.amount = normalized.amount as any;
 };
 
-export const createTrans = createManyFactory(Transaction, ["type", "title", "amount"], {
-  funcInitiator(req, res) {
-    const body = req.body as any[];
-    if (!body.every((body) => transactionType.includes(body.type))) {
-      res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
-      return "stop";
-    }
-    body.forEach((data) => {
-      const { amount, type } = data;
-      if (amount !== 0 && type) isLowerThanZero(data);
-    });
-  },
-  async funcBeforeRes(data, req) {
-    await updateMoneyMany(data, data[0].userId.toString());
-    data.forEach((data) => {
-      amountToCurrency(data, req);
-    });
-  },
-});
+export const createTrans = createManyFactory(
+  Transaction,
+  { neededField: ["type", "title", "amount"], acceptableField: ["details"] },
+  {
+    funcInitiator(req, res) {
+      const body = req.body as any[];
+      if (!body.every((body) => transactionType.includes(body.type))) {
+        res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
+        return "stop";
+      }
+      body.forEach((data) => {
+        const { amount, type } = data;
+        if (amount !== 0 && type) isLowerThanZero(data);
+      });
+    },
+    async funcBeforeRes(data, req) {
+      await updateMoneyMany(data, data[0].userId.toString());
+      data.forEach((data) => {
+        amountToCurrency(data, req);
+      });
+    },
+  }
+);
 
 export const getTrans = getManyFactory(Transaction, {
   funcBeforeRes(data, req) {
@@ -91,17 +95,21 @@ export const deleteTrans = softDeleteManyFactory(Transaction, {
   },
 });
 
-export const createTran = createOneFactory(Transaction, ["title", "type", "amount"], {
-  funcInitiator(req, res) {
-    const { type, amount } = req.body;
-    if (!transactionType.includes(type)) {
-      res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
-      return "stop";
-    }
-    if (amount !== 0 && type) isLowerThanZero(req.body);
-  },
-  async funcBeforeRes(data, req) {
-    await updateMoney(data);
-    amountToCurrency(data, req);
-  },
-});
+export const createTran = createOneFactory(
+  Transaction,
+  { neededField: ["type", "title", "amount"], acceptableField: ["details"] },
+  {
+    funcInitiator(req, res) {
+      const { type, amount } = req.body;
+      if (!transactionType.includes(type)) {
+        res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
+        return "stop";
+      }
+      if (amount !== 0 && type) isLowerThanZero(req.body);
+    },
+    async funcBeforeRes(data, req) {
+      await updateMoney(data);
+      amountToCurrency(data, req);
+    },
+  }
+);

@@ -13,7 +13,7 @@ export const getOneFactory = <T extends Record<string, any>>(model: Model<T>, op
         return;
       }
 
-      const data = (await getOne(model, { _id: id, userId: req.user!.id })) as Normalized<T>;
+      const data = (await getOne<any, any>(model, { _id: id, userId: req.user!.id })) as Normalized<T>;
 
       if (options?.funcBeforeRes) await options.funcBeforeRes(data, req, res);
 

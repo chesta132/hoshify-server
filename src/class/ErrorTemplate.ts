@@ -1,6 +1,6 @@
 import { ErrorResponseType, Respond, RestError } from "./Response";
 
-type TemplateErrors =
+export type ErrorTemplateConfig =
   | { code: "CLIENT_FIELD"; field: ErrorResponseType["field"]; message: string; restErr?: RestError }
   | { code: "MISSING_FIELDS"; fields: string; restErr?: RestError }
   | { code: "CLIENT_TYPE"; field: string; details?: string; restErr?: RestError }
@@ -21,17 +21,18 @@ type TemplateErrors =
   | { code: "NOT_RECYCLED"; name: string; restErr?: RestError };
 
 export class ErrorTemplate<T extends Respond | undefined = undefined> {
-  error: TemplateErrors;
+  error: ErrorTemplateConfig;
   private res?: T;
-  constructor(error: TemplateErrors, res?: T) {
+  constructor(error: ErrorTemplateConfig, res?: T) {
     this.error = error;
     this.res = res;
   }
 
   execute: IsTruthy<T, () => void> = (() => {
-    const res = this.res!;
-    const { error } = this;
+    const { error, res } = this;
     const { code, restErr } = error;
+    if (!res) return;
+
     switch (code) {
       case "CLIENT_FIELD":
         res.tempClientField(error.field, error.message, restErr).error();

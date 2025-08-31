@@ -2,18 +2,25 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { ellipsis } from "@/utils/manipulate/string";
 import { Model } from "mongoose";
-import { ControllerOptions, Normalized } from "@/types/types";
+import { ControllerConfig, ControllerOptions } from "@/types/types";
 import { validateRequires } from "@/utils/validate";
 import { create } from "@/services/crud/create";
+import { pick } from "@/utils/manipulate/object";
 
-export const createOneFactory = <T>(model: Model<T>, neededField: string[], options?: ControllerOptions<T>) => {
+export const createOneFactory = <T, F extends keyof T>(
+  model: Model<T>,
+  { neededField, acceptableField }: ControllerConfig<T, F>,
+  options?: ControllerOptions<T>
+) => {
   return async (req: Request, { res }: Response) => {
     try {
       const user = req.user!;
-      if (!validateRequires(neededField, req.body, res)) return;
+      if (neededField) validateRequires(neededField as string[], req.body);
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
-      const createdData = (await create(model, { ...req.body, userId: user.id })) as Normalized<T>;
+      const datas = { ...pick(req.body, [...(neededField || []), ...(acceptableField || [])]), userId: user.id } as T;
+
+      const createdData = await create(model, datas);
 
       if (options?.funcBeforeRes) await options.funcBeforeRes(createdData, req, res);
       res

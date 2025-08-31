@@ -10,13 +10,17 @@ import { updateManyFactory } from "../factory/updateMany";
 import { createOneFactory } from "../factory/createOne";
 import { updateOneFactory } from "../factory/updateOne";
 
-export const createSchedules = createManyFactory(Schedule, ["title", "details"], {
-  funcInitiator(req) {
-    (req.body as any[]).forEach((data) => {
-      if (!data?.end) data.end = data?.start;
-    });
-  },
-});
+export const createSchedules = createManyFactory(
+  Schedule,
+  { neededField: ["title", "details"], acceptableField: ["start", "end"] },
+  {
+    funcInitiator(req) {
+      (req.body as any[]).forEach((data) => {
+        if (!data?.end) data.end = data?.start;
+      });
+    },
+  }
+);
 
 export const getSchedules = getManyFactory(Schedule);
 
@@ -32,11 +36,15 @@ export const deleteSchedules = softDeleteManyFactory(Schedule);
 
 export const updateSchedules = updateManyFactory(Schedule);
 
-export const createSchedule = createOneFactory(Schedule, ["title", "details"], {
-  funcInitiator(req) {
-    const { end, start } = req.body;
-    if (!end) req.body.end = start;
-  },
-});
+export const createSchedule = createOneFactory(
+  Schedule,
+  { neededField: ["title", "details"], acceptableField: ["start", "end"] },
+  {
+    funcInitiator(req) {
+      const { end, start } = req.body;
+      if (!end) req.body.end = start;
+    },
+  }
+);
 
 export const updateSchedule = updateOneFactory(Schedule);

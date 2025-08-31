@@ -1,3 +1,5 @@
+import { oneWeeks } from "./token";
+
 export const randomNumber = (minVal?: number, maxVal?: number) => {
   const min = minVal ?? 0;
   const max = maxVal ?? min;
@@ -8,7 +10,7 @@ export const randomNumber = (minVal?: number, maxVal?: number) => {
 export const randomDate = (startDate?: Date, endDate?: Date) => {
   const min = startDate ?? new Date();
   const minDate = min.getTime();
-  const maxDate = (endDate ?? min).getTime();
+  const maxDate = (endDate ?? new Date(minDate + oneWeeks * 4 * 12)).getTime();
   const randomDate = minDate + Math.random() * (maxDate - minDate);
   return new Date(randomDate);
 };
