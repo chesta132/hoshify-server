@@ -1,39 +1,59 @@
-import { NormalizedData } from "@/types/types";
-import { isValidObjectId, Model, ObjectId, RootFilterQuery } from "mongoose";
-import { invalidObjectId, notFound, Settings } from "./utils";
+import { Normalized } from "@/types/types";
+import { isValidObjectId, Model, RootFilterQuery } from "mongoose";
+import { Id, invalidObjectId, notFound, QueryResult, Settings } from ".";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
 
-export const getById = async <T>(model: Model<T>, id: string | ObjectId, settings?: Settings<T>): Promise<NormalizedData<T>> => {
+export const getById = async <T, S extends Settings<T>>(model: Model<T>, id: Id, settings?: S): Promise<QueryResult<T, S, T>> => {
+  const { error, options, populate, project, sort, sortOptions } = settings || {};
+
   if (!isValidObjectId(id)) {
     throw invalidObjectId(model, id);
   }
 
   const query = await model
-    .findById(id, settings?.project, settings?.options)
-    .populate(settings?.populate || [])
-    .sort(settings?.sort, settings?.sortOptions)
+    .findById(id, project, options)
+    .populate(populate || [])
+    .sort(sort, sortOptions)
     .normalize();
 
-  if (!query) throw notFound(model);
-  return query;
+  if (!query && error !== null) {
+    if (error) throw new ErrorTemplate(error);
+    else throw notFound(model);
+  }
+  return query as Normalized<T>;
 };
 
-export const getOne = async <T>(model: Model<T>, filter: RootFilterQuery<T>, settings?: Settings<T>): Promise<NormalizedData<T>> => {
+export const getOne = async <T, S extends Settings<T>>(
+  model: Model<T>,
+  filter: RootFilterQuery<T> & Partial<T>,
+  settings?: S
+): Promise<QueryResult<T, S, T>> => {
+  const { error, options, populate, project, sort, sortOptions } = settings || {};
   const query = await model
-    .findOne(filter, settings?.project, settings?.options)
-    .populate(settings?.populate || [])
-    .sort(settings?.sort, settings?.sortOptions)
+    .findOne(filter, project, options)
+    .populate(populate || [])
+    .sort(sort, sortOptions)
     .normalize();
 
-  if (!query) throw notFound(model);
-  return query;
+  if (!query && error !== null) {
+    if (error) throw new ErrorTemplate(error);
+    else throw notFound(model);
+  }
+  return query as Normalized<T>;
 };
 
-export const getMany = async <T>(model: Model<T>, filter: RootFilterQuery<T>, settings?: Settings<T>): Promise<NormalizedData<T>[]> => {
+export const getMany = async <T>(
+  model: Model<T>,
+  filter: RootFilterQuery<T>,
+  settings?: Omit<Settings<T>, "error">
+): Promise<QueryResult<T, {}, []>> => {
+  const { options, populate, project, sort, sortOptions } = settings || {};
+
   const query = await model
-    .find(filter, settings?.project, settings?.options)
-    .populate(settings?.populate || [])
-    .sort(settings?.sort, settings?.sortOptions)
+    .find(filter, project, options)
+    .populate(populate || [])
+    .sort(sort, sortOptions)
     .normalize();
 
-  return query as NormalizedData<T>[];
+  return query as Normalized<T, []>;
 };

@@ -8,56 +8,103 @@ import {
   UpdateWithAggregationPipeline,
   UpdateWriteOpResult,
 } from "mongoose";
-import { invalidObjectId, notFound, Settings } from "./utils";
-import { Normalized, NormalizedData } from "@/types/types";
+import { Id, invalidObjectId, notFound, QueryResult, Settings } from ".";
+import { Normalized } from "@/types/types";
 import { getMany } from "./read";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
 
-export const updateById = async <T>(
+export const updateById = async <T, S extends Omit<Settings<T>, "project">>(
   model: Model<T>,
-  id: string | ObjectId,
+  id: Id,
   update: UpdateQuery<T>,
-  settings?: Omit<Settings<T>, "project">
-): Promise<NormalizedData<T>> => {
+  settings?: S
+): Promise<QueryResult<T, S, T>> => {
+  const { error, options, populate, sort, sortOptions } = settings || {};
   if (!isValidObjectId(id)) {
     throw invalidObjectId(model, id);
   }
 
   const query = await model
-    .findByIdAndUpdate(id, update, settings?.options)
-    .populate(settings?.populate || [])
-    .sort(settings?.sort, settings?.sortOptions)
+    .findByIdAndUpdate(id, update, options)
+    .populate(populate || [])
+    .sort(sort, sortOptions)
     .normalize();
 
-  if (!query) throw notFound(model);
-  return query;
+  if (!query && error !== null) {
+    if (error) throw new ErrorTemplate(error);
+    else throw notFound(model);
+  }
+  return query as Normalized<T>;
 };
 
-export const updateOne = async <T>(
+export const updateOne = async <T, S extends Omit<Settings<T>, "project">>(
   model: Model<T>,
   filter: RootFilterQuery<T>,
   update: UpdateQuery<T>,
-  settings?: Omit<Settings<T>, "project">
-): Promise<NormalizedData<T>> => {
+  settings?: S
+): Promise<QueryResult<T, S, T>> => {
+  const { error, options, populate, sort, sortOptions } = settings || {};
   const query = await model
-    .findOneAndUpdate(filter, update, settings?.options)
-    .populate(settings?.populate || [])
-    .sort(settings?.sort, settings?.sortOptions)
+    .findOneAndUpdate(filter, update, options)
+    .populate(populate || [])
+    .sort(sort, sortOptions)
     .normalize();
 
-  if (!query) throw notFound(model);
-  return query;
+  if (!query && error !== null) {
+    if (error) throw new ErrorTemplate(error);
+    else throw notFound(model);
+  }
+  return query as Normalized<T>;
 };
 
-export const updateMany = async <
-  T,
-  S extends { normalize?: boolean; options: MongooseUpdateQueryOptions } & Omit<Settings<T>, "project" | "options">
->(
+export const updateMany = async <T, S extends { normalize?: boolean; options: MongooseUpdateQueryOptions } & Omit<Settings<T>, "error">>(
   model: Model<T>,
   filter: RootFilterQuery<T>,
   update: UpdateQuery<T> | UpdateWithAggregationPipeline,
   settings: S
-): Promise<IsTruthy<S["normalize"], Normalized<T>, UpdateWriteOpResult>> => {
-  const query = await model.updateMany(filter, update, settings?.options);
+): Promise<IsTruthy<S["normalize"], Normalized<T, []>, UpdateWriteOpResult>> => {
+  const { options } = settings || {};
+  const query = await model.updateMany(filter, update, options as MongooseUpdateQueryOptions);
   if (!settings.normalize) return query as any;
   return (await getMany(model, filter, settings)) as any;
+};
+
+export const restoreById = async <T, S extends Omit<Settings<T>, "project">>(
+  model: Model<T>,
+  id: Id,
+  settings?: S,
+  update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">
+): Promise<QueryResult<T, S, T>> => {
+  const { error, options, populate, sort, sortOptions } = settings || {};
+  const query = await model
+    .restoreById(id, update, options)
+    .populate(populate || [])
+    .sort(sort, sortOptions)
+    .normalize();
+
+  if (!query && error !== null) {
+    if (error) throw new ErrorTemplate(error);
+    else throw notFound(model);
+  }
+  return query as Normalized<T>;
+};
+
+export const restoreOne = async <T, S extends Omit<Settings<T>, "project">>(
+  model: Model<T>,
+  filter: RootFilterQuery<T> | Partial<T>,
+  settings?: S,
+  update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">
+): Promise<QueryResult<T, S, T>> => {
+  const { error, options, populate, sort, sortOptions } = settings || {};
+  const query = await model
+    .restoreOne(filter, update, options)
+    .populate(populate || [])
+    .sort(sort, sortOptions)
+    .normalize();
+
+  if (!query && error !== null) {
+    if (error) throw new ErrorTemplate(error);
+    else throw notFound(model);
+  }
+  return query as Normalized<T>;
 };
