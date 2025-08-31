@@ -1,7 +1,7 @@
 export const randomNumber = (minVal?: number, maxVal?: number) => {
   const min = minVal ?? 0;
   const max = maxVal ?? min;
-  const rand = Math.floor(Math.random() * (min - max)) + min;
+  const rand = Math.floor(Math.random() * (max - min + 1)) + min;
   return rand;
 };
 
