@@ -1,4 +1,4 @@
-import { editTran } from "@/controllers/transaction/editTran";
+import { updateTran } from "@/controllers/transaction/updateTran";
 import {
   createTran,
   createTrans,
@@ -17,7 +17,7 @@ export const tranRoutes = Router();
 tranRoutes.post("/", polyBody(createTran, createTrans));
 tranRoutes.get("/", getTrans);
 tranRoutes.get("/:id", getTran);
-tranRoutes.put("/:id", editTran);
+tranRoutes.put("/:id", updateTran);
 tranRoutes.delete("/", deleteTrans);
 tranRoutes.delete("/:id", deleteTran);
 tranRoutes.patch("/restores/", restoreTrans);

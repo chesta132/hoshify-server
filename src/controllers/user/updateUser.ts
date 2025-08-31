@@ -3,7 +3,7 @@ import handleError from "../../utils/handleError";
 import { userProject } from "../../utils/manipulate/normalize";
 import { User } from "../../models/User";
 
-export const editUser = async (req: Request, { res }: Response) => {
+export const updateUser = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { fullName } = req.body;

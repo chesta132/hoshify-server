@@ -2,8 +2,8 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import bcrypt from "bcrypt";
-import { ErrorResponseType } from "../class/Response";
-import { User } from "../models/User";
+import { ErrorResponseType } from "@/class/Response";
+import { User } from "@/models/User";
 
 passport.use(
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {

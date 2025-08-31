@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Money } from "@/models/Money";
 
-export const editMoney = async (req: Request, { res }: Response) => {
+export const updateMoney = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { id } = req.params;

@@ -4,7 +4,7 @@ import { Transaction, transactionType } from "@/models/Transaction";
 import { isValidObjectId } from "mongoose";
 import { getTotal, Money, updateMoneyMany } from "@/models/Money";
 
-export const editTran = async (req: Request, { res }: Response) => {
+export const updateTran = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { id } = req.params;

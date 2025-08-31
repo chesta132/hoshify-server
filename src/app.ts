@@ -7,9 +7,9 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import router from "./routes";
-import { connectDB } from "./services/connectDB";
+import { connectDB } from "./utils/database/connectDB";
 import passport from "passport";
-import "./services/passport";
+import "./services/auth/passport";
 import "./utils/extends";
 import { resMiddleware } from "./middlewares/res";
 

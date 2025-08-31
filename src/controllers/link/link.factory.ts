@@ -1,6 +1,6 @@
 import { createMany } from "../factory/createMany";
 import { createOne } from "../factory/createOne";
-import { editOne } from "../factory/editOne";
+import { updateOne } from "../factory/updateOne";
 import { getMany } from "../factory/getMany";
 import { Link } from "@/models/Link";
 
@@ -24,4 +24,4 @@ export const createLink = createOne(Link, ["title", "link"], {
   },
 });
 
-export const editLink = editOne(Link);
+export const updateLink = updateOne(Link);

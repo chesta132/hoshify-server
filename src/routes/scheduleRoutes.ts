@@ -3,8 +3,8 @@ import {
   createSchedules,
   deleteSchedule,
   deleteSchedules,
-  editSchedule,
-  editSchedules,
+  updateSchedule,
+  updateSchedules,
   getSchedule,
   getSchedules,
   restoreSchedule,
@@ -18,8 +18,8 @@ export const scheduleRoutes = Router();
 scheduleRoutes.post("/", polyBody(createSchedule, createSchedules));
 scheduleRoutes.get("/", getSchedules);
 scheduleRoutes.get("/:id", getSchedule);
-scheduleRoutes.put("/:id", editSchedule);
-scheduleRoutes.put("/", editSchedules);
+scheduleRoutes.put("/:id", updateSchedule);
+scheduleRoutes.put("/", updateSchedules);
 scheduleRoutes.delete("/", deleteSchedules);
 scheduleRoutes.delete("/:id", deleteSchedule);
 scheduleRoutes.patch("/restores/", restoreSchedules);

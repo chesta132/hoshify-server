@@ -6,7 +6,7 @@ import { unEditableField } from "@/utils/database/plugin";
 import { omit } from "@/utils/manipulate/object";
 import { validateRequires } from "@/utils/validate";
 
-export const editOne = <T>(model: Model<T>, neededField?: string[], options?: ControllerTemplateOptions<T>) => {
+export const updateOne = <T>(model: Model<T>, neededField?: string[], options?: ControllerTemplateOptions<T>) => {
   return async (req: Request, { res }: Response) => {
     try {
       const { id } = req.params;

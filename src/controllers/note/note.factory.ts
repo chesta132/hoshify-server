@@ -6,9 +6,9 @@ import { restoreMany } from "../factory/restoreMany";
 import { restoreOne } from "../factory/restoreOne";
 import { softDeleteMany } from "../factory/softDeleteMany";
 import { softDeleteOne } from "../factory/softDeleteOne";
-import { editMany } from "../factory/editMany";
+import { updateMany } from "../factory/updateMany";
 import { createOne } from "../factory/createOne";
-import { editOne } from "../factory/editOne";
+import { updateOne } from "../factory/updateOne";
 
 export const createNotes = createMany(Note, ["title", "details"]);
 
@@ -24,8 +24,8 @@ export const deleteNote = softDeleteOne(Note);
 
 export const deleteNotes = softDeleteMany(Note);
 
-export const editNotes = editMany(Note);
+export const updateNotes = updateMany(Note);
 
 export const createNote = createOne(Note, ["title", "details"]);
 
-export const editNote = editOne(Note);
+export const updateNote = updateOne(Note);
