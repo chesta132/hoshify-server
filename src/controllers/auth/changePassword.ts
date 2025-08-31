@@ -10,7 +10,7 @@ export const changePassword = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { newPassword, password } = req.body;
-    if (!validateRequires(["newPassword", "password"], req.body, res)) return;
+    validateRequires(["newPassword", "password"], req.body);
     if (!user.email) {
       res.tempNotBound().respond();
       return;

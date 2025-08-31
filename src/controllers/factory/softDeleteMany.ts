@@ -13,18 +13,14 @@ export const softDeleteManyFactory = <T extends { isRecycled: boolean; deleteAt:
   return async (req: Request, { res }: Response) => {
     try {
       const ids: string[] = req.body;
-      if (!validateIds(ids, res)) return;
+      validateIds(ids);
 
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
       const unUpdated = await model.find({ _id: { $in: ids }, userId: req.user!.id, isRecycled: false });
 
       const deleteAt = getDeleteTTL();
-      await model.updateMany(
-        { _id: { $in: ids }, userId: req.user!.id, isRecycled: false },
-        { isRecycled: true, deleteAt },
-        { runValidators: true }
-      );
+      await model.updateMany({ _id: { $in: ids }, userId: req.user!.id, isRecycled: false }, { isRecycled: true, deleteAt }, { runValidators: true });
 
       const updatedData = unUpdated.map((data) => ({ ...data.normalize(), isRecycled: true, deleteAt }));
       if (options?.funcBeforeRes) await options.funcBeforeRes(updatedData, req, res);

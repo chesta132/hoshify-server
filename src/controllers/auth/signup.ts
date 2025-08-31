@@ -8,7 +8,7 @@ import { validateRequires } from "@/utils/validate";
 export const signup = async (req: Request, { res }: Response) => {
   try {
     const { email, password, fullName, rememberMe } = req.body;
-    if (!validateRequires(["email", "password", "fullName"], req.body, res)) return;
+    validateRequires(["email", "password", "fullName"], req.body);
 
     const potentialUser = await User.find({ $or: [{ email }, { gmail: email }] });
     potentialUser.forEach((potential) => {

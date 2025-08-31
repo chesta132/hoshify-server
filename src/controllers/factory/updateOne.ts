@@ -11,7 +11,7 @@ export const updateOneFactory = <T>(model: Model<T>, neededField?: string[], opt
   return async (req: Request, { res }: Response) => {
     try {
       const { id } = req.params;
-      if (neededField && !validateRequires(neededField, req.body, res)) return;
+      if (neededField) validateRequires(neededField, req.body);
 
       if (!isValidObjectId(id)) {
         res.tempClientType("Object ID").respond();

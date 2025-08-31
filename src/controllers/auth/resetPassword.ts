@@ -12,7 +12,8 @@ export const resetPassword = async (req: Request, { res }: Response) => {
     const user = req.user!;
     const { token } = req.query;
     const { newPassword } = req.body;
-    if (!validateRequires(["newPassword"], req.body, res) || !validateRequires(["token"], req.query, res)) return;
+    validateRequires(["newPassword"], req.body);
+    validateRequires(["token"], req.query);
     if (!user.password || !user.email) {
       res.tempNotBound().respond();
       return;

@@ -9,7 +9,7 @@ export const bindLocal = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     const { email, password } = req.body;
-    if (!validateRequires(["email", "password"], req.body, res)) return;
+    validateRequires(["email", "password"], req.body);
     if (user.email) {
       res.tempIsBound().error();
       return;

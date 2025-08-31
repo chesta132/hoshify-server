@@ -2,17 +2,23 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
 import { isValidObjectId, Model } from "mongoose";
-import { ControllerOptions, NormalizedData } from "@/types/types";
-import { omit } from "@/utils/manipulate/object";
+import { ControllerConfig, ControllerOptions, NormalizedData } from "@/types/types";
+import { omit, pick } from "@/utils/manipulate/object";
 import { unEditableField } from "@/utils/database/plugin";
+import { validateRequires } from "@/utils/validate";
 
-export const updateManyFactory = <T>(model: Model<T>, neededField?: string[], options?: ControllerOptions<T[]>) => {
+export const updateManyFactory = <T, F extends string>(
+  model: Model<T>,
+  { neededField, acceptableField }: ControllerConfig<T, F> = {},
+  options?: ControllerOptions<T[]>
+) => {
   return async (req: Request, { res }: Response) => {
     try {
-      const datas: any[] = req.body;
+      const body: any[] = req.body;
+      const user = req.user!;
       let invalidDatas: string[] = [];
 
-      const isObjectId = datas.every((data, idx) => {
+      const isObjectId = body.every((data, idx) => {
         if (isValidObjectId(data._id) || isValidObjectId(data.id)) return true;
         else {
           invalidDatas.push(data?.title || `Index ${idx}`);
@@ -25,32 +31,18 @@ export const updateManyFactory = <T>(model: Model<T>, neededField?: string[], op
         return;
       }
 
-      if (neededField) {
-        const missingFields: string[] = [];
-        const isValidField = datas.every((data) => {
-          return neededField.every((field) => {
-            if (!data[field]) {
-              missingFields.push(field);
-              return false;
-            }
-            return true;
-          });
-        });
-        if (!isValidField) {
-          res.tempMissingFields(missingFields.join(", ")).respond();
-          return;
-        }
-      }
+      if (neededField) validateRequires(neededField, req.body);
 
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
-      const dataIds = datas.map((data) => data._id || data.id);
+      const dataIds = body.map((data) => data._id || data.id);
 
+      const datas = body.map((b) => ({ ...pick(b, [...(neededField || []), ...(acceptableField || [])]), userId: user.id })) as T[];
       await model.bulkWrite(
         datas.map((data) => ({
           updateOne: {
             filter: { _id: dataIds },
-            update: omit(data, unEditableField),
+            update: omit(data as any, unEditableField),
           },
         }))
       );

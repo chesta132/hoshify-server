@@ -27,7 +27,7 @@ export const deleteLink = async (req: Request, { res }: Response) => {
 export const deleteLinks = async (req: Request, { res }: Response) => {
   try {
     const ids: any[] = req.body;
-    if (!validateIds(ids, res)) return;
+    validateIds(ids);
 
     await Link.deleteMany({ _id: { $in: ids } });
 

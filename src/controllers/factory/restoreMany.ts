@@ -7,11 +7,11 @@ import { validateIds } from "@/utils/validate";
 import { getMany } from "@/services/crud/read";
 import { updateMany } from "@/services/crud/update";
 
-export const restoreManyFactory = <T extends { isRecycled: boolean; deleteAt: Date | null }>(model: Model<T>, options?: ControllerOptions<T[]>) => {
+export const restoreManyFactory = <T extends { isRecycled: boolean; deleteAt: Date | null }>(model: Model<T>, options?: ControllerOptions<T, []>) => {
   return async (req: Request, { res }: Response) => {
     try {
       const ids: string[] = req.body;
-      if (!validateIds(ids, res)) return;
+      validateIds(ids);
 
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
