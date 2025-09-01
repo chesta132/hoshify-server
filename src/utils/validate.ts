@@ -45,6 +45,6 @@ export const validateRequires = (neededField: string[], from: any) => {
   const missingFields = [...missingFieldsSet].map((field) => spacing(field));
 
   if (!isValid) {
-    throw new ErrorTemplate({ code: "MISSING_FIELDS", fields: missingFields.join(", ") });
+    throw new ErrorTemplate({ code: "MISSING_FIELDS", field: missingFields.join(", ") });
   }
 };

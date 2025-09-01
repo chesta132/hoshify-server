@@ -67,7 +67,7 @@ export interface ErrorResponseType {
   status?: number;
 }
 
-export interface RestError extends Omit<ErrorResponseType, "title" | "message" | "code"> {}
+export interface RestError extends Omit<ErrorResponseType, "message" | "code"> {}
 
 const statusAlias: {
   code: CodeError[];

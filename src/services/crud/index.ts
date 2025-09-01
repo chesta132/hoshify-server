@@ -23,8 +23,7 @@ export const notFound = (model: Model<any>) => {
   return new ErrorTemplate({ code: "NOT_FOUND", item: model.getName() });
 };
 
-export const invalidObjectId = (model: Model<any>, id: string | ObjectId) => {
-  console.warn(`Invalid ObjectId provided for model ${model.modelName}: ${id}`);
+export const invalidObjectId = () => {
   return new ErrorTemplate({ code: "CLIENT_TYPE", field: "Object ID" });
 };
 

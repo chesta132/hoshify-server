@@ -2,7 +2,7 @@ import { ErrorResponseType, Respond, RestError } from "./Response";
 
 export type ErrorTemplateConfig =
   | { code: "CLIENT_FIELD"; field: ErrorResponseType["field"]; message: string; restErr?: RestError }
-  | { code: "MISSING_FIELDS"; fields: string; restErr?: RestError }
+  | { code: "MISSING_FIELDS"; field: string; restErr?: RestError }
   | { code: "CLIENT_TYPE"; field: string; details?: string; restErr?: RestError }
   | { code: "INVALID_OTP"; restErr?: Omit<RestError, "field"> }
   | { code: "INVALID_VERIF_TOKEN"; restErr?: Omit<RestError, "field"> }
@@ -20,12 +20,25 @@ export type ErrorTemplateConfig =
   | { code: "IS_RECYCLED"; name: string; restErr?: RestError }
   | { code: "NOT_RECYCLED"; name: string; restErr?: RestError };
 
-export class ErrorTemplate<T extends Respond | undefined = undefined> {
+type SelectedConfig<C> = Extract<ErrorTemplateConfig, { code: C }>;
+type ErrorProps<C> = Omit<SelectedConfig<C>, "code" | "restErr"> & SelectedConfig<C>["restErr"];
+
+export class ErrorTemplate<C extends ErrorTemplateConfig["code"], T extends Respond | undefined = undefined> {
   error: ErrorTemplateConfig;
   private res?: T;
-  constructor(error: ErrorTemplateConfig, res?: T) {
-    this.error = error;
-    this.res = res;
+
+  constructor(code: C, props: ErrorProps<C>);
+  constructor(error: ErrorTemplateConfig, res?: T);
+  constructor(error: C | ErrorTemplateConfig, depedencies: (T | undefined) | ErrorProps<C>) {
+    if (typeof error === "string") {
+      const code = error;
+      const dep = depedencies as ErrorProps<C>;
+      const err = { code, ...dep, restErr: dep } as ErrorTemplateConfig;
+      this.error = err;
+    } else {
+      this.error = error;
+      this.res = depedencies as T | undefined;
+    }
   }
 
   execute: IsTruthy<T, () => void> = (() => {
@@ -35,7 +48,7 @@ export class ErrorTemplate<T extends Respond | undefined = undefined> {
 
     switch (code) {
       case "CLIENT_FIELD":
-        res.tempClientField(error.field, error.message, restErr).error();
+        res.tempClientField(error.field, error.message).error();
         return;
       case "EMAIL_LIMIT":
         res.tempLimitSendEmail(restErr).error();
@@ -71,7 +84,7 @@ export class ErrorTemplate<T extends Respond | undefined = undefined> {
         res.tempIsVerified(restErr).error();
         return;
       case "MISSING_FIELDS":
-        res.tempMissingFields(error.fields, restErr).error();
+        res.tempMissingFields(error.field, restErr).error();
         return;
       case "NOT_FOUND":
         res.tempNotFound(error.item, error.desc, restErr).error();

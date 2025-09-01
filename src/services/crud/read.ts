@@ -7,7 +7,7 @@ export const getById = async <T, S extends Settings<T>>(model: Model<T>, id: Id,
   const { error, options, populate, project, sort, sortOptions } = settings || {};
 
   if (!isValidObjectId(id)) {
-    throw invalidObjectId(model, id);
+    throw invalidObjectId();
   }
 
   const query = await model

@@ -5,13 +5,16 @@ import { decrypt } from "@/utils/crypto";
 import { User, UserRole } from "@/models/User";
 import { normalizeUserQuery, userProject } from "@/utils/manipulate/normalize";
 import { sendRoleGranted } from "@/utils/email/send";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { getOne } from "@/services/crud/read";
+import { updateById } from "@/services/crud/update";
+import { deleteOne } from "@/services/crud/delete";
 
 export const acceptRequestRole = async (req: Request, { res }: Response) => {
   try {
-    const { token } = req.query;
+    const token = req.query.token?.toString();
     if (!token) {
-      res.tempMissingFields("token").respond();
-      return;
+      throw new ErrorTemplate({ code: "MISSING_FIELDS", field: "token" });
     }
 
     const decrToken = decrypt(token.toString()) as string;
@@ -21,23 +24,16 @@ export const acceptRequestRole = async (req: Request, { res }: Response) => {
     const userId = decrToken.slice(indexOfReqRole + 12, indexOfRole - 1);
     const role = decrToken.slice(indexOfRole + 5) as UserRole;
 
-    const verification = await Verify.findOne({
+    await getOne(Verify, { userId, value: token, type: "REQUEST_ROLE" }, { error: { code: "INVALID_VERIF_TOKEN" } });
+
+    const user = await updateById(
+      User,
       userId,
-      value: token,
-      type: "REQUEST_ROLE",
-    }).normalize();
-    if (!verification) {
-      res.tempInvalidVerifyToken().error();
-      return;
-    }
+      { role },
+      { options: { new: true, runValidators: true, projection: userProject() }, error: { code: "INVALID_VERIF_TOKEN" } }
+    );
 
-    const user = await User.findByIdAndUpdate(userId, { role }, { new: true, runValidators: true, projection: userProject() }).normalize();
-    if (!user) {
-      res.tempInvalidVerifyToken().error();
-      return;
-    }
-
-    await Verify.deleteOne({ value: token, type: "REQUEST_ROLE", userId });
+    await deleteOne(Verify, { value: token, type: "REQUEST_ROLE", userId });
     await sendRoleGranted(role, user.email || user.gmail!, user.fullName);
 
     res.body({ success: normalizeUserQuery(user) }).respond();

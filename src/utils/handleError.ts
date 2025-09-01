@@ -2,7 +2,7 @@ import { ErrorTemplate } from "@/class/ErrorTemplate";
 import { Response } from "express";
 
 export default function handleError(error: unknown, res: Response["res"]) {
-  const err = error as Error | ErrorTemplate;
+  const err = error as Error | ErrorTemplate<any>;
   const createdError = new Error();
   const callerLine = createdError.stack?.split("\n")[2];
 

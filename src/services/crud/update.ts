@@ -21,7 +21,7 @@ export const updateById = async <T, S extends Omit<Settings<T>, "project">>(
 ): Promise<QueryResult<T, S, T>> => {
   const { error, options, populate, sort, sortOptions } = settings || {};
   if (!isValidObjectId(id)) {
-    throw invalidObjectId(model, id);
+    throw invalidObjectId();
   }
 
   const query = await model
