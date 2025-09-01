@@ -4,14 +4,15 @@ import { verifyAccessToken, verifyRefreshToken } from "../utils/token";
 import { Revoked } from "../models/Revoked";
 import { User, UserRole } from "../models/User";
 import { Respond } from "@/class/Response";
+import db from "@/services/crud";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
 
 const isRefreshSafe = async (refreshToken: string) => {
   const refreshPayload = verifyRefreshToken(refreshToken);
 
-  if (!refreshPayload) return;
-  const revoked = await Revoked.findOne({ value: refreshToken }).normalize();
-  if (revoked) return;
-  return { refreshPayload, revoked };
+  if (!refreshPayload) throw new ErrorTemplate("INVALID_TOKEN", {});
+  await db.getOne(Revoked, { value: refreshToken }, { error: null });
+  return { refreshPayload };
 };
 
 export const authMiddleware = async (req: Request, response: Response, next: NextFunction) => {
@@ -20,23 +21,14 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
     const { refreshToken, accessToken } = req.cookies;
 
     // refresh token validation
-    const isRSafe = await isRefreshSafe(refreshToken);
-    if (!isRSafe) {
-      res.tempInvalidToken().respond();
-      return;
-    }
-    const { refreshPayload } = isRSafe;
+    const { refreshPayload } = await isRefreshSafe(refreshToken);
 
     // access token validation
     const payload = verifyAccessToken(accessToken);
 
     if (!payload) {
       // Check if refresh token exists in database
-      const user = await User.findById(refreshPayload.userId).normalize();
-      if (!user) {
-        res.tempInvalidToken().respond();
-        return;
-      }
+      const user = await db.getById(User, refreshPayload.userId, { error: { code: "INVALID_TOKEN" } });
 
       // Set new access token in cookie
       res.sendCookie({ template: "ACCESS", user });
@@ -47,11 +39,9 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
       return next();
     }
 
-    const user = await User.findById(payload.userId).normalize();
-    if (!user) {
-      res.tempNotFound("user", "please back to dashboard or sign in page").respond();
-      return;
-    }
+    const user = await db.getById(User, payload.userId, {
+      error: { code: "NOT_FOUND", item: "user", desc: "please back to dashboard or sign in page" },
+    });
 
     // refresh token if payload is expires
     if (new Date(refreshPayload.expires) <= new Date()) {
@@ -68,39 +58,40 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
 };
 
 export const requireVerified = async (req: Request, { res }: Response, next: NextFunction) => {
-  if (req.user?.verified) {
-    if (req.user.verified) next();
-    else res.tempNotVerified().respond();
-  } else {
-    const { refreshToken } = req.cookies;
-    const isRSafe = await isRefreshSafe(refreshToken);
-    if (!isRSafe) {
-      res.tempInvalidToken().respond();
-      return;
-    }
-    const { refreshPayload } = isRSafe;
+  try {
+    if (req.user?.verified) {
+      if (req.user.verified) next();
+      else throw new ErrorTemplate("NOT_VERIFIED", {});
+    } else {
+      const { refreshToken } = req.cookies;
+      const { refreshPayload } = await isRefreshSafe(refreshToken);
 
-    if (refreshPayload.verified) next();
-    else res.tempNotVerified().respond();
+      if (refreshPayload.verified) next();
+      else res.tempNotVerified().respond();
+    }
+  } catch (err) {
+    handleError(err, res);
   }
 };
 
 export const requireRole = (role: UserRole | UserRole[]) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
-    if (req.user?.role) {
-      if (typeof role === "string" ? req.user.role === role : role.includes(req.user.role)) next();
-      else res.tempInvalidRole(typeof role === "string" ? role : role.join(", ")).respond();
-    } else {
-      const { refreshToken } = req.cookies;
-      const isRSafe = await isRefreshSafe(refreshToken);
-      if (!isRSafe) {
-        res.tempInvalidToken().respond();
-        return;
+    try {
+      const error = new ErrorTemplate("INVALID_ROLE", { role: typeof role === "string" ? role : role.join(", ") });
+      if (req.user?.role) {
+        if (typeof role === "string" ? req.user.role === role : role.includes(req.user.role)) {
+          next();
+        } else {
+          throw error;
+        }
+      } else {
+        const { refreshToken } = req.cookies;
+        const { refreshPayload } = await isRefreshSafe(refreshToken);
+        if (typeof role === "string" ? refreshPayload.role === role : role.includes(refreshPayload.role)) next();
+        else throw error;
       }
-      const { refreshPayload } = isRSafe;
-
-      if (typeof role === "string" ? refreshPayload.role === role : role.includes(refreshPayload.role)) next();
-      else res.tempInvalidRole(typeof role === "string" ? role : role.join(", ")).respond();
+    } catch (err) {
+      handleError(err, res);
     }
   };
 };

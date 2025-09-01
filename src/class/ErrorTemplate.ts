@@ -2,8 +2,8 @@ import { ErrorResponseType, Respond, RestError } from "./Response";
 
 export type ErrorTemplateConfig =
   | { code: "CLIENT_FIELD"; field: ErrorResponseType["field"]; message: string; restErr?: RestError }
-  | { code: "MISSING_FIELDS"; field: string; restErr?: RestError }
-  | { code: "CLIENT_TYPE"; field: string; details?: string; restErr?: RestError }
+  | { code: "MISSING_FIELDS"; fields: string; restErr?: RestError }
+  | { code: "CLIENT_TYPE"; fields: string; details?: string; restErr?: RestError }
   | { code: "INVALID_OTP"; restErr?: Omit<RestError, "field"> }
   | { code: "INVALID_VERIF_TOKEN"; restErr?: Omit<RestError, "field"> }
   | { code: "INVALID_AUTH"; restErr?: RestError }
@@ -54,7 +54,7 @@ export class ErrorTemplate<C extends ErrorTemplateConfig["code"], T extends Resp
         res.tempLimitSendEmail(restErr).error();
         return;
       case "CLIENT_TYPE":
-        res.tempClientType(error.field, error.details, restErr).error();
+        res.tempClientType(error.fields, error.details, restErr).error();
         return;
       case "INVALID_AUTH":
         res.tempInvalidAuth(restErr).error();
@@ -84,7 +84,7 @@ export class ErrorTemplate<C extends ErrorTemplateConfig["code"], T extends Resp
         res.tempIsVerified(restErr).error();
         return;
       case "MISSING_FIELDS":
-        res.tempMissingFields(error.field, restErr).error();
+        res.tempMissingFields(error.fields, restErr).error();
         return;
       case "NOT_FOUND":
         res.tempNotFound(error.item, error.desc, restErr).error();

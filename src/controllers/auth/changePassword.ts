@@ -5,6 +5,8 @@ import { userProject } from "../../utils/manipulate/normalize";
 import { sendCredentialChanges } from "../../utils/email/send";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { updateById } from "@/services/crud/update";
 
 export const changePassword = async (req: Request, { res }: Response) => {
   try {
@@ -12,25 +14,19 @@ export const changePassword = async (req: Request, { res }: Response) => {
     const { newPassword, password } = req.body;
     validateRequires(["newPassword", "password"], req.body);
     if (!user.email) {
-      res.tempNotBound().respond();
-      return;
+      throw new ErrorTemplate("NOT_BOUND", {});
     }
     if (user.password && !(await bcrypt.compare(password, user.password))) {
-      res.tempClientField("password", "Old password is wrong").respond();
-      return;
+      throw new ErrorTemplate("CLIENT_FIELD", { field: "password", message: "Old password is wrong" });
     }
 
     if (user.password && (await bcrypt.compare(newPassword, user.password))) {
-      res.tempClientField("newPassword", "New password and old password can not same").respond();
-      return;
+      throw new ErrorTemplate("CLIENT_FIELD", { field: "newPassword", message: "New password and old password can not same" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const updatedUser = await User.findByIdAndUpdate(user.id, { password: hashedPassword }, { projection: userProject() }).normalize();
-    if (!updatedUser) {
-      res.tempNotFound("user").respond();
-      return;
-    }
+    const updatedUser = await updateById(User, user.id, { password: hashedPassword }, { project: userProject() });
+
     await sendCredentialChanges(user.email, user.fullName);
     res.body({ success: updatedUser }).info("Successfully update new password").ok();
   } catch (err) {

@@ -14,7 +14,7 @@ export const acceptRequestRole = async (req: Request, { res }: Response) => {
   try {
     const token = req.query.token?.toString();
     if (!token) {
-      throw new ErrorTemplate({ code: "MISSING_FIELDS", field: "token" });
+      throw new ErrorTemplate({ code: "MISSING_FIELDS", fields: "token" });
     }
 
     const decrToken = decrypt(token.toString()) as string;

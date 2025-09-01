@@ -4,6 +4,8 @@ import { userProject } from "../../utils/manipulate/normalize";
 import bcrypt from "bcrypt";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
+import { updateById } from "@/services/crud/update";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
 
 export const bindLocal = async (req: Request, { res }: Response) => {
   try {
@@ -11,19 +13,11 @@ export const bindLocal = async (req: Request, { res }: Response) => {
     const { email, password } = req.body;
     validateRequires(["email", "password"], req.body);
     if (user.email) {
-      res.tempIsBound().error();
-      return;
+      throw new ErrorTemplate("IS_BOUND", {});
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const updatedUser = await User.findByIdAndUpdate(
-      user.id,
-      {
-        email,
-        password: hashedPassword,
-      },
-      { projection: userProject() }
-    ).normalize();
+    const updatedUser = await updateById(User, user.id, { email, password: hashedPassword }, { project: userProject() });
     res.info("Successfully link to local account").body({ success: updatedUser }).ok();
   } catch (err) {
     handleError(err, res);

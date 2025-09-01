@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { User } from "../../models/User";
 import { Money } from "@/models/Money";
 import { validateRequires } from "@/utils/validate";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
+import db from "@/services/crud";
 
 export const signup = async (req: Request, { res }: Response) => {
   try {
@@ -14,20 +16,23 @@ export const signup = async (req: Request, { res }: Response) => {
     potentialUser.forEach((potential) => {
       if (potential) {
         if (potential?.email === email) {
-          return res.tempClientField("email", "Email is already in use").error();
-        } else return res.tempClientField("email", "Email is already bind with google account, please bind on account settings").error();
+          throw new ErrorTemplate("CLIENT_FIELD", { field: "email", message: "Email is already in use" });
+        } else {
+          throw new ErrorTemplate("CLIENT_FIELD", {
+            field: "email",
+            message: "Email is already bind with google account, please bind on account settings",
+          });
+        }
       }
     });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = (
-      await User.create({
-        email,
-        password: hashedPassword,
-        fullName,
-      })
-    ).normalizeUser();
-    await Money.create({ userId: newUser.id });
+    const newUser = await db.create(User, {
+      email,
+      password: hashedPassword,
+      fullName,
+    });
+    await db.create(Money, { userId: newUser.id });
 
     res.body({ success: newUser }).sendCookie({ template: "REFRESH_ACCESS", rememberMe }).created();
   } catch (error) {

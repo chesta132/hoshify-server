@@ -24,7 +24,7 @@ export const notFound = (model: Model<any>) => {
 };
 
 export const invalidObjectId = () => {
-  return new ErrorTemplate({ code: "CLIENT_TYPE", field: "Object ID" });
+  return new ErrorTemplate({ code: "CLIENT_TYPE", fields: "Object ID" });
 };
 
 const db = {

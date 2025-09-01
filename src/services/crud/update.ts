@@ -2,7 +2,6 @@ import {
   isValidObjectId,
   Model,
   MongooseUpdateQueryOptions,
-  ObjectId,
   RootFilterQuery,
   UpdateQuery,
   UpdateWithAggregationPipeline,
@@ -13,19 +12,19 @@ import { Normalized } from "@/types/types";
 import { getMany } from "./read";
 import { ErrorTemplate } from "@/class/ErrorTemplate";
 
-export const updateById = async <T, S extends Omit<Settings<T>, "project">>(
+export const updateById = async <T, S extends Settings<T>>(
   model: Model<T>,
   id: Id,
   update: UpdateQuery<T>,
   settings?: S
 ): Promise<QueryResult<T, S, T>> => {
-  const { error, options, populate, sort, sortOptions } = settings || {};
+  const { error, options, populate, sort, sortOptions, project } = settings || {};
   if (!isValidObjectId(id)) {
     throw invalidObjectId();
   }
 
   const query = await model
-    .findByIdAndUpdate(id, update, options)
+    .findByIdAndUpdate(id, update, { projection: project, ...options })
     .populate(populate || [])
     .sort(sort, sortOptions)
     .normalize();
@@ -37,15 +36,15 @@ export const updateById = async <T, S extends Omit<Settings<T>, "project">>(
   return query as Normalized<T>;
 };
 
-export const updateOne = async <T, S extends Omit<Settings<T>, "project">>(
+export const updateOne = async <T, S extends Settings<T>>(
   model: Model<T>,
   filter: RootFilterQuery<T>,
   update: UpdateQuery<T>,
   settings?: S
 ): Promise<QueryResult<T, S, T>> => {
-  const { error, options, populate, sort, sortOptions } = settings || {};
+  const { error, options, populate, sort, sortOptions, project } = settings || {};
   const query = await model
-    .findOneAndUpdate(filter, update, options)
+    .findOneAndUpdate(filter, update, { projection: project, ...options })
     .populate(populate || [])
     .sort(sort, sortOptions)
     .normalize();
@@ -69,15 +68,15 @@ export const updateMany = async <T, S extends { normalize?: boolean; options: Mo
   return (await getMany(model, filter, settings)) as any;
 };
 
-export const restoreById = async <T, S extends Omit<Settings<T>, "project">>(
+export const restoreById = async <T, S extends Settings<T>>(
   model: Model<T>,
   id: Id,
   settings?: S,
   update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">
 ): Promise<QueryResult<T, S, T>> => {
-  const { error, options, populate, sort, sortOptions } = settings || {};
+  const { error, options, populate, sort, sortOptions, project } = settings || {};
   const query = await model
-    .restoreById(id, update, options)
+    .restoreById(id, update, { projection: project, ...options })
     .populate(populate || [])
     .sort(sort, sortOptions)
     .normalize();
@@ -89,15 +88,15 @@ export const restoreById = async <T, S extends Omit<Settings<T>, "project">>(
   return query as Normalized<T>;
 };
 
-export const restoreOne = async <T, S extends Omit<Settings<T>, "project">>(
+export const restoreOne = async <T, S extends Settings<T>>(
   model: Model<T>,
   filter: RootFilterQuery<T> | Partial<T>,
   settings?: S,
   update?: Omit<UpdateQuery<T>, "isRecycled" | "deleteAt">
 ): Promise<QueryResult<T, S, T>> => {
-  const { error, options, populate, sort, sortOptions } = settings || {};
+  const { error, options, populate, sort, sortOptions, project } = settings || {};
   const query = await model
-    .restoreOne(filter, update, options)
+    .restoreOne(filter, update, { projection: project, ...options })
     .populate(populate || [])
     .sort(sort, sortOptions)
     .normalize();

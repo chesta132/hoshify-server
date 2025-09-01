@@ -6,42 +6,35 @@ import { sendCredentialChanges } from "../../utils/email/send";
 import { Verify } from "../../models/Verify";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
+import db from "@/services/crud";
 
 export const resetPassword = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const { token } = req.query;
+    const token = req.query.token?.toString();
     const { newPassword } = req.body;
     validateRequires(["newPassword"], req.body);
     validateRequires(["token"], req.query);
     if (!user.password || !user.email) {
-      res.tempNotBound().respond();
-      return;
+      throw new ErrorTemplate("NOT_BOUND", {});
     }
 
     if (!user.verified) {
-      res.tempClientField("newPassword", "User email must be verified first").error();
-      return;
+      throw new ErrorTemplate("CLIENT_FIELD", { message: "User email must be verified first", field: "newPassword" });
     }
 
     const password = await bcrypt.hash(newPassword, 10);
 
     if (await bcrypt.compare(newPassword, user.password)) {
-      res.tempClientField("newPassword", "New password and old password can not same").error();
-      return;
+      throw new ErrorTemplate("CLIENT_FIELD", { field: "newPassword", message: "New password and old password can not same" });
     }
 
-    const verifyOtp = await Verify.findOne({ value: token, type: "RESET_PASSWORD_OTP", userId: user.id }).normalize();
-    if (!verifyOtp) {
-      res.tempInvalidOTP().respond();
-      return;
-    }
-    const updatedUser = await User.findByIdAndUpdate(user.id, { password }, { projection: userProject() }).normalize();
-    if (!updatedUser) {
-      res.tempNotFound("user").respond();
-      return;
-    }
-    await Verify.deleteOne({ value: token, type: "RESET_PASSWORD_OTP", userId: user.id });
+    await db.getOne(Verify, { value: token, type: "RESET_PASSWORD_OTP", userId: user.id }, { error: { code: "INVALID_OTP" } });
+
+    const updatedUser = await db.updateById(User, user.id, { password }, { project: userProject() });
+
+    await db.deleteOne(Verify, { value: token, type: "RESET_PASSWORD_OTP", userId: user.id }, { error: null });
     await sendCredentialChanges(user.email, user.fullName);
 
     res.body({ success: updatedUser }).info("Successfully reset and update new password").ok();

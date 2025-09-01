@@ -6,6 +6,8 @@ import { encrypt } from "@/utils/crypto";
 import { sendRequestRole } from "@/utils/email/send";
 import { oneMin } from "@/utils/token";
 import { userProject } from "@/utils/manipulate/normalize";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
+import db from "@/services/crud";
 
 export const requestRole = async (req: Request, { res }: Response) => {
   try {
@@ -13,12 +15,12 @@ export const requestRole = async (req: Request, { res }: Response) => {
     let { role }: { role?: UserRole } = req.query;
     role = role?.toString().toUpperCase() as UserRole;
     if (!userRole.includes(role) || user.role === role) {
-      res.tempClientType("role").respond();
+      throw new ErrorTemplate("CLIENT_TYPE", { fields: "role" });
     }
 
     const token = encrypt(`requestRole_${user.id}_role_${role}`);
 
-    await Verify.create({
+    await db.create(Verify, {
       userId: user.id,
       value: token,
       type: "REQUEST_ROLE",
@@ -26,11 +28,7 @@ export const requestRole = async (req: Request, { res }: Response) => {
     });
 
     await sendRequestRole(role, token, user.fullName);
-    const updatedUser = await User.findByIdAndUpdate(
-      user.id,
-      { timeToAllowSendEmail: new Date(Date.now() + oneMin * 2) },
-      { projection: userProject() }
-    ).normalize();
+    const updatedUser = await db.updateById(User, user.id, { timeToAllowSendEmail: new Date(Date.now() + oneMin * 2) }, { project: userProject() });
 
     res.body({ success: updatedUser }).respond();
   } catch (err) {

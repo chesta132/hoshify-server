@@ -4,44 +4,41 @@ import { userProject } from "../../utils/manipulate/normalize";
 import { sendCredentialChanges } from "../../utils/email/send";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { updateById } from "@/services/crud/update";
+import { getOne } from "@/services/crud/read";
+import { deleteOne } from "@/services/crud/delete";
 
 export const changeEmail = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const { token } = req.query;
+    const token = req.query.token?.toString();
     const { newEmail } = req.body;
     if (!newEmail) {
-      res.tempMissingFields("new email").error();
-      return;
+      throw new ErrorTemplate("MISSING_FIELDS", { fields: "new email" });
     }
 
     if (!user.email) {
-      res.tempNotBound().error();
-      return;
+      throw new ErrorTemplate("NOT_BOUND", {});
     }
     if (user.email === newEmail) {
-      res.tempClientField("newEmail", "New email and old email can not same").error();
-      return;
+      throw new ErrorTemplate("CLIENT_FIELD", { field: "newEmail", message: "New email and old email can not same" });
     }
     if (await User.findOne({ email: newEmail })) {
-      res.tempClientField("newEmail", "Email is already in use").error();
-      return;
+      throw new ErrorTemplate("CLIENT_FIELD", { field: "newEmail", message: "Email is already in use" });
     }
 
     const updateEmail = async () => {
-      const updatedUser = await User.findByIdAndUpdate(
+      const updatedUser = await updateById(
+        User,
         user.id,
         {
           email: newEmail,
           // verified comment: new email is auto verified because google mail always valid
           verified: user?.gmail === newEmail,
         },
-        { projection: userProject() }
-      ).normalize();
-      if (!updatedUser) {
-        res.tempNotFound("user").error();
-        return;
-      }
+        { project: userProject() }
+      );
       return updatedUser;
     };
 
@@ -53,18 +50,15 @@ export const changeEmail = async (req: Request, { res }: Response) => {
     }
 
     if (!token) {
-      res.tempMissingFields("token").respond();
-      return;
+      throw new ErrorTemplate("MISSING_FIELDS", { fields: "token" });
     }
+    const verifyFilter = { value: token, type: "CHANGE_EMAIL_OTP", userId: user.id } as const;
+    const verifyError = { error: { code: "INVALID_OTP" } } as const;
 
-    const VerifyOtp = await Verify.findOne({ value: token, type: "CHANGE_EMAIL_OTP", userId: user.id }).normalize();
-    if (!VerifyOtp) {
-      res.tempInvalidOTP().error();
-      return;
-    }
+    await getOne(Verify, verifyFilter, verifyError);
 
     const updatedUser = await updateEmail();
-    await Verify.deleteOne({ value: token, type: "CHANGE_EMAIL_OTP", userId: user.id });
+    await deleteOne(Verify, verifyFilter, verifyError);
     await sendCredentialChanges(user.email, user.fullName, "email");
 
     res.body({ success: updatedUser }).info("Local email successfully updated").ok();
