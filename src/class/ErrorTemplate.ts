@@ -1,3 +1,4 @@
+import { omit, pick } from "@/utils/manipulate/object";
 import { ErrorResponseType, Respond, RestError } from "./Response";
 
 export type ErrorTemplateConfig =
@@ -20,20 +21,52 @@ export type ErrorTemplateConfig =
   | { code: "IS_RECYCLED"; name: string; restErr?: RestError }
   | { code: "NOT_RECYCLED"; name: string; restErr?: RestError };
 
+type OptionalCodes =
+  | "SELF_REQ"
+  | "INVALID_OTP"
+  | "INVALID_VERIF_TOKEN"
+  | "INVALID_AUTH"
+  | "INVALID_TOKEN"
+  | "IS_BOUND"
+  | "NOT_BOUND"
+  | "TOO_MUCH_REQ"
+  | "EMAIL_LIMIT"
+  | "IS_VERIFIED"
+  | "NOT_VERIFIED";
+
 type SelectedConfig<C> = Extract<ErrorTemplateConfig, { code: C }>;
-type ErrorProps<C> = Omit<SelectedConfig<C>, "code" | "restErr"> & SelectedConfig<C>["restErr"];
+type Depedencies<C> = Omit<SelectedConfig<C>, "code" | "restErr">;
+type SelectedRestErr<C> = Pick<SelectedConfig<C>, "restErr">;
+type ErrorProps<C> = Depedencies<C> & SelectedRestErr<C>;
+type ExtractOptional<C> = Extract<C, OptionalCodes>;
 
 export class ErrorTemplate<C extends ErrorTemplateConfig["code"], T extends Respond | undefined = undefined> {
   error: ErrorTemplateConfig;
   private res?: T;
 
-  constructor(code: C, props: ErrorProps<C>);
+  constructor(code: ExtractOptional<C>, depedencies?: Depedencies<C>, restErr?: SelectedRestErr<C>["restErr"]);
+  constructor(code: ExtractOptional<C>, depedencies?: ErrorProps<C>);
+  constructor(code: C, depedencies: Depedencies<C>, restErr?: SelectedRestErr<C>["restErr"]);
+  constructor(code: C, depedencies: ErrorProps<C>);
+
   constructor(error: ErrorTemplateConfig, res?: T);
-  constructor(error: C | ErrorTemplateConfig, depedencies: (T | undefined) | ErrorProps<C>) {
+
+  constructor(
+    error: C | ExtractOptional<C> | ErrorTemplateConfig,
+    depedencies: (T | undefined) | ErrorProps<C> | Depedencies<C>,
+    restErr?: SelectedRestErr<C>["restErr"]
+  ) {
     if (typeof error === "string") {
       const code = error;
-      const dep = depedencies as ErrorProps<C>;
-      const err = { code, ...dep, restErr: dep } as ErrorTemplateConfig;
+      const dep = depedencies as ErrorProps<C> | Depedencies<C> | undefined;
+      const err = { code, ...dep } as ErrorTemplateConfig;
+      if (!err.restErr) {
+        if (restErr) {
+          err.restErr = restErr as RestError;
+        } else if (dep) {
+          err.restErr = pick(dep as RestError, ["title", "details", "field", "status"]);
+        }
+      }
       this.error = err;
     } else {
       this.error = error;
