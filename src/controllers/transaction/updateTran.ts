@@ -2,7 +2,9 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Transaction, transactionType } from "@/models/Transaction";
 import { isValidObjectId } from "mongoose";
-import { getTotal, Money, updateMoneyMany } from "@/models/Money";
+import { getTotal, Money } from "@/models/Money";
+import { ErrorTemplate } from "@/class/ErrorTemplate";
+import db from "@/services/crud";
 
 export const updateTran = async (req: Request, { res }: Response) => {
   try {
@@ -10,19 +12,18 @@ export const updateTran = async (req: Request, { res }: Response) => {
     const { id } = req.params;
     let { title, details, type, amount } = req.body;
     if (!isValidObjectId(id)) {
-      res.tempClientType("Object ID").respond();
-      return;
+      throw new ErrorTemplate("CLIENT_TYPE", { fields: "Object ID" });
     }
     if (!transactionType.includes(type)) {
-      res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
-      return;
+      throw new ErrorTemplate("CLIENT_TYPE", { fields: "type", details: `invalid type enum, please select between ${transactionType.join(" or ")}` });
     }
     if (amount < 0) {
       type = type === "INCOME" ? "OUTCOME" : "INCOME";
       amount = Math.abs(amount);
     }
 
-    const tran = await Transaction.findByIdAndUpdate(
+    const tran = await db.updateById(
+      Transaction,
       id,
       {
         title,
@@ -30,12 +31,9 @@ export const updateTran = async (req: Request, { res }: Response) => {
         type,
         amount,
       },
-      { runValidators: true }
-    ).normalize();
-    if (!tran) {
-      res.tempNotFound("transaction");
-      return;
-    }
+      { options: { runValidators: true } }
+    );
+
     const { amount: tranAmount } = tran;
     const tranType = tran.type.toLowerCase() as "income" | "outcome";
     const typeField = type.toLowerCase() as "income" | "outcome";
