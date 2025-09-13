@@ -1,23 +1,24 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
 import { normalizeCurrency, normalizeUserQuery } from "../../utils/manipulate/normalize";
-import { buildUserPopulate, BuildUserPopulateProps, PopulatedUser, User } from "../../models/User";
+import { buildUserPopulate, PopulatedUser, User } from "../../models/User";
 import { Normalized } from "@/types/types";
+
+export const initialPopulateConfig = {
+  todos: 5,
+  transactions: 5,
+  notes: 3,
+  links: "all",
+  schedules: 3,
+  money: "all",
+} as const;
 
 export const initiateUser = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
-    const populateConfig: BuildUserPopulateProps = {
-      todos: 5,
-      transactions: 5,
-      notes: 3,
-      links: "all",
-      schedules: 3,
-      money: "all",
-    };
 
-    const populatedUser = (await User.findById(user.id).populate(buildUserPopulate(populateConfig)).normalize()) as Normalized<
-      PopulatedUser<keyof typeof populateConfig>
+    const populatedUser = (await User.findById(user.id).populate(buildUserPopulate(initialPopulateConfig)).normalize()) as Normalized<
+      PopulatedUser<keyof typeof initialPopulateConfig>
     >;
     if (!populatedUser) {
       res.tempNotFound("user");

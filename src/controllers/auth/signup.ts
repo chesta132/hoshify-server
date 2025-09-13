@@ -1,11 +1,12 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
 import bcrypt from "bcrypt";
-import { User } from "../../models/User";
+import { buildUserPopulate, User } from "../../models/User";
 import { Money } from "@/models/Money";
 import { validateRequires } from "@/utils/validate";
 import { ErrorTemplate } from "@/class/ErrorTemplate";
 import db from "@/services/crud";
+import { initialPopulateConfig } from "../user/initiateUser";
 
 export const signup = async (req: Request, { res }: Response) => {
   try {
@@ -27,12 +28,14 @@ export const signup = async (req: Request, { res }: Response) => {
     });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await db.create(User, {
+    const createdUser = await db.create(User, {
       email,
       password: hashedPassword,
       fullName,
     });
-    await db.create(Money, { userId: newUser.id });
+    await db.create(Money, { userId: createdUser.id });
+
+    const newUser = await db.getById(User, createdUser.id, { populate: buildUserPopulate(initialPopulateConfig) });
 
     res.body({ success: newUser }).sendCookie({ template: "REFRESH_ACCESS", rememberMe }).created();
   } catch (error) {

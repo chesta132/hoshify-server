@@ -3,12 +3,13 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import bcrypt from "bcrypt";
 import { ErrorResponseType } from "@/class/Response";
-import { User } from "@/models/User";
+import { buildUserPopulate, User } from "@/models/User";
+import { initialPopulateConfig } from "@/controllers/user/initiateUser";
 
 passport.use(
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
     try {
-      const user = await User.findOne({ email: email.trim() }).normalize();
+      const user = await User.findOne({ email: email.trim() }).populate(buildUserPopulate(initialPopulateConfig)).normalize();
       if (!user || !user.password) {
         return done(null, false, { message: "Email not registered", code: "CLIENT_FIELD", field: "email" } as ErrorResponseType);
       }

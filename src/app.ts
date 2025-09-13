@@ -7,9 +7,11 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import router from "./routes";
-import { connectDB } from "./utils/database/connectDB";
+import { connectDB, URI } from "./utils/database/connectDB";
 import passport from "passport";
 import { resMiddleware } from "./middlewares/res";
+import session from "express-session";
+import MongoStore from "connect-mongo";
 import "./services/auth/passport";
 import "./utils/extends";
 import "./utils/database/extends";
@@ -44,6 +46,14 @@ app.use(
       message: "Too many requests, please try again later",
       code: "TOO_MUCH_REQUEST",
     },
+  })
+);
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET_KEY!,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: URI! }),
   })
 );
 app.use(passport.initialize());

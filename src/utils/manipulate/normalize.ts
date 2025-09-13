@@ -9,7 +9,7 @@ const shouldProcess = (data: any): boolean => {
 };
 
 const objecting = <T extends Record<string, any>>(data: T) => {
-  return (data.toObject ? data.toObject() : data) as T;
+  return (data?.toObject ? data.toObject() : { ...data }) as T;
 };
 
 export const traverseAndNormalize = (data: any): any => {
