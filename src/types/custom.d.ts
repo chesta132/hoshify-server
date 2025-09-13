@@ -54,6 +54,8 @@ type IsArray<T, TrueType = T, FalseType = never> = [T] extends [any[]] ? TrueTyp
 /** IsArray but not strict. */
 type IncludeArray<T, TrueType = T, FalseType = never> = T extends any[] ? TrueType : FalseType;
 
+/** Extracts the element type of an array `T`. */
 type ExtractArray<T> = T extends (infer U)[] ? U : T;
 
+/** Conditionally adds a new field to a type `T`. */
 type ConditionalField<T, Key extends string, ExtraKey extends string, ExtraType> = IsFalsy<T[Key], T, T & { [K in ExtraKey]: ExtraType }>;

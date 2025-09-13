@@ -13,7 +13,7 @@ passport.use(
         return done(null, false, { message: "Email not registered", code: "CLIENT_FIELD", field: "email" } as ErrorResponseType);
       }
 
-      const passwordValid = bcrypt.compare(password.trim(), user.password);
+      const passwordValid = await bcrypt.compare(password.trim(), user.password);
       if (!passwordValid) {
         return done(null, false, { message: "Incorrect Password", code: "CLIENT_FIELD", field: "password" } as ErrorResponseType);
       }

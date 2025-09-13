@@ -3,7 +3,7 @@ import { codeErrorAuth, codeErrorClient, codeErrorField, codeErrorServer, CodeEr
 import { UserCred } from "@/models/User";
 import { Response, Request } from "express";
 
-export type Fields = "password" | "newPassword" | "username" | "email" | "newEmail" | "newFullName" | "token" | "type" | "refreshMoney";
+export type Fields = "password" | "newPassword" | "email" | "newEmail" | "newFullName" | "token" | "type" | "refreshMoney";
 
 export type CodeAuthError = (typeof codeErrorAuth)[number];
 export type CodeFieldError = (typeof codeErrorField)[number];
