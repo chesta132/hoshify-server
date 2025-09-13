@@ -1,12 +1,14 @@
 import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
 import bcrypt from "bcrypt";
-import { buildUserPopulate, User } from "../../models/User";
+import { buildUserPopulate, IUser, User, UserPopulateField } from "../../models/User";
 import { Money } from "@/models/Money";
 import { validateRequires } from "@/utils/validate";
 import { ErrorTemplate } from "@/class/ErrorTemplate";
 import db from "@/services/crud";
 import { initialPopulateConfig } from "../user/initiateUser";
+import { normalizeCurrency } from "@/utils/manipulate/normalize";
+import { NormalizedData } from "@/types/types";
 
 export const signup = async (req: Request, { res }: Response) => {
   try {
@@ -35,7 +37,11 @@ export const signup = async (req: Request, { res }: Response) => {
     });
     await db.create(Money, { userId: createdUser.id });
 
-    const newUser = await db.getById(User, createdUser.id, { populate: buildUserPopulate(initialPopulateConfig) });
+    const newUser = (await db.getById(User, createdUser.id, { populate: buildUserPopulate(initialPopulateConfig) })) as NormalizedData<
+      IUser & UserPopulateField
+    >;
+    (newUser.money as any) = normalizeCurrency(newUser.money, createdUser.currency);
+    (newUser.transactions as any) = normalizeCurrency(newUser.transactions, createdUser.currency);
 
     res.body({ success: newUser }).sendCookie({ template: "REFRESH_ACCESS", rememberMe }).created();
   } catch (error) {

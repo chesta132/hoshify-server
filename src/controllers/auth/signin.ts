@@ -2,7 +2,7 @@ import { Response, Request, NextFunction } from "express";
 import passport from "passport";
 import { ErrorResponseType } from "../../class/Response";
 import handleError from "../../utils/handleError";
-import { normalizeUserQuery } from "../../utils/manipulate/normalize";
+import { normalizeCurrency, normalizeUserQuery } from "../../utils/manipulate/normalize";
 import { IUser, UserPopulateField } from "../../models/User";
 import { NormalizedData } from "../../types/types";
 
@@ -22,6 +22,8 @@ export const signin = async (req: Request, { res }: Response, next: NextFunction
 
       req.login(user, { session: false }, (err) => {
         const normalized = normalizeUserQuery(user);
+        (normalized.money as any) = normalizeCurrency(normalized.money, user.currency);
+        (normalized.transactions as any) = normalizeCurrency(normalized.transactions, user.currency);
         if (err) {
           return handleError(err, res);
         }

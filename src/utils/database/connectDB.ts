@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export const URI = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.HOST}:27017`
+export const URI = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.HOST}:27017`;
 
 export const connectDB = async () => {
   try {

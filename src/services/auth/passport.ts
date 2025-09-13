@@ -3,8 +3,12 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import bcrypt from "bcrypt";
 import { ErrorResponseType } from "@/class/Response";
-import { buildUserPopulate, User } from "@/models/User";
+import { buildUserPopulate, IUser, User, UserPopulateField } from "@/models/User";
 import { initialPopulateConfig } from "@/controllers/user/initiateUser";
+import { Money } from "@/models/Money";
+import { NormalizedData } from "@/types/types";
+import db from "../crud";
+import { normalizeCurrency } from "@/utils/manipulate/normalize";
 
 passport.use(
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
@@ -53,13 +57,22 @@ passport.use(
           return done(null, updatedUser!);
         }
 
-        const newUser = await User.create({
-          googleId: profile.id,
-          gmail: profile.emails![0]?.value,
-          fullName: profile.displayName,
-        });
+        const createdUser = (
+          await User.create({
+            googleId: profile.id,
+            gmail: profile.emails![0]?.value,
+            fullName: profile.displayName,
+          })
+        ).normalize();
+        await Money.create({ userId: createdUser.id });
 
-        done(null, newUser.normalize());
+        const newUser = (await db.getById(User, createdUser.id, { populate: buildUserPopulate(initialPopulateConfig) })) as NormalizedData<
+          IUser & UserPopulateField
+        >;
+        (newUser.money as any) = normalizeCurrency(newUser.money, createdUser.currency);
+        (newUser.transactions as any) = normalizeCurrency(newUser.transactions, createdUser.currency);
+
+        done(null, newUser);
       } catch (err) {
         console.error(err);
         done(err);
@@ -83,7 +96,9 @@ passport.use(
         const updatedUser = await User.findByIdAndUpdate(user.id, {
           googleId: profile.id,
           gmail: profile.emails![0].value,
-        }).normalize();
+        })
+          .populate(buildUserPopulate(initialPopulateConfig))
+          .normalize();
         if (!updatedUser) {
           return done(null, false, {
             title: "User not found",
