@@ -10,7 +10,7 @@ import { pick } from "@/utils/manipulate/object";
 export const createManyFactory = <T, F extends Partial<keyof T>>(
   model: Model<T>,
   { neededField, acceptableField }: ControllerConfig<T, F>,
-  options?: ControllerOptions<T, []>
+  options?: Omit<ControllerOptions<T, []>, "filter" | "settings">
 ) => {
   return async (req: Request, { res }: Response) => {
     try {

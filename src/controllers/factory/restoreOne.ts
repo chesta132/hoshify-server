@@ -17,7 +17,7 @@ export const restoreOneFactory = <T extends { isRecycled: boolean; title: string
         return;
       }
 
-      const data = (await model.restoreOne({ _id: id, userId: req.user!.id, isRecycled: true }))?.normalize();
+      const data = (await model.restoreOne({ _id: id, userId: req.user!.id, isRecycled: true, ...options?.filter }))?.normalize();
       if (!data) {
         res.tempNotFound(model.getName()).respond();
         return;

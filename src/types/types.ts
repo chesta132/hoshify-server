@@ -1,7 +1,8 @@
-import { Document, ObjectId } from "mongoose";
+import { Document, ObjectId, RootFilterQuery } from "mongoose";
 import { codeErrorAuth, codeErrorClient, codeErrorField, codeErrorServer, CodeErrorValues } from "../class/Response";
 import { UserCred } from "@/models/User";
 import { Response, Request } from "express";
+import { Settings } from "@/services/crud";
 
 export type Fields = "password" | "newPassword" | "email" | "newEmail" | "newFullName" | "token" | "type" | "refreshMoney";
 
@@ -45,6 +46,8 @@ export type NormalizedUser<DocType, ResultType = DocType, IfObject = never> = Re
   : NormalizeUserReturn<DocType> | IfObject;
 
 export interface ControllerOptions<T, Z = T> {
+  filter?: RootFilterQuery<T>;
+  settings?: Settings<T>;
   funcBeforeRes?: (data: Normalized<T, Z>, req: Request, res: Response["res"]) => any;
   funcInitiator?: (req: Request, res: Response["res"]) => Promise<"stop"> | "stop" | Promise<void> | void;
 }

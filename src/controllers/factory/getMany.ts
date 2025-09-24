@@ -3,11 +3,9 @@ import handleError from "@/utils/handleError";
 import { ControllerOptions } from "@/types/types";
 import { Model } from "mongoose";
 import { getMany } from "@/services/crud/read";
+import { omit } from "@/utils/manipulate/object";
 
-export const getManyFactory = <T extends Record<string, any>>(
-  model: Model<T>,
-  options?: Omit<ControllerOptions<T[]>, "funcInitiator"> & { isRecycled?: boolean }
-) => {
+export const getManyFactory = <T extends Record<string, any>>(model: Model<T>, options?: Omit<ControllerOptions<T[]>, "funcInitiator">) => {
   return async (req: Request, { res }: Response) => {
     try {
       const user = req.user!;
@@ -17,8 +15,8 @@ export const getManyFactory = <T extends Record<string, any>>(
 
       const data = await getMany(
         model,
-        { userId: user.id, isRecycled: options?.isRecycled || false },
-        { options: { sort: { createdAt: -1 }, limit, skip } }
+        { userId: user.id, ...options?.filter },
+        { options: { limit, skip, ...options?.settings?.options }, ...omit(options?.settings || {}, ["options"]) }
       );
       if (options?.funcBeforeRes) {
         await options.funcBeforeRes(data, req, res);

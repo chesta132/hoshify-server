@@ -42,11 +42,9 @@ export const getOne = async <T, S extends Settings<T>>(
   return query as Normalized<T>;
 };
 
-export const getMany = async <T>(
-  model: Model<T>,
-  filter: RootFilterQuery<T>,
-  settings?: Omit<Settings<T>, "error">
-): Promise<QueryResult<T, {}, []>> => {
+export type GetManySettings<T> = Omit<Settings<T>, "error">;
+
+export const getMany = async <T>(model: Model<T>, filter: RootFilterQuery<T>, settings?: GetManySettings<T>): Promise<QueryResult<T, {}, []>> => {
   const { options, populate, project, sort, sortOptions } = settings || {};
 
   const query = await model

@@ -19,9 +19,9 @@ export const restoreManyFactory = <T extends { isRecycled: boolean; deleteAt: Da
 
       await updateMany(
         model,
-        { _id: { $in: ids }, userId: req.user!.id, isRecycled: true },
+        { _id: { $in: ids }, userId: req.user!.id, isRecycled: true, ...options?.filter },
         { isRecycled: false, deleteAt: null },
-        { options: { runValidators: true } }
+        { options: { runValidators: true }, ...options?.settings }
       );
 
       const updatedData = unUpdated.map((data) => ({ ...data, isRecycled: false, deleteAt: null }));

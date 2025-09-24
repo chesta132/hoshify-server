@@ -20,8 +20,8 @@ export const updateOneFactory = <T>(model: Model<T>, neededField?: string[], opt
 
       if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
 
-      const data = (await updateOne(model, { _id: id, userId: req.user!.id }, omit(req.body, unEditableField), {
-        options: { new: true, runValidators: true },
+      const data = (await updateOne(model, { _id: id, userId: req.user!.id, ...options?.filter }, omit(req.body, unEditableField), {
+        options: { new: true, runValidators: true }, ...options?.settings
       })) as Normalized<T>;
 
       if (options?.funcBeforeRes) await options.funcBeforeRes(data, req, res);

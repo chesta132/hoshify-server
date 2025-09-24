@@ -8,7 +8,7 @@ export const initialPopulateConfig = {
   todos: 5,
   transactions: 5,
   notes: 3,
-  links: "all",
+  links: 10,
   schedules: 3,
   money: "all",
 } as const;

@@ -1,5 +1,6 @@
 import { createDummy } from "@/controllers/dummy/createDummy";
 import { deleteDummy } from "@/controllers/dummy/deleteDummy";
+import { Link } from "@/models/Link";
 import { Note } from "@/models/Note";
 import { Schedule } from "@/models/Schedule";
 import { Todo } from "@/models/Todo";

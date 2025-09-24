@@ -4,15 +4,15 @@ import { updateOneFactory } from "../factory/updateOne";
 import { getManyFactory } from "../factory/getMany";
 import { Link } from "@/models/Link";
 
-export const getLinks = getManyFactory(Link);
+export const getLinks = getManyFactory(Link, { settings: { sort: { position: 1 } } });
 
 export const createLinks = createManyFactory(
   Link,
-  { neededField: ["title", "link"] },
+  { neededField: ["title", "link"], acceptableField: ["position"] },
   {
     async funcInitiator(req) {
       const lastLink = await Link.findOne({ userId: req.user?.id }).sort({ position: -1 }).normalize();
-      let position = lastLink?.position || 0;
+      let position = (lastLink?.position || 0) + 1;
       (req.body as any[]).forEach((data) => {
         data.position = position++;
       });
@@ -22,7 +22,7 @@ export const createLinks = createManyFactory(
 
 export const createLink = createOneFactory(
   Link,
-  { neededField: ["title", "link"] },
+  { neededField: ["title", "link"], acceptableField: ["position"] },
   {
     async funcInitiator(req) {
       const lastLink = await Link.findOne({ userId: req.user!.id }).sort({ position: -1 }).normalize();
