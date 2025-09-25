@@ -18,42 +18,70 @@ export const updateManyFactory = <T, F extends string>(
       const user = req.user!;
       let invalidDatas: string[] = [];
 
-      const isObjectId = body.every((data, idx) => {
-        if (isValidObjectId(data._id) || isValidObjectId(data.id)) return true;
-        else {
+      const dataIds: string[] = [];
+      body.forEach((data, idx) => {
+        const id = data._id || data.id;
+        if (isValidObjectId(id)) {
+          dataIds.push(id);
+        } else {
           invalidDatas.push(data?.title || `Index ${idx}`);
-          return false;
         }
       });
 
-      if (!isObjectId) {
+      if (invalidDatas.length > 0) {
         res.tempClientType("Object ID", `${invalidDatas.join(", ")} is not ObjectId.`).respond();
         return;
       }
 
-      if (neededField) validateRequires(neededField, req.body);
+      if (neededField) {
+        body.forEach((item, idx) => {
+          try {
+            validateRequires(neededField, item);
+          } catch (err) {
+            invalidDatas.push(item?.title || `Index ${idx}`);
+          }
+        });
 
-      if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
+        if (invalidDatas.length > 0) {
+          res.tempClientType("Validation", `Missing required fields in: ${invalidDatas.join(", ")}`).respond();
+          return;
+        }
+      }
 
-      const dataIds = body.map((data) => data._id || data.id);
+      if (options?.funcInitiator) {
+        if ((await options.funcInitiator(req, res)) === "stop") return;
+      }
 
-      const datas = body.map((b) => ({ ...pick(b, [...(neededField || []), ...(acceptableField || [])]), userId: user.id })) as T[];
+      const datas = body.map((b, index) => ({
+        ...pick(b, [...(neededField || []), ...(acceptableField || [])]),
+        userId: user.id,
+        _id: dataIds[index],
+      }));
+
       await model.bulkWrite(
         datas.map((data) => ({
           updateOne: {
-            filter: { _id: dataIds },
-            update: omit(data as any, unEditableField),
+            filter: { _id: data._id, userId: user.id },
+            update: omit(data as any, [...unEditableField, "_id"]),
           },
         }))
       );
 
-      const updatedDatas = (await model.find({ _id: { $in: dataIds }, userId: req.user!.id })).map((data) => data.normalize()) as NormalizedData<T>[];
-      if (options?.funcBeforeRes) await options.funcBeforeRes(updatedDatas, req, res);
+      const updatedDatas = (
+        await model.find({
+          _id: { $in: dataIds },
+          userId: user.id,
+        })
+      ).map((data) => data.normalize()) as NormalizedData<T>[];
+
+      if (options?.funcBeforeRes) {
+        await options.funcBeforeRes(updatedDatas, req, res);
+      }
 
       res
         .body({ success: updatedDatas })
         .info(`${updatedDatas.length} ${pluralize(model.getName(), updatedDatas.length)} updated`)
-        .created();
+        .respond();
     } catch (err) {
       handleError(err, res);
     }
