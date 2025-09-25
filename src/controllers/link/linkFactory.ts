@@ -3,6 +3,7 @@ import { createOneFactory } from "../factory/createOne";
 import { updateOneFactory } from "../factory/updateOne";
 import { getManyFactory } from "../factory/getMany";
 import { Link } from "@/models/Link";
+import { updateManyFactory } from "../factory/updateMany";
 
 export const getLinks = getManyFactory(Link, { settings: { sort: { position: 1 } } });
 
@@ -33,3 +34,5 @@ export const createLink = createOneFactory(
 );
 
 export const updateLink = updateOneFactory(Link);
+
+export const updateLinks = updateManyFactory(Link, { neededField: ["title", "link"], acceptableField: ["position"] })

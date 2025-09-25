@@ -17,8 +17,7 @@ export const deleteLink = async (req: Request, { res }: Response) => {
       res.tempNotFound("link").respond();
       return;
     }
-
-    res.noContent();
+    res.body({ success: deletedLink }).info(`${deletedLink.title} deleted`).respond();
   } catch (err) {
     handleError(err, res);
   }
