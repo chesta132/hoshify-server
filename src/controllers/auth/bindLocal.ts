@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
 import { updateById } from "@/services/crud/update";
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 
 export const bindLocal = async (req: Request, { res }: Response) => {
   try {
@@ -13,7 +13,7 @@ export const bindLocal = async (req: Request, { res }: Response) => {
     const { email, password } = req.body;
     validateRequires(["email", "password"], req.body);
     if (user.email) {
-      throw new ErrorTemplate("IS_BOUND", {});
+      throw new ServerError("IS_BOUND", {});
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

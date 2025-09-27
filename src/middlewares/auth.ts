@@ -5,12 +5,12 @@ import { Revoked } from "../models/Revoked";
 import { User, UserRole } from "../models/User";
 import { Respond } from "@/class/Response";
 import db from "@/services/crud";
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 
 const isRefreshSafe = async (refreshToken: string) => {
   const refreshPayload = verifyRefreshToken(refreshToken);
 
-  if (!refreshPayload) throw new ErrorTemplate("INVALID_TOKEN", {});
+  if (!refreshPayload) throw new ServerError("INVALID_TOKEN", {});
   await db.getOne(Revoked, { value: refreshToken }, { error: null });
   return { refreshPayload };
 };
@@ -61,7 +61,7 @@ export const requireVerified = async (req: Request, { res }: Response, next: Nex
   try {
     if (req.user?.verified) {
       if (req.user.verified) next();
-      else throw new ErrorTemplate("NOT_VERIFIED", {});
+      else throw new ServerError("NOT_VERIFIED", {});
     } else {
       const { refreshToken } = req.cookies;
       const { refreshPayload } = await isRefreshSafe(refreshToken);
@@ -77,7 +77,7 @@ export const requireVerified = async (req: Request, { res }: Response, next: Nex
 export const requireRole = (role: UserRole | UserRole[]) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
-      const error = new ErrorTemplate("INVALID_ROLE", { role: typeof role === "string" ? role : role.join(", ") });
+      const error = new ServerError("INVALID_ROLE", { role: typeof role === "string" ? role : role.join(", ") });
       if (req.user?.role) {
         if (typeof role === "string" ? req.user.role === role : role.includes(req.user.role)) {
           next();

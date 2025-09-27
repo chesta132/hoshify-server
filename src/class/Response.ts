@@ -153,15 +153,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   constructor(req: Request, res: Response) {
     this._res = res;
     this._req = req;
-    return new Proxy(this, {
-      get: (target, prop, receiver) => {
-        if (prop in target) {
-          return Reflect.get(target, prop, receiver);
-        }
-        const value = (res as any)[prop as any];
-        return typeof value === "function" ? value.bind(res) : value;
-      },
-    });
   }
 
   private reset() {
@@ -346,6 +337,42 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
   }
 
   /**
+   * Delete cookies from the response.
+   *
+   * @example
+   * ```ts
+   * res.body({ success: user }).deleteCookies(["accessToken", "refreshToken"]).ok();
+   * ```
+   *
+   * @param name Name of the cookie or array of names to delete
+   * @param options Cookie options
+   * @returns this
+   */
+  deleteCookies(name: string[] | string, options?: CookieOptions) {
+    if (Array.isArray(name)) {
+      name.forEach((n) => this._res.clearCookie(n, options));
+    } else {
+      this._res.clearCookie(name, options);
+    }
+    return this;
+  }
+
+  /**
+   * Redirect the client to a specified URL.
+   * @example
+   * ```ts
+   * res.redirect("https://example.com");
+   * ```
+   *
+   * @param url URL to redirect to
+   * @returns this
+   */
+  redirect(url: string) {
+    this._res.redirect(url);
+    return this;
+  }
+
+  /**
    * Smart send success or error.
    *
    * @example
@@ -451,53 +478,16 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return this;
   }) as any;
 
-  /**
-   * Template of a missing fields error.
-   *
-   * @example
-   * ```ts
-   * res.tempMissingFields("email");
-   * ```
-   *
-   * @param fields Name of the missing fields
-   * @param restErr Additional error properties
-   * @returns this
-   */
   tempMissingFields(fields: string, restErr?: RestError) {
     const body = this.body({ error: { ...restErr, title: "Missing Fields", message: `${capital(fields)} is required`, code: "MISSING_FIELDS" } });
     return body;
   }
 
-  /**
-   * Template of a client field error.
-   *
-   * @example
-   * ```ts
-   * res.tempClientField("username", "Username is invalid");
-   * ```
-   *
-   * @param field Field name that causing error
-   * @param message Error message for client
-   * @param restErr Additional error properties
-   * @returns this
-   */
   tempClientField(field: ErrorResponseType["field"], message: string, restErr?: RestError) {
     const body = this.body({ error: { ...restErr, field, message, code: "CLIENT_FIELD" } });
     return body;
   }
 
-  /**
-   * Template of an invalid client field type.
-   *
-   * @example
-   * ```ts
-   * res.tempClientField("username");
-   * ```
-   *
-   * @param field Field name that causing the error
-   * @param restErr Additional error properties
-   * @returns this
-   */
   tempClientType(field: string, details?: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -510,17 +500,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template of an invalid OTP error.
-   *
-   * @example
-   * ```ts
-   * res.tempInvalidOTP();
-   * ```
-   *
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempInvalidOTP(restErr?: Omit<RestError, "field">) {
     const body = this.body({
       error: {
@@ -534,17 +513,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template of an invalid OTP error.
-   *
-   * @example
-   * ```ts
-   * res.tempInvalidVerifyToken();
-   * ```
-   *
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempInvalidVerifyToken(restErr?: Omit<RestError, "field">) {
     const body = this.body({
       error: {
@@ -558,17 +526,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template of an authentication error.
-   *
-   * @example
-   * ```ts
-   * res.tempInvalidAuth();
-   * ```
-   *
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempInvalidAuth(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -581,17 +538,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template of an invalid role.
-   *
-   * @example
-   * ```ts
-   * res.tempInvalidRole("DEVELOPER");
-   * ```
-   *
-   * @param role Role to access
-   * @returns typeof .body({ error })
-   */
   tempInvalidRole(role: string, restErr?: RestError) {
     const body = this.body({
       error: { ...restErr, code: "INVALID_ROLE", message: `${capital(role.toLowerCase())} role needed`, title: "Invalid Role" },
@@ -599,17 +545,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template of an invalid token error.
-   *
-   * @example
-   * ```ts
-   * res.tempInvalidToken();
-   * ```
-   *
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempInvalidToken(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -622,19 +557,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template of a not found error.
-   *
-   * @example
-   * ```ts
-   * res.tempNotFound("User");
-   * ```
-   *
-   * @param item Item name
-   * @param desc Optional description
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempNotFound(item: string, desc?: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -647,18 +569,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template when account is already bound.
-   *
-   * @example
-   * ```ts
-   * res.tempIsBound("google");
-   * ```
-   *
-   * @param provider Optional provider name
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempIsBound = (provider?: string, restErr?: RestError) => {
     const body = this.body({
       error: { ...restErr, code: "IS_BOUND", message: `Account is already bound to ${provider ?? "local"}`, title: "Account already bounded" },
@@ -666,18 +576,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   };
 
-  /**
-   * Template when account is not bound.
-   *
-   * @example
-   * ```ts
-   * res.tempNotBound("google");
-   * ```
-   *
-   * @param provider Optional provider name
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempNotBound(provider?: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -690,18 +588,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template of too many requests error.
-   *
-   * @example
-   * ```ts
-   * res.tempTooMuchReq("Rate limit exceeded");
-   * ```
-   *
-   * @param desc Optional description
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempTooMuchReq(desc?: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -714,17 +600,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template of limit send email error.
-   *
-   * @example
-   * ```ts
-   * res.tempLimitSendEmail();
-   * ```
-   *
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempLimitSendEmail(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -737,33 +612,11 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template when email is already verified.
-   *
-   * @example
-   * ```ts
-   * res.tempIsVerified();
-   * ```
-   *
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempIsVerified(restErr?: RestError) {
     const body = this.body({ error: { ...restErr, message: "Your email has been verified", code: "IS_VERIFIED", title: "You have been verified" } });
     return body;
   }
 
-  /**
-   * Template when account is not verified.
-   *
-   * @example
-   * ```ts
-   * res.tempNotVerified();
-   * ```
-   *
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempNotVerified(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -776,17 +629,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template when a user tries to perform a self request.
-   *
-   * @example
-   * ```ts
-   * res.tempSelfReq();
-   * ```
-   *
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempSelfReq(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -799,18 +641,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template when item is recycled but user want to access it.
-   *
-   * @example
-   * ```ts
-   * res.tempIsRecycled("fix motherboard");
-   * ```
-   *
-   * @param name Name of item
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempIsRecycled(name: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -822,18 +652,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
-  /**
-   * Template when item is not recycled.
-   *
-   * @example
-   * ```ts
-   * res.tempIsRecycled("fix motherboard");
-   * ```
-   *
-   * @param name Name of item
-   * @param restErr Additional error properties
-   * @returns typeof .body({ error })
-   */
   tempNotRecycled(name: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -845,8 +663,3 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 }
-
-/**
- * Extends Express Response with Respond features.
- */
-export interface Respond extends Omit<Response, "res"> {}

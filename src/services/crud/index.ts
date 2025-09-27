@@ -1,4 +1,4 @@
-import { ErrorTemplate, ErrorTemplateConfig } from "@/class/ErrorTemplate";
+import { ServerError, ServerErrorConfig } from "@/class/ServerError";
 import { Model, ObjectId, PopulateOptions, ProjectionType, QueryOptions, SortOrder } from "mongoose";
 import * as read from "./read";
 import * as update from "./update";
@@ -14,17 +14,17 @@ export type Settings<T> = {
   populate?: PopulateOptions | (PopulateOptions | string)[];
   sort?: string | { [key: string]: SortOrder | { $meta: any } } | [string, SortOrder][] | undefined | null;
   sortOptions?: { override?: boolean };
-  error?: ErrorTemplateConfig | null;
+  error?: ServerErrorConfig | null;
 };
 
 export type QueryResult<T, S extends Partial<Settings<T>> = {}, Z = T> = S["error"] extends null ? Normalized<T, Z> | null : Normalized<T, Z>;
 
 export const notFound = (model: Model<any>) => {
-  return new ErrorTemplate({ code: "NOT_FOUND", item: model.getName() });
+  return new ServerError({ code: "NOT_FOUND", item: model.getName() });
 };
 
 export const invalidObjectId = () => {
-  return new ErrorTemplate({ code: "CLIENT_TYPE", fields: "Object ID" });
+  return new ServerError({ code: "CLIENT_TYPE", fields: "Object ID" });
 };
 
 const db = {

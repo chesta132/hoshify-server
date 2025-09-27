@@ -6,7 +6,7 @@ import { Revoked } from "../../models/Revoked";
 import db from "@/services/crud";
 
 export const signout = async (req: Request, { res }: Response) => {
-  const clearAndRedirect = () => res.clearCookie("accessToken").clearCookie("refreshToken").redirect(`${CLIENT_URL}/signin`);
+  const clearAndRedirect = () => res.deleteCookies(["accessToken", "refreshToken"]).redirect(`${CLIENT_URL}/signin`);
   try {
     const user = req.user!;
     const { refreshToken } = req.cookies;

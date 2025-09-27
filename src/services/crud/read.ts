@@ -1,7 +1,7 @@
 import { Normalized } from "@/types/types";
 import { isValidObjectId, Model, RootFilterQuery } from "mongoose";
 import { Id, invalidObjectId, notFound, QueryResult, Settings } from ".";
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 
 export const getById = async <T, S extends Settings<T>>(model: Model<T>, id: Id, settings?: S): Promise<QueryResult<T, S, T>> => {
   const { error, options, populate, project, sort, sortOptions } = settings || {};
@@ -17,7 +17,7 @@ export const getById = async <T, S extends Settings<T>>(model: Model<T>, id: Id,
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;
@@ -36,7 +36,7 @@ export const getOne = async <T, S extends Settings<T>>(
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;

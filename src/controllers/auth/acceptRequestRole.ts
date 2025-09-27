@@ -5,7 +5,7 @@ import { decrypt } from "@/utils/crypto";
 import { User, UserRole } from "@/models/User";
 import { normalizeUserQuery, userProject } from "@/utils/manipulate/normalize";
 import { sendRoleGranted } from "@/utils/email/send";
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 import { getOne } from "@/services/crud/read";
 import { updateById } from "@/services/crud/update";
 import { deleteOne } from "@/services/crud/delete";
@@ -14,7 +14,7 @@ export const acceptRequestRole = async (req: Request, { res }: Response) => {
   try {
     const token = req.query.token?.toString();
     if (!token) {
-      throw new ErrorTemplate({ code: "MISSING_FIELDS", fields: "token" });
+      throw new ServerError({ code: "MISSING_FIELDS", fields: "token" });
     }
 
     const decrToken = decrypt(token.toString()) as string;

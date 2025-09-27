@@ -25,6 +25,7 @@ const deletes = async (user: NormalizedData<IUser>) => {
 };
 
 export const deleteUser = async (req: Request, { res }: Response) => {
+  const resSuccess = () => res.deleteCookies(["accessToken", "refreshToken"]).redirect(`${CLIENT_URL}/signin`);
   try {
     const userId = req.user!.id;
     const { token } = req.query;
@@ -37,7 +38,7 @@ export const deleteUser = async (req: Request, { res }: Response) => {
 
     if (!user.verified && !user.googleId) {
       await deletes(user);
-      res.clearCookie("accessToken").clearCookie("refreshToken").redirect(`${CLIENT_URL}/signin`);
+      resSuccess();
       return;
     }
     if (!token) {
@@ -51,7 +52,7 @@ export const deleteUser = async (req: Request, { res }: Response) => {
       return;
     }
     await deletes(user);
-    res.clearCookie("accessToken").clearCookie("refreshToken").redirect(`${CLIENT_URL}/signin`);
+    resSuccess();
   } catch (err) {
     handleError(err, res);
   }

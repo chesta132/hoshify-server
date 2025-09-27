@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { buildUserPopulate, IUser, User, UserPopulateField } from "../../models/User";
 import { Money } from "@/models/Money";
 import { validateRequires } from "@/utils/validate";
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 import db from "@/services/crud";
 import { initialPopulateConfig } from "../user/initiateUser";
 import { normalizeCurrency } from "@/utils/manipulate/normalize";
@@ -19,9 +19,9 @@ export const signup = async (req: Request, { res }: Response) => {
     potentialUser.forEach((potential) => {
       if (potential) {
         if (potential?.email === email) {
-          throw new ErrorTemplate("CLIENT_FIELD", { field: "email", message: "Email is already in use" });
+          throw new ServerError("CLIENT_FIELD", { field: "email", message: "Email is already in use" });
         } else {
-          throw new ErrorTemplate("CLIENT_FIELD", {
+          throw new ServerError("CLIENT_FIELD", {
             field: "email",
             message: "Email is already bind with google account, please bind on account settings",
           });

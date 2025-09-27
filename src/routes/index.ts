@@ -8,7 +8,7 @@ import { tranRoutes } from "./tranRoutes";
 import { scheduleRoutes } from "./scheduleRoutes";
 import { linkRoutes } from "./linkRoutes";
 import { moneyRoutes } from "./moneyRoutes";
-import { updateLinks } from "@/controllers/link/linkFactory";
+
 const router = Router();
 
 router.use("/auth", authRoutes);

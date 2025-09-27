@@ -1,11 +1,11 @@
 import { isValidObjectId } from "mongoose";
 import { Response } from "express";
 import { spacing } from "./manipulate/string";
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 
 export const validateIds = (ids: string[]) => {
   if (!Array.isArray(ids)) {
-    throw new ErrorTemplate({ code: "CLIENT_TYPE", fields: "body", details: "Array only." });
+    throw new ServerError({ code: "CLIENT_TYPE", fields: "body", details: "Array only." });
   }
   let invalidIds: string[] = [];
 
@@ -18,7 +18,7 @@ export const validateIds = (ids: string[]) => {
   });
 
   if (!isObjectId) {
-    throw new ErrorTemplate({ code: "CLIENT_TYPE", fields: "Object ID", details: `${invalidIds.join(", ")} is not ObjectId.` });
+    throw new ServerError({ code: "CLIENT_TYPE", fields: "Object ID", details: `${invalidIds.join(", ")} is not ObjectId.` });
   }
 };
 
@@ -45,6 +45,6 @@ export const validateRequires = (neededField: string[], from: any) => {
   const missingFields = [...missingFieldsSet].map((field) => spacing(field));
 
   if (!isValid) {
-    throw new ErrorTemplate({ code: "MISSING_FIELDS", fields: missingFields.join(", ") });
+    throw new ServerError({ code: "MISSING_FIELDS", fields: missingFields.join(", ") });
   }
 };

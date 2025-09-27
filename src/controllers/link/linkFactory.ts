@@ -33,6 +33,6 @@ export const createLink = createOneFactory(
   }
 );
 
-export const updateLink = updateOneFactory(Link);
+export const updateLink = updateOneFactory(Link, { neededField: ["title", "link"], acceptableField: ["position"] });
 
 export const updateLinks = updateManyFactory(Link, { neededField: ["title", "link"], acceptableField: ["position"] })

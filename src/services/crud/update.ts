@@ -10,7 +10,7 @@ import {
 import { Id, invalidObjectId, notFound, QueryResult, Settings } from ".";
 import { Normalized } from "@/types/types";
 import { getMany } from "./read";
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 
 export const updateById = async <T, S extends Settings<T>>(
   model: Model<T>,
@@ -30,7 +30,7 @@ export const updateById = async <T, S extends Settings<T>>(
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;
@@ -50,7 +50,7 @@ export const updateOne = async <T, S extends Settings<T>>(
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;
@@ -82,7 +82,7 @@ export const restoreById = async <T, S extends Settings<T>>(
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;
@@ -102,7 +102,7 @@ export const restoreOne = async <T, S extends Settings<T>>(
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;

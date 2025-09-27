@@ -1,7 +1,7 @@
-import { omit, pick } from "@/utils/manipulate/object";
+import { pick } from "@/utils/manipulate/object";
 import { ErrorResponseType, Respond, RestError } from "./Response";
 
-export type ErrorTemplateConfig =
+export type ServerErrorConfig =
   | { code: "CLIENT_FIELD"; field: ErrorResponseType["field"]; message: string; restErr?: RestError }
   | { code: "MISSING_FIELDS"; fields: string; restErr?: RestError }
   | { code: "CLIENT_TYPE"; fields: string; details?: string; restErr?: RestError }
@@ -34,14 +34,14 @@ type OptionalCodes =
   | "IS_VERIFIED"
   | "NOT_VERIFIED";
 
-type SelectedConfig<C> = Extract<ErrorTemplateConfig, { code: C }>;
+type SelectedConfig<C> = Extract<ServerErrorConfig, { code: C }>;
 type Depedencies<C> = Omit<SelectedConfig<C>, "code" | "restErr">;
 type SelectedRestErr<C> = Pick<SelectedConfig<C>, "restErr">;
 type ErrorProps<C> = Depedencies<C> & SelectedRestErr<C>;
 type ExtractOptional<C> = Extract<C, OptionalCodes>;
 
-export class ErrorTemplate<C extends ErrorTemplateConfig["code"], T extends Respond | undefined = undefined> {
-  error: ErrorTemplateConfig;
+export class ServerError<C extends ServerErrorConfig["code"], T extends Respond | undefined = undefined> {
+  error: ServerErrorConfig;
   private res?: T;
 
   constructor(code: ExtractOptional<C>, depedencies?: Depedencies<C>, restErr?: SelectedRestErr<C>["restErr"]);
@@ -49,17 +49,17 @@ export class ErrorTemplate<C extends ErrorTemplateConfig["code"], T extends Resp
   constructor(code: C, depedencies: Depedencies<C>, restErr?: SelectedRestErr<C>["restErr"]);
   constructor(code: C, depedencies: ErrorProps<C>);
 
-  constructor(error: ErrorTemplateConfig, res?: T);
+  constructor(error: ServerErrorConfig, res?: T);
 
   constructor(
-    error: C | ExtractOptional<C> | ErrorTemplateConfig,
+    error: C | ExtractOptional<C> | ServerErrorConfig,
     depedencies: (T | undefined) | ErrorProps<C> | Depedencies<C>,
     restErr?: SelectedRestErr<C>["restErr"]
   ) {
     if (typeof error === "string") {
       const code = error;
       const dep = depedencies as ErrorProps<C> | Depedencies<C> | undefined;
-      const err = { code, ...dep } as ErrorTemplateConfig;
+      const err = { code, ...dep } as ServerErrorConfig;
       if (!err.restErr) {
         if (restErr) {
           err.restErr = restErr as RestError;

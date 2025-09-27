@@ -34,7 +34,7 @@ export const deleteSchedule = softDeleteOneFactory(Schedule);
 
 export const deleteSchedules = softDeleteManyFactory(Schedule);
 
-export const updateSchedules = updateManyFactory(Schedule);
+export const updateSchedules = updateManyFactory(Schedule, { neededField: ["title", "details"], acceptableField: ["start", "end"] });
 
 export const createSchedule = createOneFactory(
   Schedule,
@@ -47,4 +47,4 @@ export const createSchedule = createOneFactory(
   }
 );
 
-export const updateSchedule = updateOneFactory(Schedule);
+export const updateSchedule = updateOneFactory(Schedule, { neededField: ["title", "details"], acceptableField: ["start", "end"] });

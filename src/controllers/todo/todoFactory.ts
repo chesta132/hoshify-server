@@ -24,8 +24,8 @@ export const deleteTodo = softDeleteOneFactory(Todo);
 
 export const deleteTodos = softDeleteManyFactory(Todo);
 
-export const updateTodos = updateManyFactory(Todo);
+export const updateTodos = updateManyFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
 export const createTodo = createOneFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
-export const updateTodo = updateOneFactory(Todo);
+export const updateTodo = updateOneFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });

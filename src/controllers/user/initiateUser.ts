@@ -7,9 +7,9 @@ import { Normalized } from "@/types/types";
 export const initialPopulateConfig = {
   todos: 5,
   transactions: 5,
-  notes: 3,
+  notes: 5,
   links: 10,
-  schedules: 3,
+  schedules: 5,
   money: "all",
 } as const;
 

@@ -3,7 +3,7 @@ import handleError from "@/utils/handleError";
 import { Transaction, transactionType } from "@/models/Transaction";
 import { isValidObjectId } from "mongoose";
 import { getTotal, Money } from "@/models/Money";
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 import db from "@/services/crud";
 
 export const updateTran = async (req: Request, { res }: Response) => {
@@ -12,10 +12,10 @@ export const updateTran = async (req: Request, { res }: Response) => {
     const { id } = req.params;
     let { title, details, type, amount } = req.body;
     if (!isValidObjectId(id)) {
-      throw new ErrorTemplate("CLIENT_TYPE", { fields: "Object ID" });
+      throw new ServerError("CLIENT_TYPE", { fields: "Object ID" });
     }
     if (!transactionType.includes(type)) {
-      throw new ErrorTemplate("CLIENT_TYPE", { fields: "type", details: `invalid type enum, please select between ${transactionType.join(" or ")}` });
+      throw new ServerError("CLIENT_TYPE", { fields: "type", details: `invalid type enum, please select between ${transactionType.join(" or ")}` });
     }
     if (amount < 0) {
       type = type === "INCOME" ? "OUTCOME" : "INCOME";

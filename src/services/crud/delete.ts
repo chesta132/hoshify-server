@@ -1,6 +1,6 @@
 import { Model, RootFilterQuery, UpdateQuery } from "mongoose";
 import { Id, notFound, QueryResult, Settings } from ".";
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 import { Normalized } from "@/types/types";
 
 export const softDeleteOne = async <T, S extends Omit<Settings<T>, "project">>(
@@ -17,7 +17,7 @@ export const softDeleteOne = async <T, S extends Omit<Settings<T>, "project">>(
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;
@@ -37,7 +37,7 @@ export const softDeleteById = async <T, S extends Omit<Settings<T>, "project">>(
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;
@@ -52,7 +52,7 @@ export const deleteById = async <T, S extends Omit<Settings<T>, "project">>(mode
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;
@@ -71,7 +71,7 @@ export const deleteOne = async <T, S extends Omit<Settings<T>, "project">>(
     .normalize();
 
   if (!query && error !== null) {
-    if (error) throw new ErrorTemplate(error);
+    if (error) throw new ServerError(error);
     else throw notFound(model);
   }
   return query as Normalized<T>;

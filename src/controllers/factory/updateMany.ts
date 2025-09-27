@@ -9,7 +9,7 @@ import { validateRequires } from "@/utils/validate";
 
 export const updateManyFactory = <T, F extends string>(
   model: Model<T>,
-  { neededField, acceptableField }: ControllerConfig<T, F> = {},
+  { neededField, acceptableField }: ControllerConfig<T, F>,
   options?: Omit<ControllerOptions<T[]>, "filter" | "settings">
 ) => {
   return async (req: Request, { res }: Response) => {

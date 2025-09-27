@@ -1,14 +1,14 @@
-import { ErrorTemplate } from "@/class/ErrorTemplate";
+import { ServerError } from "@/class/ServerError";
 import { Response } from "express";
 
 export default function handleError(error: unknown, res: Response["res"]) {
-  const err = error as Error | ErrorTemplate<any>;
+  const err = error as Error | ServerError<any>;
   const createdError = new Error();
   const callerLine = createdError.stack?.split("\n")[2];
 
   console.error(`\n\n\nError found ${callerLine?.trim()}:\n`, err);
-  if (err instanceof ErrorTemplate) {
-    new ErrorTemplate(err.error, res).execute();
+  if (err instanceof ServerError) {
+    new ServerError(err.error, res).execute();
     return;
   } else if (err && err.name === "ValidationError") {
     res
