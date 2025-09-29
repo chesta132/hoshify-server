@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { omit } from "./object";
-import { Normalized, NormalizedData, RequireAtLeastOne } from "@/types/types";
+import { Normalized, NormalizedData, RequireAtLeastOne } from "@/types";
 import { IUser, USER_CRED, UserCred } from "@/models/User";
 import { currencyFields, CurrencyFields, formatCurrency, ModifiedCurrency } from "../money";
 

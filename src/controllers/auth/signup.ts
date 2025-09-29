@@ -8,14 +8,15 @@ import { ServerError } from "@/class/ServerError";
 import db from "@/services/crud";
 import { initialPopulateConfig } from "../user/initiateUser";
 import { normalizeCurrency } from "@/utils/manipulate/normalize";
-import { NormalizedData } from "@/types/types";
+import { NormalizedData } from "@/types";
+import { getMany } from "@/services/crud/read";
 
 export const signup = async (req: Request, { res }: Response) => {
   try {
     const { email, password, fullName, rememberMe } = req.body;
     validateRequires(["email", "password", "fullName"], req.body);
 
-    const potentialUser = await User.find({ $or: [{ email }, { gmail: email }] });
+    const potentialUser = await getMany(User, { $or: [{ email }, { gmail: email }] });
     potentialUser.forEach((potential) => {
       if (potential) {
         if (potential?.email === email) {

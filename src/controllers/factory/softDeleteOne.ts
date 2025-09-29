@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
-import { ControllerOptions } from "@/types/types";
+import { ControllerOptions } from "@/types";
 import { ellipsis } from "@/utils/manipulate/string";
 import { getDeleteTTL } from "@/utils/database/plugin";
 import db, { Settings } from "@/services/crud";
@@ -19,7 +19,11 @@ export const softDeleteOneFactory = <T extends { isRecycled: boolean; title: str
         return;
       }
 
-      const data = await db.softDeleteOne<T, Settings<T>>({ _id: id, userId: req.user!.id, isRecycled: false, ...options?.filter } as any, {}, options?.settings);
+      const data = await db.softDeleteOne<T, Settings<T>>(
+        { _id: id, userId: req.user!.id, isRecycled: false, ...options?.filter } as any,
+        {},
+        options?.settings
+      );
       const deleteAt = getDeleteTTL();
       if (!data) {
         res.tempNotFound(model.getName()).respond();

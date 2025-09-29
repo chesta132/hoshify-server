@@ -24,7 +24,8 @@ export const changeEmail = async (req: Request, { res }: Response) => {
     if (user.email === newEmail) {
       throw new ServerError("CLIENT_FIELD", { field: "newEmail", message: "New email and old email can not same" });
     }
-    if (await User.findOne({ email: newEmail })) {
+    const emailCandidate = await getOne(User, { email: newEmail }, { error: null });
+    if (emailCandidate) {
       throw new ServerError("CLIENT_FIELD", { field: "newEmail", message: "Email is already in use" });
     }
 

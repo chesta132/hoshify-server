@@ -4,7 +4,7 @@ import * as read from "./read";
 import * as update from "./update";
 import * as create from "./create";
 import * as deletes from "./delete";
-import { Normalized } from "@/types/types";
+import { Normalized } from "@/types";
 
 export type Id = string | ObjectId;
 

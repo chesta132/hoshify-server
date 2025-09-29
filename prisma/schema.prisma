@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  DEVELOPER
+  USER
+}
+
+enum TodoStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+enum TransactionType {
+  INCOME
+  OUTCOME
+}
+
+enum RevokeType {
+  TOKEN
+  OTP
+}
+
+enum VerifyType {
+  CHANGE_EMAIL_OTP
+  RESET_PASSWORD_OTP
+  DELETE_ACCOUNT_OTP
+  VERIFY_EMAIL
+  REQUEST_ROLE
+}
+
+model User {
+  id                   String   @id @default(cuid())
+  fullName             String   @db.VarChar(100)
+  email                String?  @unique
+  password             String?
+  gmail                String?  @unique
+  googleId             String?
+  role                 UserRole @default(USER)
+  currency             String   @default("IDR")
+  verified             Boolean  @default(false)
+  timeToAllowSendEmail DateTime @default(now())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // relations
+  todos        Todo[]
+  notes        Note[]
+  transactions Transaction[]
+  schedules    Schedule[]
+  links        Link[]
+  money        Money?
+}
+
+model Todo {
+  id         String     @id @default(cuid())
+  title      String
+  details    String     @default("")
+  status     TodoStatus @default(PENDING)
+  dueDate    DateTime
+  isRecycled Boolean    @default(false)
+  deleteAt   DateTime?
+  dummy      Boolean?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Money {
+  id      String @id @default(cuid())
+  total   Int    @default(0)
+  income  Int    @default(0)
+  outcome Int    @default(0)
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Link {
+  id       String @id @default(cuid())
+  link     String
+  title    String @db.VarChar(100)
+  position Int
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Note {
+  id         String    @id @default(cuid())
+  title      String
+  details    String    @default("")
+  isRecycled Boolean   @default(false)
+  deleteAt   DateTime?
+  dummy      Boolean?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id         String          @id @default(cuid())
+  amount     Float
+  type       TransactionType
+  title      String          @db.VarChar(100)
+  details    String          @default("")
+  isRecycled Boolean         @default(false)
+  deleteAt   DateTime?
+  dummy      Boolean?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Schedule {
+  id         String    @id @default(cuid())
+  title      String    @db.VarChar(100)
+  details    String    @default("")
+  start      DateTime  @default(now())
+  end        DateTime  @default(now())
+  isRecycled Boolean   @default(false)
+  deleteAt   DateTime?
+  dummy      Boolean?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Revoked {
+  id       String     @id @default(cuid())
+  value    String
+  type     RevokeType
+  deleteAt DateTime
+
+  userId String
+}
+
+model Verify {
+  id       String     @id @default(cuid())
+  value    String
+  type     VerifyType
+  deleteAt DateTime
+
+  userId String
+}

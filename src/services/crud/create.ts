@@ -1,12 +1,15 @@
-import { Normalized } from "@/types/types";
-import { Model } from "mongoose";
+import { Model } from "@/types/db";
+import { prisma } from "../db";
 
-export const create = async <T, Z extends Partial<T>[] | Partial<T> = T>(model: Model<T>, doc: Z): Promise<Normalized<T, Z>> => {
-  if (Array.isArray(doc)) {
-    const query = (await model.create(doc)).map((q) => q.normalize());
-    return query as any;
+type ParamOf<F extends () => any> = Omit<Parameters<F>, "data">;
+type DataOf<F extends () => any> = ParamOf<F>[0]["data"];
+
+export function create<M extends Model, T>(model: M, data: DataOf<M["create"]>, ...props: ParamOf<M["create"]>): ReturnType<M["create"]>;
+export function create<M extends Model, T>(model: M, data: DataOf<M["createMany"]>, ...props: ParamOf<M["createMany"]>): ReturnType<M["createMany"]>;
+export function create<M extends Model, T>(model: M, data: DataOf<M["createMany"]>, ...props: ParamOf<M["createMany"]> | ParamOf<M["create"]>): any {
+  if (Array.isArray(data)) {
+    return model.createMany({ data, ...props });
   } else {
-    const query = (await model.create(doc)).normalize();
-    return query as any;
+    return model.create({ data, ...props });
   }
-};
+}

@@ -1,3 +1,5 @@
+import dayjs, { Dayjs } from "dayjs";
+
 type FormatDateOptions = { includeThisYear?: boolean; includeHour?: boolean };
 /**
  * Returns a string representation of a date. The format of the string is en-US locale.
@@ -35,4 +37,49 @@ export const formatDate = (date: Date, options: FormatDateOptions = { includeThi
     console.error(error);
     return "Invalid Date";
   }
+};
+
+export const isIsoDateValid = (dateString: string | Date) => {
+  const parsedDate = dayjs(dateString);
+  return parsedDate.isValid() && dateString.toString().includes("T") && dateString.toString().includes("Z");
+};
+
+type NormalizedDates<T> = T extends (infer U)[]
+  ? NormalizedDates<U>[]
+  : {
+      [K in keyof T]: T[K] extends Date
+        ? Dayjs
+        : T[K] extends Date | undefined
+        ? Dayjs | undefined
+        : T[K] extends object
+        ? NormalizedDates<T[K]>
+        : T[K];
+    };
+
+export const normalizeDates = <T extends Record<string, any> | any[]>(
+  data: T
+): T extends any[] ? NormalizedDates<ExtractArray<T>>[] : NormalizedDates<T> => {
+  if (typeof data !== "object" || data === null) {
+    return data;
+  }
+  if (Array.isArray(data)) {
+    return data.map((arr) => normalizeDates(arr)) as any;
+  }
+  const sanitized = { ...data } as Record<string, any>;
+
+  for (const key in sanitized) {
+    if (!Object.prototype.hasOwnProperty.call(sanitized, key)) {
+      continue;
+    }
+    const value = sanitized[key];
+
+    if (isIsoDateValid(value)) {
+      sanitized[key] = dayjs(value);
+    } else if (Array.isArray(value)) {
+      sanitized[key] = value.map((item) => normalizeDates(item));
+    } else if (typeof value === "object" && value !== null) {
+      normalizeDates(value);
+    }
+  }
+  return sanitized as any;
 };

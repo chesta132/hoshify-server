@@ -2,7 +2,7 @@ import { Response, Request } from "express";
 import handleError from "../../utils/handleError";
 import { normalizeCurrency, normalizeUserQuery } from "../../utils/manipulate/normalize";
 import { buildUserPopulate, PopulatedUser, User } from "../../models/User";
-import { Normalized } from "@/types/types";
+import { Normalized } from "@/types";
 
 export const initialPopulateConfig = {
   todos: 5,

@@ -1,17 +1,17 @@
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: viartic
+  postgres:
+    image: postgres:16
+    container_name: viartic_pg
     restart: always
     ports:
-      - "27017:27017"
+      - "5432:5432"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
-      MONGO_INITDB_ROOT_DB: ${MONGODB_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - mongo_data:/data/db
+      - pg_data:/var/lib/postgresql/data
 
 volumes:
-  mongo_data:
+  pg_data:
     driver: local

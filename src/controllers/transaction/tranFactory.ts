@@ -9,7 +9,7 @@ import { softDeleteOneFactory } from "../factory/softDeleteOne";
 import { softDeleteManyFactory } from "../factory/softDeleteMany";
 import { createOneFactory } from "../factory/createOne";
 import { normalizeCurrency } from "@/utils/manipulate/normalize";
-import { Normalized } from "@/types/types";
+import { Normalized } from "@/types";
 import { Request } from "express";
 
 const isLowerThanZero = (data: any) => {

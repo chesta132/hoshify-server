@@ -6,7 +6,7 @@ import { ErrorResponseType } from "@/class/Response";
 import { buildUserPopulate, IUser, User, UserPopulateField } from "@/models/User";
 import { initialPopulateConfig } from "@/controllers/user/initiateUser";
 import { Money } from "@/models/Money";
-import { NormalizedData } from "@/types/types";
+import { NormalizedData } from "@/types";
 import db from "../crud";
 import { normalizeCurrency } from "@/utils/manipulate/normalize";
 

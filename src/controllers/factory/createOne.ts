@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { ellipsis } from "@/utils/manipulate/string";
 import { Model } from "mongoose";
-import { ControllerConfig, ControllerOptions } from "@/types/types";
+import { ControllerConfig, ControllerOptions } from "@/types";
 import { validateRequires } from "@/utils/validate";
 import { create } from "@/services/crud/create";
 import { pick } from "@/utils/manipulate/object";

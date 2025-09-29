@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
-import { ControllerOptions } from "@/types/types";
+import { ControllerOptions } from "@/types";
 import { Model } from "mongoose";
 import { getMany } from "@/services/crud/read";
 import { omit } from "@/utils/manipulate/object";

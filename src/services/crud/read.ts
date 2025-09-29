@@ -1,4 +1,4 @@
-import { Normalized } from "@/types/types";
+import { Normalized } from "@/types";
 import { isValidObjectId, Model, RootFilterQuery } from "mongoose";
 import { Id, invalidObjectId, notFound, QueryResult, Settings } from ".";
 import { ServerError } from "@/class/ServerError";

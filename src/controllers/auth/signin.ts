@@ -4,7 +4,7 @@ import { ErrorResponseType } from "../../class/Response";
 import handleError from "../../utils/handleError";
 import { normalizeCurrency, normalizeUserQuery } from "../../utils/manipulate/normalize";
 import { IUser, UserPopulateField } from "../../models/User";
-import { NormalizedData } from "../../types/types";
+import { NormalizedData } from "../../types";
 
 export const signin = async (req: Request, { res }: Response, next: NextFunction) => {
   passport.authenticate(

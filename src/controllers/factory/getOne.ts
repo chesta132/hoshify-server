@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
-import { ControllerOptions, Normalized } from "@/types/types";
+import { ControllerOptions, Normalized } from "@/types";
 import { getOne } from "@/services/crud/read";
 
 export const getOneFactory = <T extends Record<string, any>>(model: Model<T>, options?: Omit<ControllerOptions<T>, "funcInitiator">) => {

@@ -1,4 +1,4 @@
-import { RequireAtLeastOne } from "@/types/types";
+import { RequireAtLeastOne } from "@/types";
 
 const currencyLocales: Record<string, Intl.LocalesArgument> = {
   // Asia
@@ -30,7 +30,6 @@ const currencyLocales: Record<string, Intl.LocalesArgument> = {
   AUD: "en-AU",
   NZD: "en-NZ",
 };
-
 
 export const formatCurrency = (amount: number, currency: string): string => {
   const locale = currencyLocales[currency] || "en-US";
