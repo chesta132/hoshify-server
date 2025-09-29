@@ -9,7 +9,7 @@ import { Schedule } from "../../models/Schedule";
 import { Todo } from "../../models/Todo";
 import { Transaction } from "../../models/Transaction";
 import { Money } from "@/models/Money";
-import { NormalizedData } from "@/types/types";
+import { NormalizedData } from "@/types";
 
 const deletes = async (user: NormalizedData<IUser>) => {
   const deleteConfig = { userId: user.id } as const;

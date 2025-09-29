@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import pluralize from "pluralize";
 import { isValidObjectId, Model } from "mongoose";
-import { ControllerConfig, ControllerOptions, NormalizedData } from "@/types/types";
+import { ControllerConfig, ControllerOptions, NormalizedData } from "@/types";
 import { omit, pick } from "@/utils/manipulate/object";
 import { unEditableField } from "@/utils/database/plugin";
 import { validateRequires } from "@/utils/validate";

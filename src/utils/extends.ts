@@ -1,11 +1,19 @@
-import { NODE_ENV } from "../app";
+import { NODE_ENV } from "@/config";
 
-JSON.isJSON = function (item: any) {
+JSON.isJSON = function (text) {
   try {
-    JSON.parse(item);
+    JSON.parse(text);
     return true;
   } catch {
     return false;
+  }
+};
+
+JSON.safeParse = function <T>(text?: string, fallback?: T) {
+  try {
+    return this.parse(text || "invalid");
+  } catch {
+    return fallback;
   }
 };
 
@@ -28,23 +36,52 @@ Object.compare = function <T extends object>(...objectsProp: T[]) {
   });
 };
 
-console.debug = function (message?: any, ...optionalParams: any[]) {
+console.debug = function (message?: "NO_TRACE" | (string & {}), ...data: any[]) {
   if (NODE_ENV === "production") return;
-  const createdError = new Error();
-  const callerLine = createdError.stack?.split("\n")[2];
-  console.log("Called by: ", callerLine);
-  return this.log(message, ...optionalParams);
+  const noTrace = message === "NO_TRACE";
+  if (message === "[vite]") {
+    return this.log(message, ...data);
+  }
+
+  if (noTrace) {
+    this.groupCollapsed(...data);
+  } else {
+    this.groupCollapsed(message, ...data);
+  }
+
+  if (!noTrace) {
+    this.trace();
+  }
+
+  console.groupEnd();
 };
 
-console.debugTable = function (message?: any, ...optionalParams: any[]) {
+console.debugTable = function (tabularData, properties, trace) {
   if (NODE_ENV === "production") return;
   const createdError = new Error();
-  const callerLine = createdError.stack?.split("\n")[2];
-  this.log("Called by: ", callerLine);
-  return this.table(message, ...optionalParams);
+  const callerLine = createdError.stack?.split("\n")[2].trim().slice(2);
+  const noTrace = trace === "NO_TRACE";
+  const superTrace = trace === "SUPER_TRACE";
+
+  if (!noTrace) this.log("Called by: " + callerLine);
+  else if (superTrace) this.trace();
+
+  this.table(tabularData, properties);
 };
 
 Object.isObject = function <T>(object: T) {
   if (typeof object === "object" && object !== null && !(object instanceof Date)) return true;
   return false;
+};
+
+Object.typedEntries = function <T extends object>(object: T) {
+  return this.entries(object) as [keyof T, T[keyof T]][];
+};
+
+Object.typedKeys = function <T extends object>(object: T) {
+  return this.keys(object) as (keyof T)[];
+};
+
+Object.typedValues = function <T extends object>(object: T) {
+  return this.values(object) as T[keyof T][];
 };

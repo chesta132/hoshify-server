@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { isValidObjectId, Model } from "mongoose";
-import { ControllerOptions } from "@/types/types";
+import { ControllerOptions } from "@/types";
 import { ellipsis } from "@/utils/manipulate/string";
 
 export const restoreOneFactory = <T extends { isRecycled: boolean; title: string; deleteAt: Date | null }>(

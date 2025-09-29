@@ -1,4 +1,3 @@
-/// <reference path="./types/global.d.ts" />
 import { config } from "dotenv";
 config();
 import express from "express";
@@ -7,20 +6,16 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import router from "./routes";
-import { connectDB, URI } from "./utils/database/connectDB";
 import passport from "passport";
 import { resMiddleware } from "./middlewares/res";
 import session from "express-session";
-import MongoStore from "connect-mongo";
+import { timeInMs } from "./utils/manipulate/number";
+import { CLIENT_URL } from "./config";
 import "./services/auth/passport";
+import "./services/db/index";
 import "./utils/extends";
-import "./utils/database/extends";
-
-export const { NODE_ENV, HOSHIFY_ICON, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } = process.env;
-export const CLIENT_URL = NODE_ENV === "development" ? process.env.CLIENT_URL_DEV : process.env.CLIENT_URL;
 
 const app = express();
-connectDB();
 app.set("trust proxy", ["loopback", "linklocal"]);
 
 app.use(express.json());
@@ -37,7 +32,7 @@ app.use(
 );
 app.use(
   rateLimit({
-    windowMs: 60 * 1000,
+    windowMs: timeInMs({ minute: 1 }),
     limit: 100,
     standardHeaders: true,
     legacyHeaders: false,
@@ -53,7 +48,9 @@ app.use(
     secret: process.env.SESSION_SECRET_KEY!,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: URI! }),
+    cookie: {
+      maxAge: timeInMs({ hour: 6 }),
+    },
   })
 );
 app.use(passport.initialize());

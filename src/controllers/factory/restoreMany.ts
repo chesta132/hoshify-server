@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import handleError from "@/utils/handleError";
 import { Model } from "mongoose";
-import { ControllerOptions } from "@/types/types";
+import { ControllerOptions } from "@/types";
 import pluralize from "pluralize";
 import { validateIds } from "@/utils/validate";
 import { getMany } from "@/services/crud/read";

@@ -1,4 +1,4 @@
-import { CodeError, EitherWithKeys, Fields, NormalizedData, OneFieldOnly } from "../types/types";
+import { CodeError, EitherWithKeys, Fields, NormalizedData, OneFieldOnly } from "../types";
 import { CookieOptions, Response, Request } from "express";
 import {
   createAccessToken,
