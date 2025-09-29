@@ -6,11 +6,12 @@ import { ControllerConfig, ControllerOptions, NormalizedData } from "@/types/typ
 import { omit, pick } from "@/utils/manipulate/object";
 import { unEditableField } from "@/utils/database/plugin";
 import { validateRequires } from "@/utils/validate";
+import db from "@/services/crud";
 
 export const updateManyFactory = <T, F extends string>(
   model: Model<T>,
   { neededField, acceptableField }: ControllerConfig<T, F>,
-  options?: Omit<ControllerOptions<T[]>, "filter" | "settings">
+  options?: Omit<ControllerOptions<T[]>, "filter">
 ) => {
   return async (req: Request, { res }: Response) => {
     try {
@@ -67,12 +68,14 @@ export const updateManyFactory = <T, F extends string>(
         }))
       );
 
-      const updatedDatas = (
-        await model.find({
+      const updatedDatas = await db.getMany(
+        model,
+        {
           _id: { $in: dataIds },
           userId: user.id,
-        })
-      ).map((data) => data.normalize()) as NormalizedData<T>[];
+        },
+        options?.settings
+      );
 
       if (options?.funcBeforeRes) {
         await options.funcBeforeRes(updatedDatas, req, res);

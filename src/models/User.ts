@@ -119,6 +119,7 @@ export const USER_CRED: UserCred[] = ["password", "googleId", "currency"];
 const sortMap: Partial<Record<keyof UserPopulateField, object>> & { default: object } = {
   schedules: { start: -1 },
   links: { position: 1 },
+  todos: { dueDate: 1 },
   default: { updatedAt: -1 },
 };
 

@@ -12,19 +12,23 @@ import { updateOneFactory } from "../factory/updateOne";
 
 export const createTodos = createManyFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
-export const getTodos = getManyFactory(Todo);
+export const getTodos = getManyFactory(Todo, { settings: { sort: { dueDate: 1 } } });
 
 export const getTodo = getOneFactory(Todo);
 
 export const restoreTodo = restoreOneFactory(Todo);
 
-export const restoreTodos = restoreManyFactory(Todo);
+export const restoreTodos = restoreManyFactory(Todo, { settings: { sort: { dueDate: 1 } } });
 
 export const deleteTodo = softDeleteOneFactory(Todo);
 
-export const deleteTodos = softDeleteManyFactory(Todo);
+export const deleteTodos = softDeleteManyFactory(Todo, { settings: { sort: { dueDate: 1 } } });
 
-export const updateTodos = updateManyFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
+export const updateTodos = updateManyFactory(
+  Todo,
+  { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] },
+  { settings: { sort: { dueDate: 1 } } }
+);
 
 export const createTodo = createOneFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
