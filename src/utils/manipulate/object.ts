@@ -56,11 +56,12 @@ export const record = <T extends Record<string, any>, Z>(data: T, recordType: Z)
 };
 
 /**
- * Wraps an object in a Proxy that automatically binds all methods to the target instance.
- * This ensures that methods maintain their correct `this` context when passed around or destructured.
+ * Wraps an object in a Proxy that automatically binds all methods to a specified target object.
+ * This allows methods to be called with a different `this` context than the original object.
  *
- * @param target - The object to wrap with auto-binding behavior
- * @returns A proxied version of the target with all methods automatically bound
+ * @param target - The object to wrap with the Proxy
+ * @param bindTarget - The object to bind all methods to (the `this` context)
+ * @returns A proxied version where all methods are bound to `bindTarget`
  *
  * @example
  * ```ts
@@ -71,9 +72,8 @@ export const record = <T extends Record<string, any>, Z>(data: T, recordType: Z)
  *   }
  * }
  * ```
- *
  */
-export const proxy = <T extends object, Z extends object>(target: T, bindTarget: Z): T => {
+export const proxy = <T extends object, Z extends object>(target: T, bindTarget: Z) => {
   return new Proxy(target, {
     get(obj, key, receiver) {
       const prop = Reflect.get(obj, key, receiver);
@@ -83,4 +83,28 @@ export const proxy = <T extends object, Z extends object>(target: T, bindTarget:
       return prop;
     },
   });
+};
+
+/**
+ * Applies multiple plugin objects to a target by chaining proxies.
+ * Each plugin's methods are merged into the target, enabling a composable plugin-based architecture.
+ * Plugins are applied in order, so later plugins can override earlier ones if they have methods with the same name.
+ *
+ * @param target - The base object to extend with plugins
+ * @param plugins - One or more plugin objects whose methods will be merged into the target
+ * @returns A proxied version of the target with all plugin methods accessible
+ *
+ * @example
+ * ```ts
+ * class ClassA {
+ *   constructor() {
+ *     super();
+ *     return applyPlugins(this, new PluginA(), new PluginB(), new PluginC());
+ *     // Auto-bind all methods plugins
+ *   }
+ * }
+ * ```
+ */
+export const applyPlugins = <T extends object>(target: T, ...plugins: object[]): T => {
+  return plugins.reduce((result, plugin) => proxy(result, plugin), target) as T;
 };
