@@ -14,3 +14,5 @@ export const randomDate = (startDate?: Date, endDate?: Date) => {
   const randomDate = minDate + Math.random() * (maxDate - minDate);
   return new Date(randomDate);
 };
+
+export const shortId = () => Math.random().toString(36).substring(2, 8);
