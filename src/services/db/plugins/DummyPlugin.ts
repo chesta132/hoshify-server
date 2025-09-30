@@ -1,8 +1,9 @@
 import { AppError } from "@/class/Error";
 import { NODE_ENV } from "@/config";
 import { OneFieldOnly } from "@/types";
-import { DefaultModelDelegate, ModelNames, PromiseReturn } from "@/types/db";
+import { DefaultModelDelegate, InferByDelegate, ModelNames, PromiseReturn } from "@/types/db";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
+import { timeInMs } from "@/utils/manipulate/number";
 import { randomDate, randomNumber, shortId } from "@/utils/random";
 
 type CustomData<T> = T extends Date
@@ -11,7 +12,7 @@ type CustomData<T> = T extends Date
   ? { dynamicNumber: { min?: T; max?: T } }
   : T extends string
   ? { dynamicString: T }
-  : {};
+  : never;
 type DataDummy<M extends DefaultModelDelegate> = {
   [K in keyof M]: OneFieldOnly<{ fixed: M[K]; enum: M[K][] } & CustomData<M[K]>>;
 };
@@ -19,39 +20,49 @@ type DataDummy<M extends DefaultModelDelegate> = {
 export class DummyPlugin<ModelDelegate extends DefaultModelDelegate, ModelName extends ModelNames> {
   private DModel: ModelDelegate;
   private DModelName: ModelName;
+  private seed: DataDummy<ModelDelegate>;
 
-  constructor(model: ModelDelegate, modelName: ModelName) {
+  constructor(model: ModelDelegate, modelName: ModelName, seed: DataDummy<InferByDelegate<ModelDelegate>>) {
     this.DModel = model;
     this.DModelName = modelName;
+    this.seed = seed;
   }
 
-  async createDummy(length: number, data: DataDummy<ModelDelegate>): Promise<PromiseReturn<ModelDelegate["createMany"]>> {
+  async createDummy(
+    userId: string,
+    {
+      seed,
+      length = 30,
+    }: {
+      length?: number;
+      seed?: Partial<DataDummy<InferByDelegate<ModelDelegate>>>;
+    } = {}
+  ): Promise<PromiseReturn<ModelDelegate["createMany"]>> {
     try {
       if (NODE_ENV !== "development") throw new AppError("FORBIDDEN", { message: "Can not create dummy data right now." });
+      const seeds = { ...this.seed, ...seed } as DataDummy<ModelDelegate>;
 
       const dummys = Array.from(new Array(length)).map((_, idx) => {
-        const customized: [string, any][] = [];
-        for (const [doc, val] of Object.entries(data)) {
-          if (val?.fixed) {
-            customized.push([doc, val.fixed]);
+        const customized: Record<string, any> = {};
+
+        for (const [doc, val] of Object.entries(seeds)) {
+          if (val?.fixed !== undefined) {
+            customized[doc] = val.fixed;
           } else if (val?.dynamicString) {
-            const dynamiced = `${val.dynamicString}_${idx + 1}_${shortId()}`;
-            customized.push([doc, dynamiced]);
+            customized[doc] = `${val.dynamicString}_${idx + 1}_${shortId()}`;
           } else if (val?.dynamicNumber) {
             const { max = 1000, min = 0 } = val.dynamicNumber;
-            const rand = randomNumber(min, max);
-            customized.push([doc, rand]);
+            customized[doc] = randomNumber(min, max);
           } else if (val?.dynamicDate) {
-            const { start = new Date(0), end = new Date() } = val.dynamicDate;
-            const rand = randomDate(start, end);
-            customized.push([doc, rand]);
-          } else if (val?.enum) {
+            const { start = new Date(Date.now() - timeInMs({ year: 1 })), end = new Date() } = val.dynamicDate;
+            customized[doc] = randomDate(start, end);
+          } else if (val?.enum?.length) {
             const rand = randomNumber(0, val.enum.length - 1);
-            const choosen = val.enum[rand];
-            customized.push([doc, choosen]);
+            customized[doc] = val.enum[rand];
           }
         }
-        return { ...Object.fromEntries(customized), dummy: true };
+
+        return { ...customized, dummy: true, userId };
       });
 
       return await this.DModel.create({ data: dummys });
