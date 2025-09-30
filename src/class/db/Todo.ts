@@ -1,7 +1,9 @@
 import { prisma } from "@/services/db";
 import { Prisma } from "@prisma/client";
 import * as runtime from "@prisma/client/runtime/library.js";
-import { BaseService } from "./Service";
+import { BaseService } from "./Base";
+import { applyPlugins } from "@/utils/manipulate/object";
+import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
 
 type InternalArgs = runtime.Types.Extensions.InternalArgs;
 
