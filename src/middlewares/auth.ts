@@ -5,7 +5,7 @@ import { Revoked } from "../models/Revoked";
 import { User, UserRole } from "../models/User";
 import { Respond } from "@/class/Response";
 import db from "@/services/crud";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 
 const isRefreshSafe = async (refreshToken: string) => {
   const refreshPayload = verifyRefreshToken(refreshToken);

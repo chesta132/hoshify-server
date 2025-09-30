@@ -4,7 +4,7 @@ import { userProject } from "../../utils/manipulate/normalize";
 import { sendCredentialChanges } from "../../utils/email/send";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 import { updateById } from "@/services/crud/update";
 import { getOne } from "@/services/crud/read";
 import { deleteOne } from "@/services/crud/delete";

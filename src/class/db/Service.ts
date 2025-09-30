@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { ServerError } from "../ServerError";
+import { AppError } from "../Error";
 
 type DefaultModelDelegate = {
   findFirstOrThrow: (...args: any) => any;
@@ -42,12 +42,13 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
 
     switch (code) {
       case "P2025":
-        throw new ServerError("NOT_FOUND", { item: this.modelName });
+        throw new AppError("NOT_FOUND", { item: this.modelName });
 
       case "P2003":
-        throw new ServerError("NOT_FOUND", {
+        throw new AppError("NOT_FOUND", {
           item: "related record",
           desc: "Foreign key constraint failed",
+          details: isPrismaError(err) ? err.message : undefined,
         });
 
       default:

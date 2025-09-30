@@ -1,7 +1,7 @@
 import { Normalized } from "@/types";
 import { isValidObjectId, Model, RootFilterQuery } from "mongoose";
 import { Id, invalidObjectId, notFound, QueryResult, Settings } from ".";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 
 export const getById = async <T, S extends Settings<T>>(model: Model<T>, id: Id, settings?: S): Promise<QueryResult<T, S, T>> => {
   const { error, options, populate, project, sort, sortOptions } = settings || {};

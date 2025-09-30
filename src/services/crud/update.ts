@@ -10,7 +10,7 @@ import {
 import { Id, invalidObjectId, notFound, QueryResult, Settings } from ".";
 import { Normalized } from "@/types";
 import { getMany } from "./read";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 
 export const updateById = async <T, S extends Settings<T>>(
   model: Model<T>,

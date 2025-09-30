@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
 import { updateById } from "@/services/crud/update";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 
 export const bindLocal = async (req: Request, { res }: Response) => {
   try {

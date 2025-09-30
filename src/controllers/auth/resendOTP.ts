@@ -5,7 +5,7 @@ import { oneMin } from "../../utils/token";
 import { IVerify, Verify } from "../../models/Verify";
 import { User } from "../../models/User";
 import { userProject } from "../../utils/manipulate/normalize";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 import db from "@/services/crud";
 
 type TypeOTP = "CHANGE_EMAIL" | "CHANGE_PASSWORD" | "DELETE_ACCOUNT";

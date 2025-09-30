@@ -3,7 +3,7 @@ import handleError from "@/utils/handleError";
 import { Transaction, transactionType } from "@/models/Transaction";
 import { isValidObjectId } from "mongoose";
 import { getTotal, Money } from "@/models/Money";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 import db from "@/services/crud";
 
 export const updateTran = async (req: Request, { res }: Response) => {

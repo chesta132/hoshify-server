@@ -1,10 +1,9 @@
 import { Respond } from "../class/Response";
 import { IUser, UserRole } from "../models/User";
-import { NormalizedData } from ".";
 
 declare global {
   namespace Express {
-    interface User extends NormalizedData<IUser> {}
+    interface User extends IUser {}
     interface Response {
       res: Respond;
     }

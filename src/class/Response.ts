@@ -1,4 +1,4 @@
-import { CodeError, EitherWithKeys, Fields, NormalizedData, OneFieldOnly } from "../types";
+import { CodeError, EitherWithKeys, Fields, OneFieldOnly } from "../types";
 import { CookieOptions, Response, Request } from "express";
 import {
   createAccessToken,
@@ -10,8 +10,8 @@ import {
   resRefreshTokenSessionOnly,
 } from "../utils/token";
 import { USER_CRED, UserRole } from "@/models/User";
-import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "@/app";
-import { normalizeCurrency, normalizeQuery, normalizeUserQuery } from "@/utils/manipulate/normalize";
+import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "@/config";
+import { normalizeCurrency, normalizable, normalizeQuery, normalizeUserQuery } from "@/utils/manipulate/normalize";
 import { capital } from "@/utils/manipulate/string";
 import { currencyFields } from "@/utils/money";
 
@@ -138,7 +138,7 @@ const defaultBody = <T>(): DataToResponse<T> => ({ data: {} as T, meta: { status
  */
 export class Respond<SuccessType = unknown, SuccessReady extends boolean = false, ErrorReady extends boolean = false> {
   private _jsonBody: DataToResponse<typeof this._body | typeof this._errorBody> = defaultBody();
-  private _body?: SuccessType | SuccessType[] | NormalizedData<SuccessType> | NormalizedData<SuccessType>[];
+  private _body?: SuccessType | SuccessType[];
   private _errorBody?: ErrorResponseType;
   private _accessToken?: string;
   private _refreshToken?: string;
@@ -170,21 +170,20 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
       const checkCurrencyField = (body: any) => currencyFields.some((field) => typeof body[field] === "number");
       const checkUserCred = (body: any) => Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number]));
 
-      const hasId = Array.isArray(body) ? body.some((body) => body?._id) : body?._id;
+      const needToNormalize = Array.isArray(body) ? body.some((b) => normalizable.includes(b)) : normalizable.includes(body as any);
       const isUserCred = Array.isArray(body) ? body.some((body) => checkUserCred(body)) : checkUserCred(body);
       const hasCurrencyField = Array.isArray(body) ? body.some((body) => checkCurrencyField(body)) : checkCurrencyField(body);
-      type Normalizable = NormalizedData<SuccessType> | NormalizedData<SuccessType>[];
 
       if (isUserCred) {
         if (Array.isArray(body)) {
-          this._body = body.map((body) => normalizeUserQuery(body)) as Normalizable;
-        } else this._body = normalizeUserQuery(body) as Normalizable;
+          this._body = body.map((body) => normalizeUserQuery(body)) as SuccessType[];
+        } else this._body = normalizeUserQuery(body) as SuccessType;
       } else if (hasCurrencyField && this._req.user) {
         if (Array.isArray(body)) {
-          this._body = body.map((body) => normalizeCurrency(body, this._req.user!.currency)) as Normalizable;
+          this._body = body.map((body) => normalizeCurrency(body, this._req.user!.currency));
         } else this._body = normalizeCurrency(body as any, this._req.user.currency);
-      } else if (hasId) {
-        this._body = normalizeQuery(body) as Normalizable;
+      } else if (needToNormalize) {
+        this._body = normalizeQuery(body) as SuccessType;
       }
     }
     this._jsonBody.meta.status = success ? "SUCCESS" : "ERROR";
@@ -384,7 +383,6 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    * @returns this
    */
   respond: ResType<SuccessReady, ErrorReady> = (() => {
-    this.finalize(true);
     if (this._body) {
       this.ok();
     } else if (this._errorBody) {

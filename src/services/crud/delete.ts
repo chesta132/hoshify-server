@@ -1,6 +1,6 @@
 import { Model, RootFilterQuery, UpdateQuery } from "mongoose";
 import { Id, notFound, QueryResult, Settings } from ".";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 import { Normalized } from "@/types";
 
 export const softDeleteOne = async <T, S extends Omit<Settings<T>, "project">>(

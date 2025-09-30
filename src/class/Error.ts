@@ -167,7 +167,7 @@ export type AppErrorCode = AppErrorConfig["code"];
 type Config<C> = Extract<AppErrorConfig, { code: C }>;
 type DepsOf<C extends AppErrorCode> = Config<C>["deps"];
 
-export class AppError<C extends AppErrorCode, R extends Respond | never = never> {
+export class AppError<C extends AppErrorCode, R extends Respond | undefined = undefined> {
   code: C;
   deps: DepsOf<C>;
   private res?: R;
@@ -185,7 +185,7 @@ export class AppError<C extends AppErrorCode, R extends Respond | never = never>
     }
   }
 
-  exec: R extends never ? never : () => void = (() => {
+  exec: R extends undefined ? never : () => void = (() => {
     const { res } = this;
     if (!res) throw new Error("res not inserted");
     const { deps, code } = { code: this.code, deps: this.deps } as AppErrorConfig;

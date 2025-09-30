@@ -1,7 +1,7 @@
 import { isValidObjectId } from "mongoose";
 import { Response } from "express";
 import { spacing } from "./manipulate/string";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 
 export const validateIds = (ids: string[]) => {
   if (!Array.isArray(ids)) {

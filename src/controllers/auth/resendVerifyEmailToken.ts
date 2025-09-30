@@ -6,7 +6,7 @@ import { fiveMin, oneMin } from "../../utils/token";
 import { Verify } from "../../models/Verify";
 import { User } from "../../models/User";
 import { userProject } from "../../utils/manipulate/normalize";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 import db from "@/services/crud";
 
 export const sendVerifyEmail = async (user: Express.User) => {

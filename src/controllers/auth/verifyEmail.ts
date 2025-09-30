@@ -4,7 +4,7 @@ import { userProject } from "../../utils/manipulate/normalize";
 import { decrypt } from "../../utils/crypto";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 import db from "@/services/crud";
 
 export const verifyEmail = async (req: Request, { res }: Response) => {

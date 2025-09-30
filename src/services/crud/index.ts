@@ -1,4 +1,4 @@
-import { ServerError, ServerErrorConfig } from "@/class/ServerError";
+import { ServerError, ServerErrorConfig } from "@/class/Error";
 import { Model, ObjectId, PopulateOptions, ProjectionType, QueryOptions, SortOrder } from "mongoose";
 import * as read from "./read";
 import * as update from "./update";

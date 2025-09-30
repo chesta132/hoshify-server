@@ -6,7 +6,7 @@ import { encrypt } from "@/utils/crypto";
 import { sendRequestRole } from "@/utils/email/send";
 import { oneMin } from "@/utils/token";
 import { userProject } from "@/utils/manipulate/normalize";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 import db from "@/services/crud";
 
 export const requestRole = async (req: Request, { res }: Response) => {

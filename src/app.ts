@@ -10,7 +10,9 @@ import passport from "passport";
 import { resMiddleware } from "./middlewares/res";
 import session from "express-session";
 import { timeInMs } from "./utils/manipulate/number";
-import { CLIENT_URL } from "./config";
+import { CLIENT_URL, NODE_ENV } from "./config";
+import { AppError } from "./class/Error";
+import { handleAppError } from "./utils/handleError";
 import "./services/auth/passport";
 import "./services/db/index";
 import "./utils/extends";
@@ -58,10 +60,25 @@ app.use(resMiddleware);
 
 app.use("/api", router);
 
+app.use("*", (req) => {
+  throw new AppError("NOT_FOUND", { item: `Can not ${req.method} ${req.url}` });
+});
+
+app.use(handleAppError);
+
 const PORT = parseInt(process.env.PORT || "5000");
 const HOST = process.env.HOST || "localhost";
 
 app.listen(PORT, HOST, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Accessible on network via http://${HOST}:${PORT} (or your actual network IP)`);
+  const box = `
+  ______________________________
+  |                             |
+  | 🚀 Server is running       |+|
+  | @ Hoshify                   |
+  | Host    : ${HOST}           |
+  | Port    : ${PORT}           |
+  | Network : ${NODE_ENV === "production" ? "https" : "http"}://${HOST}:${PORT}
+  |_____________________________|
+  `;
+  console.log(box);
 });

@@ -5,7 +5,7 @@ import { userProject } from "../../utils/manipulate/normalize";
 import { sendCredentialChanges } from "../../utils/email/send";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
-import { ServerError } from "@/class/ServerError";
+import { ServerError } from "@/class/Error";
 import { updateById } from "@/services/crud/update";
 
 export const changePassword = async (req: Request, { res }: Response) => {
