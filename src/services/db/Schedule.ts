@@ -4,7 +4,7 @@ import { InternalArgs } from "@prisma/client/runtime/library";
 import { BaseService } from "./Base";
 import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
 import { applyPlugins } from "@/utils/manipulate/object";
-import { ExtendPluginss } from "@/types/db";
+import { ExtendPlugins } from "@/types/db";
 
 export class ScheduleService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<
   Prisma.ScheduleDelegate<ExtArgs, ClientOptions>,
@@ -17,7 +17,7 @@ export class ScheduleService<ExtArgs extends InternalArgs, ClientOptions> extend
 }
 
 export interface ScheduleService<ExtArgs extends InternalArgs, ClientOptions>
-  extends ExtendPluginss<Prisma.ScheduleDelegate<ExtArgs, ClientOptions>, "schedule", "softDelete"> {}
+  extends ExtendPlugins<Prisma.ScheduleDelegate<ExtArgs, ClientOptions>, "schedule", "softDelete"> {}
 
 export const Schedule = new ScheduleService(prisma.schedule);
 export type ModelSchedule = typeof Schedule;

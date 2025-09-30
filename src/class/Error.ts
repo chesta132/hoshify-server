@@ -161,7 +161,9 @@ export type AppErrorConfig =
   | { code: "NOT_VERIFIED"; deps: [err?: RestError] }
   | { code: "SELF_REQ"; deps: [err?: RestError] }
   | { code: "IS_RECYCLED"; deps: [err: { name: string } & RestError] }
-  | { code: "NOT_RECYCLED"; deps: [err: { name: string } & RestError] };
+  | { code: "NOT_RECYCLED"; deps: [err: { name: string } & RestError] }
+  | { code: "SERVER_ERROR"; deps: [err: { error: Error } & RestError] }
+  | { code: "FORBIDDEN"; deps: [err: { message: string } & RestError] };
 
 export type AppErrorCode = AppErrorConfig["code"];
 type Config<C> = Extract<AppErrorConfig, { code: C }>;
@@ -376,6 +378,12 @@ export class AppError<C extends AppErrorCode, R extends Respond | undefined = un
             },
           })
           .error();
+        break;
+      case "SERVER_ERROR":
+        res.body({ error: { ...deps[0], message: "Internal Server Error", code: "SERVER_ERROR", details: deps[0].error.message } }).error();
+        break;
+      case "FORBIDDEN":
+        res.body({ error: { ...deps[0], code: "SERVER_ERROR" } }).error();
         break;
     }
   }) as any;

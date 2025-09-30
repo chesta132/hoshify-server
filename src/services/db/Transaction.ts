@@ -4,7 +4,7 @@ import { InternalArgs } from "@prisma/client/runtime/library";
 import { BaseService } from "./Base";
 import { applyPlugins } from "@/utils/manipulate/object";
 import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
-import { ExtendPluginss } from "@/types/db";
+import { ExtendPlugins } from "@/types/db";
 
 export class TransactionService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<
   Prisma.TransactionDelegate<ExtArgs, ClientOptions>,
@@ -17,7 +17,7 @@ export class TransactionService<ExtArgs extends InternalArgs, ClientOptions> ext
 }
 
 export interface TransactionService<ExtArgs extends InternalArgs, ClientOptions>
-  extends ExtendPluginss<Prisma.TransactionDelegate<ExtArgs, ClientOptions>, "transaction", "softDelete"> {}
+  extends ExtendPlugins<Prisma.TransactionDelegate<ExtArgs, ClientOptions>, "transaction", "softDelete"> {}
 
 export const Transaction = new TransactionService(prisma.transaction);
 export type ModelTransaction = typeof Transaction;
