@@ -2,6 +2,7 @@ import { BaseService } from "@/services/db/Base";
 import { ModelLink } from "@/services/db/Link";
 import { ModelMoney } from "@/services/db/Money";
 import { ModelNote } from "@/services/db/Note";
+import { DummyPlugin } from "@/services/db/plugins/DummyPlugin";
 import { SoftDeletePlugin } from "@/services/db/plugins/SoftDeletePlugin";
 import { ModelRevoked } from "@/services/db/Revoked";
 import { ModelSchedule } from "@/services/db/Schedule";
@@ -10,6 +11,7 @@ import { ModelTransaction } from "@/services/db/Transaction";
 import { ModelUser } from "@/services/db/User";
 import { ModelVerify } from "@/services/db/Verify";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { UnionToInter } from ".";
 
 export type PrismaModels = Omit<PrismaClient, `$${string}`>;
 export type PrismaModel = PrismaModels[keyof PrismaModels];
@@ -41,9 +43,12 @@ export type DefaultModelDelegate = {
   createMany: Func;
 };
 
-export type ArgsOf<F extends () => any> = Parameters<F>[0];
-export type ArgsOfById<F extends () => any> = Omit<ArgsOf<F>, "where">;
-export type PromiseReturn<F extends () => any> = Awaited<ReturnType<F>>;
+export type ArgsOf<F extends Func> = Parameters<F>[0];
+export type ArgsOfById<F extends Func> = Omit<ArgsOf<F>, "where">;
+export type PromiseReturn<F extends Func> = Awaited<ReturnType<F>>;
 
-export type AvailablePlugins<M extends DefaultModelDelegate, N extends ModelNames> = { softDelete: SoftDeletePlugin<M, N> };
-export type ExtendPlugins<M extends DefaultModelDelegate, N extends ModelNames, P extends keyof AvailablePlugins<M, N>> = AvailablePlugins<M, N>[P];
+export type AvailablePlugins<M extends DefaultModelDelegate, N extends ModelNames> = { softDelete: SoftDeletePlugin<M, N>; dummy: DummyPlugin<M, N> };
+export type ExtendPlugins<M extends DefaultModelDelegate, N extends ModelNames, P extends keyof AvailablePlugins<M, N>> = UnionToInter<
+  AvailablePlugins<M, N>[P]
+>;
+export type InferByDelegate<M extends DefaultModelDelegate> = ArgsOf<M["update"]>["data"];

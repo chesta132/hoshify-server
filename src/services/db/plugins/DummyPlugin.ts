@@ -6,12 +6,12 @@ import { handlePrismaError } from "@/utils/db/handlePrismaError";
 import { timeInMs } from "@/utils/manipulate/number";
 import { randomDate, randomNumber, shortId } from "@/utils/random";
 
-type CustomData<T> = T extends Date
-  ? { dynamicDate: { start?: T; end?: T } }
+type CustomData<T> = Date extends T
+  ? { dynamicDate: { start?: Date; end?: Date } }
   : T extends number
   ? { dynamicNumber: { min?: T; max?: T } }
   : T extends string
-  ? { dynamicString: T }
+  ? { dynamicString: T; timestamp: boolean }
   : never;
 type DataDummy<M extends DefaultModelDelegate> = {
   [K in keyof M]: OneFieldOnly<{ fixed: M[K]; enum: M[K][] } & CustomData<M[K]>>;
@@ -59,6 +59,9 @@ export class DummyPlugin<ModelDelegate extends DefaultModelDelegate, ModelName e
           } else if (val?.enum?.length) {
             const rand = randomNumber(0, val.enum.length - 1);
             customized[doc] = val.enum[rand];
+          } else if (val?.timestamp) {
+            const now = new Date();
+            customized[doc] = `Created at - ${now.toDateString()}`;
           }
         }
 
