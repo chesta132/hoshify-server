@@ -10,7 +10,11 @@ type InternalArgs = runtime.Types.Extensions.InternalArgs;
 export class TodoService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<Prisma.TodoDelegate<ExtArgs, ClientOptions>, "todo"> {
   constructor(model: Prisma.TodoDelegate<ExtArgs, ClientOptions>) {
     super(model, "todo");
+    return applyPlugins(this, new SoftDeletePlugin(model, "todo"));
   }
 }
+
+export interface TodoService<ExtArgs extends InternalArgs, ClientOptions>
+  extends SoftDeletePlugin<Prisma.TodoDelegate<ExtArgs, ClientOptions>, "todo"> {}
 
 export const Todo = new TodoService(prisma.todo);
