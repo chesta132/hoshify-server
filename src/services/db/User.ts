@@ -1,9 +1,7 @@
 import { prisma } from "@/services/db";
 import { Prisma } from "@prisma/client";
-import * as runtime from "@prisma/client/runtime/library.js";
 import { BaseService } from "./Base";
-
-type InternalArgs = runtime.Types.Extensions.InternalArgs;
+import { InternalArgs } from "@prisma/client/runtime/library";
 
 export class UserService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<Prisma.UserDelegate<ExtArgs, ClientOptions>, "user"> {
   constructor(model: Prisma.UserDelegate<ExtArgs, ClientOptions>) {

@@ -1,12 +1,12 @@
-import { Link } from "@/class/db/Link";
-import { Money } from "@/class/db/Money";
-import { Note } from "@/class/db/Note";
-import { Revoked } from "@/class/db/Revoked";
-import { Schedule } from "@/class/db/Schedule";
-import { Todo } from "@/class/db/Todo";
-import { Transaction } from "@/class/db/Transaction";
-import { User } from "@/class/db/User";
-import { Verify } from "@/class/db/Verify";
+import { Link } from "@/services/db/Link";
+import { Money } from "@/services/db/Money";
+import { Note } from "@/services/db/Note";
+import { Revoked } from "@/services/db/Revoked";
+import { Schedule } from "@/services/db/Schedule";
+import { Todo } from "@/services/db/Todo";
+import { Transaction } from "@/services/db/Transaction";
+import { User } from "@/services/db/User";
+import { Verify } from "@/services/db/Verify";
 import { Models } from "@/types/db";
 import { PrismaClient } from "@prisma/client";
 

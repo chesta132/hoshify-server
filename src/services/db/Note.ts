@@ -1,11 +1,10 @@
 import { prisma } from "@/services/db";
 import { Prisma } from "@prisma/client";
-import * as runtime from "@prisma/client/runtime/library.js";
 import { BaseService } from "./Base";
 import { applyPlugins } from "@/utils/manipulate/object";
 import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
-
-type InternalArgs = runtime.Types.Extensions.InternalArgs;
+import { InternalArgs } from "@prisma/client/runtime/library";
+import { ExtendPlugins } from "@/types/db";
 
 export class NoteService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<Prisma.NoteDelegate<ExtArgs, ClientOptions>, "note"> {
   constructor(model: Prisma.NoteDelegate<ExtArgs, ClientOptions>) {
@@ -15,7 +14,7 @@ export class NoteService<ExtArgs extends InternalArgs, ClientOptions> extends Ba
 }
 
 export interface NoteService<ExtArgs extends InternalArgs, ClientOptions>
-  extends SoftDeletePlugin<Prisma.NoteDelegate<ExtArgs, ClientOptions>, "note"> {}
+  extends ExtendPlugins<Prisma.NoteDelegate<ExtArgs, ClientOptions>, "note", "softDelete"> {}
 
 export const Note = new NoteService(prisma.note);
 export type ModelNote = typeof Note;

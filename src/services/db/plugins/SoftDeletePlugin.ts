@@ -1,11 +1,11 @@
-import { ArgsOf, DefaultModelDelegate, PromiseReturn } from "@/types/db";
+import { ArgsOf, DefaultModelDelegate, ModelNames, PromiseReturn } from "@/types/db";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
 import { timeInMs } from "@/utils/manipulate/number";
 
 const deleteTTL = timeInMs({ week: 2 });
 const getDeleteAt = () => new Date(Date.now() + deleteTTL);
 
-export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelName extends string> {
+export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelName extends ModelNames> {
   private SDModel: ModelDelegate;
   private SDModelName: ModelName;
 

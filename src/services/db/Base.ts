@@ -1,7 +1,7 @@
-import { ArgsOf, ArgsOfById, DefaultModelDelegate, PromiseReturn } from "@/types/db";
+import { ArgsOf, ArgsOfById, DefaultModelDelegate, ModelNames, PromiseReturn } from "@/types/db";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
 
-export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, ModelName extends string> {
+export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, ModelName extends ModelNames> {
   private model: ModelDelegate;
   private modelName: ModelName;
   prisma: ModelDelegate;
