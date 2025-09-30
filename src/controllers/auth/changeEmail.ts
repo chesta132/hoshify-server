@@ -4,7 +4,7 @@ import { userProject } from "../../utils/manipulate/normalize";
 import { sendCredentialChanges } from "../../utils/email/send";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
-import { ServerError } from "@/class/Error";
+import { AppError } from "@/class/Error";
 import { updateById } from "@/services/crud/update";
 import { getOne } from "@/services/crud/read";
 import { deleteOne } from "@/services/crud/delete";
@@ -15,18 +15,18 @@ export const changeEmail = async (req: Request, { res }: Response) => {
     const token = req.query.token?.toString();
     const { newEmail } = req.body;
     if (!newEmail) {
-      throw new ServerError("MISSING_FIELDS", { fields: "new email" });
+      throw new AppError("MISSING_FIELDS", { fields: "newEmail" });
     }
 
     if (!user.email) {
-      throw new ServerError("NOT_BOUND", {});
+      throw new AppError("NOT_BOUND");
     }
     if (user.email === newEmail) {
-      throw new ServerError("CLIENT_FIELD", { field: "newEmail", message: "New email and old email can not same" });
+      throw new AppError("CLIENT_FIELD", { field: "newEmail", message: "New email and old email can not same" });
     }
     const emailCandidate = await getOne(User, { email: newEmail }, { error: null });
     if (emailCandidate) {
-      throw new ServerError("CLIENT_FIELD", { field: "newEmail", message: "Email is already in use" });
+      throw new AppError("CLIENT_FIELD", { field: "newEmail", message: "Email is already in use" });
     }
 
     const updateEmail = async () => {
@@ -51,7 +51,7 @@ export const changeEmail = async (req: Request, { res }: Response) => {
     }
 
     if (!token) {
-      throw new ServerError("MISSING_FIELDS", { fields: "token" });
+      throw new AppError("MISSING_FIELDS", { fields: "token" });
     }
     const verifyFilter = { value: token, type: "CHANGE_EMAIL_OTP", userId: user.id } as const;
     const verifyError = { error: { code: "INVALID_OTP" } } as const;

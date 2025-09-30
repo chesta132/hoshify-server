@@ -6,7 +6,7 @@ import { encrypt } from "@/utils/crypto";
 import { sendRequestRole } from "@/utils/email/send";
 import { oneMin } from "@/utils/token";
 import { userProject } from "@/utils/manipulate/normalize";
-import { ServerError } from "@/class/Error";
+import { AppError } from "@/class/Error";
 import db from "@/services/crud";
 
 export const requestRole = async (req: Request, { res }: Response) => {
@@ -15,7 +15,7 @@ export const requestRole = async (req: Request, { res }: Response) => {
     let { role }: { role?: UserRole } = req.query;
     role = role?.toString().toUpperCase() as UserRole;
     if (!userRole.includes(role) || user.role === role) {
-      throw new ServerError("CLIENT_TYPE", { fields: "role" });
+      throw new AppError("CLIENT_TYPE", { fields: "role" });
     }
 
     const token = encrypt(`requestRole_${user.id}_role_${role}`);

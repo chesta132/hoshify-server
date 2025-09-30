@@ -145,17 +145,17 @@ export class ServerError<C extends ServerErrorConfig["code"], T extends Respond 
 
 export type AppErrorConfig =
   | { code: "CLIENT_FIELD"; deps: [err: { field: Fields; message: string } & RestError] }
-  | { code: "MISSING_FIELDS"; deps: [err: { field: string } & RestError] }
-  | { code: "CLIENT_TYPE"; deps: [err: { field: string; details?: string } & RestError] }
+  | { code: "MISSING_FIELDS"; deps: [err: { fields: string } & RestError] }
+  | { code: "CLIENT_TYPE"; deps: [err: { fields: string; details?: string } & RestError] }
   | { code: "INVALID_OTP"; deps: [err?: Omit<RestError, "field">] }
-  | { code: "INVALID_VERIF_TOKEN"; deps: [err?: Omit<RestError, "field">] }
   | { code: "INVALID_AUTH"; deps: [err?: RestError] }
+  | { code: "INVALID_VERIF_TOKEN"; deps: [err?: Omit<RestError, "field">] }
   | { code: "INVALID_ROLE"; deps: [err: { role: string } & RestError] }
   | { code: "INVALID_TOKEN"; deps: [err?: RestError] }
   | { code: "NOT_FOUND"; deps: [err: { item: string; desc?: string } & RestError] }
-  | { code: "IS_BOUND"; deps: [err: { provider?: string } & RestError] }
-  | { code: "NOT_BOUND"; deps: [err: { provider?: string } & RestError] }
-  | { code: "TOO_MUCH_REQ"; deps: [err: { desc?: string } & RestError] }
+  | { code: "IS_BOUND"; deps: [err?: { provider?: string } & RestError] }
+  | { code: "NOT_BOUND"; deps: [err?: { provider?: string } & RestError] }
+  | { code: "TOO_MUCH_REQ"; deps: [err?: { desc?: string } & RestError] }
   | { code: "EMAIL_LIMIT"; deps: [err?: RestError] }
   | { code: "IS_VERIFIED"; deps: [err?: RestError] }
   | { code: "NOT_VERIFIED"; deps: [err?: RestError] }
@@ -196,7 +196,7 @@ export class AppError<C extends AppErrorCode, R extends Respond | undefined = un
         break;
       case "MISSING_FIELDS":
         res
-          .body({ error: { ...deps[0], title: "Missing Fields", message: `${capital(deps[0].field)} is required`, code: "MISSING_FIELDS" } })
+          .body({ error: { ...deps[0], title: "Missing Fields", message: `${capital(deps[0].fields)} is required`, code: "MISSING_FIELDS" } })
           .error();
         break;
       case "CLIENT_TYPE":
@@ -205,7 +205,7 @@ export class AppError<C extends AppErrorCode, R extends Respond | undefined = un
             error: {
               ...deps[0],
               code: "INVALID_CLIENT_TYPE",
-              message: `Invalid ${deps[0].field} type. ${capital(deps[0].details || "")}`.trim(),
+              message: `Invalid ${deps[0].fields} type. ${capital(deps[0].details || "")}`.trim(),
               title: "Invalid Type",
             },
           })
@@ -286,7 +286,7 @@ export class AppError<C extends AppErrorCode, R extends Respond | undefined = un
             error: {
               ...deps[0],
               code: "IS_BOUND",
-              message: `Account is already bound to ${deps[0].provider ?? "local"}`,
+              message: `Account is already bound to ${deps[0]?.provider ?? "local"}`,
               title: "Account already bounded",
             },
           })
@@ -297,7 +297,7 @@ export class AppError<C extends AppErrorCode, R extends Respond | undefined = un
           .body({
             error: {
               ...deps[0],
-              message: `Account is not bounded to ${deps[0].provider ?? "local"} yet, please bind to ${deps[0].provider ?? "local"} first`,
+              message: `Account is not bounded to ${deps[0]?.provider ?? "local"} yet, please bind to ${deps[0]?.provider ?? "local"} first`,
               code: "NOT_BOUND",
               title: "Account is not bounded",
             },
@@ -310,7 +310,7 @@ export class AppError<C extends AppErrorCode, R extends Respond | undefined = un
             error: {
               ...deps[0],
               title: "Too many requests",
-              message: `Too many requests. ${capital(deps[0].desc || "") || "Please try again later"}`,
+              message: `Too many requests. ${capital(deps[0]?.desc || "") || "Please try again later"}`,
               code: "TOO_MUCH_REQUEST",
             },
           })

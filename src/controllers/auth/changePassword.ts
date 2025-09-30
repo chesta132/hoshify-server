@@ -5,7 +5,7 @@ import { userProject } from "../../utils/manipulate/normalize";
 import { sendCredentialChanges } from "../../utils/email/send";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
-import { ServerError } from "@/class/Error";
+import { AppError } from "@/class/Error";
 import { updateById } from "@/services/crud/update";
 
 export const changePassword = async (req: Request, { res }: Response) => {
@@ -14,14 +14,14 @@ export const changePassword = async (req: Request, { res }: Response) => {
     const { newPassword, password } = req.body;
     validateRequires(["newPassword", "password"], req.body);
     if (!user.email) {
-      throw new ServerError("NOT_BOUND", {});
+      throw new AppError("NOT_BOUND");
     }
     if (user.password && !(await bcrypt.compare(password, user.password))) {
-      throw new ServerError("CLIENT_FIELD", { field: "password", message: "Old password is wrong" });
+      throw new AppError("CLIENT_FIELD", { field: "password", message: "Old password is wrong" });
     }
 
     if (user.password && (await bcrypt.compare(newPassword, user.password))) {
-      throw new ServerError("CLIENT_FIELD", { field: "newPassword", message: "New password and old password can not same" });
+      throw new AppError("CLIENT_FIELD", { field: "newPassword", message: "New password and old password can not same" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);

@@ -6,7 +6,7 @@ import { sendCredentialChanges } from "../../utils/email/send";
 import { Verify } from "../../models/Verify";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
-import { ServerError } from "@/class/Error";
+import { AppError } from "@/class/Error";
 import db from "@/services/crud";
 
 export const resetPassword = async (req: Request, { res }: Response) => {
@@ -17,17 +17,17 @@ export const resetPassword = async (req: Request, { res }: Response) => {
     validateRequires(["newPassword"], req.body);
     validateRequires(["token"], req.query);
     if (!user.password || !user.email) {
-      throw new ServerError("NOT_BOUND", {});
+      throw new AppError("NOT_BOUND");
     }
 
     if (!user.verified) {
-      throw new ServerError("CLIENT_FIELD", { message: "User email must be verified first", field: "newPassword" });
+      throw new AppError("CLIENT_FIELD", { message: "User email must be verified first", field: "newPassword" });
     }
 
     const password = await bcrypt.hash(newPassword, 10);
 
     if (await bcrypt.compare(newPassword, user.password)) {
-      throw new ServerError("CLIENT_FIELD", { field: "newPassword", message: "New password and old password can not same" });
+      throw new AppError("CLIENT_FIELD", { field: "newPassword", message: "New password and old password can not same" });
     }
 
     await db.getOne(Verify, { value: token, type: "RESET_PASSWORD_OTP", userId: user.id }, { error: { code: "INVALID_OTP" } });

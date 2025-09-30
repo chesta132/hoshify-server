@@ -4,21 +4,21 @@ import { userProject } from "../../utils/manipulate/normalize";
 import { decrypt } from "../../utils/crypto";
 import { User } from "../../models/User";
 import { Verify } from "../../models/Verify";
-import { ServerError } from "@/class/Error";
+import { AppError } from "@/class/Error";
 import db from "@/services/crud";
 
 export const verifyEmail = async (req: Request, { res }: Response) => {
   try {
     const token = req.query.token?.toString();
     if (!token) {
-      throw new ServerError("MISSING_FIELDS", { fields: "token" });
+      throw new AppError("MISSING_FIELDS", { fields: "token" });
     }
 
     const tokenDecrypted = decrypt(token?.toString());
     const userId = tokenDecrypted.slice(tokenDecrypted.indexOf("verify_") + 7);
     const user = await db.getById(User, userId, { error: { code: "INVALID_VERIF_TOKEN" } });
     if (user.verified) {
-      throw new ServerError("IS_VERIFIED", {});
+      throw new AppError("IS_VERIFIED", {});
     }
 
     await db.getOne(Verify, { value: token, type: "VERIFY_EMAIL", userId: user.id }, { error: { code: "INVALID_VERIF_TOKEN" } });

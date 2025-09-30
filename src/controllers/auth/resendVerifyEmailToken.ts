@@ -6,7 +6,7 @@ import { fiveMin, oneMin } from "../../utils/token";
 import { Verify } from "../../models/Verify";
 import { User } from "../../models/User";
 import { userProject } from "../../utils/manipulate/normalize";
-import { ServerError } from "@/class/Error";
+import { AppError } from "@/class/Error";
 import db from "@/services/crud";
 
 export const sendVerifyEmail = async (user: Express.User) => {
@@ -20,13 +20,13 @@ export const resendVerifyEmail = async (req: Request, { res }: Response) => {
   try {
     const user = req.user!;
     if (!user.email) {
-      throw new ServerError("NOT_BOUND", {});
+      throw new AppError("NOT_BOUND");
     }
     if (user.verified) {
-      throw new ServerError("IS_VERIFIED", {});
+      throw new AppError("IS_VERIFIED");
     }
     if (typeof user.timeToAllowSendEmail === "object" && (user.timeToAllowSendEmail as Date) > new Date()) {
-      throw new ServerError("EMAIL_LIMIT", {});
+      throw new AppError("EMAIL_LIMIT");
     }
     const updatedUser = await sendVerifyEmail(user);
     res.body({ success: updatedUser }).created();
