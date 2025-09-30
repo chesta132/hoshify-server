@@ -21,3 +21,4 @@ export interface TransactionService<ExtArgs extends InternalArgs, ClientOptions>
   extends SoftDeletePlugin<Prisma.TransactionDelegate<ExtArgs, ClientOptions>, "transaction"> {}
 
 export const Transaction = new TransactionService(prisma.transaction);
+export type ModelTransaction = typeof Transaction;

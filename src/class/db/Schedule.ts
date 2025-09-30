@@ -21,3 +21,4 @@ export interface ScheduleService<ExtArgs extends InternalArgs, ClientOptions>
   extends SoftDeletePlugin<Prisma.ScheduleDelegate<ExtArgs, ClientOptions>, "schedule"> {}
 
 export const Schedule = new ScheduleService(prisma.schedule);
+export type ModelSchedule = typeof Schedule;

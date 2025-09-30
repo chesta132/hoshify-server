@@ -18,3 +18,4 @@ export interface NoteService<ExtArgs extends InternalArgs, ClientOptions>
   extends SoftDeletePlugin<Prisma.NoteDelegate<ExtArgs, ClientOptions>, "note"> {}
 
 export const Note = new NoteService(prisma.note);
+export type ModelNote = typeof Note;

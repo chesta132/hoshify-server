@@ -12,3 +12,4 @@ export class VerifyService<ExtArgs extends InternalArgs, ClientOptions> extends 
 }
 
 export const Verify = new VerifyService(prisma.verify);
+export type ModelVerify = typeof Verify;

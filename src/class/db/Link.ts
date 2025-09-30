@@ -12,3 +12,4 @@ export class LinkService<ExtArgs extends InternalArgs, ClientOptions> extends Ba
 }
 
 export const Link = new LinkService(prisma.link);
+export type ModelLink = typeof Link;

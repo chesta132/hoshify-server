@@ -18,3 +18,4 @@ export interface TodoService<ExtArgs extends InternalArgs, ClientOptions>
   extends SoftDeletePlugin<Prisma.TodoDelegate<ExtArgs, ClientOptions>, "todo"> {}
 
 export const Todo = new TodoService(prisma.todo);
+export type ModelTodo = typeof Todo;

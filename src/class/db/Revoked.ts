@@ -15,3 +15,4 @@ export class RevokedService<ExtArgs extends InternalArgs, ClientOptions> extends
 }
 
 export const Revoked = new RevokedService(prisma.revoked);
+export type ModelRevoked = typeof Revoked;

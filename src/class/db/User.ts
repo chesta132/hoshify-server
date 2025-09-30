@@ -12,3 +12,4 @@ export class UserService<ExtArgs extends InternalArgs, ClientOptions> extends Ba
 }
 
 export const User = new UserService(prisma.user);
+export type ModelUser = typeof User;

@@ -12,3 +12,4 @@ export class MoneyService<ExtArgs extends InternalArgs, ClientOptions> extends B
 }
 
 export const Money = new MoneyService(prisma.money);
+export type ModelMoney = typeof Money;
