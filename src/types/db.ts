@@ -1,3 +1,4 @@
+import { BaseService } from "@/services/db/Base";
 import { ModelLink } from "@/services/db/Link";
 import { ModelMoney } from "@/services/db/Money";
 import { ModelNote } from "@/services/db/Note";
@@ -31,10 +32,13 @@ type Func = (...args: any) => any;
 export type DefaultModelDelegate = {
   findFirstOrThrow: Func;
   findUniqueOrThrow: Func;
-  findMany: Func;
   create: Func;
   update: Func;
   delete: Func;
+  findMany: Func;
+  updateMany: Func;
+  deleteMany: Func;
+  createMany: Func;
 };
 
 export type ArgsOf<F extends () => any> = Parameters<F>[0];

@@ -36,17 +36,29 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     }
   }
 
-  async create(args: ArgsOf<ModelDelegate["create"]>): Promise<PromiseReturn<ModelDelegate["create"]>> {
+  async create(args: ArgsOf<ModelDelegate["create"]>): Promise<PromiseReturn<ModelDelegate["create"]>>;
+  async create(args: ArgsOf<ModelDelegate["createMany"]>): Promise<PromiseReturn<ModelDelegate["createMany"]>>;
+  async create(args: any): Promise<any> {
     try {
-      return await this.model.create(args);
+      if (Array.isArray(args.data)) {
+        return await this.model.createMany(args);
+      } else {
+        return await this.model.create(args);
+      }
     } catch (err) {
       throw handlePrismaError(err, this.modelName);
     }
   }
 
+  async update(args: ArgsOf<ModelDelegate["update"]>): Promise<PromiseReturn<ModelDelegate["update"]>>;
+  async update(args: ArgsOf<ModelDelegate["updateMany"]>): Promise<PromiseReturn<ModelDelegate["updateMany"]>>;
   async update(args: ArgsOf<ModelDelegate["update"]>): Promise<PromiseReturn<ModelDelegate["update"]>> {
     try {
-      return await this.model.update(args);
+      if (Array.isArray(args.data)) {
+        return await this.model.updateMany(args);
+      } else {
+        return await this.model.update(args);
+      }
     } catch (err) {
       throw handlePrismaError(err, this.modelName);
     }
@@ -55,6 +67,14 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
   async delete(args: ArgsOf<ModelDelegate["delete"]>): Promise<PromiseReturn<ModelDelegate["delete"]>> {
     try {
       return await this.model.delete(args);
+    } catch (err) {
+      throw handlePrismaError(err, this.modelName);
+    }
+  }
+
+  async deleteMany(args: ArgsOf<ModelDelegate["deleteMany"]>): Promise<PromiseReturn<ModelDelegate["deleteMany"]>> {
+    try {
+      return await this.model.deleteMany(args);
     } catch (err) {
       throw handlePrismaError(err, this.modelName);
     }
