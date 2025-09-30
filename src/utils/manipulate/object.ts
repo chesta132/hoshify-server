@@ -54,3 +54,33 @@ export const record = <T extends Record<string, any>, Z>(data: T, recordType: Z)
   });
   return buildedData;
 };
+
+/**
+ * Wraps an object in a Proxy that automatically binds all methods to the target instance.
+ * This ensures that methods maintain their correct `this` context when passed around or destructured.
+ *
+ * @param target - The object to wrap with auto-binding behavior
+ * @returns A proxied version of the target with all methods automatically bound
+ *
+ * @example
+ * ```ts
+ * class ClassA extends ClassB {
+ *   constructor() {
+ *     super();
+ *     return proxy(this, new ClassC()); // Auto-bind all methods in ClassC
+ *   }
+ * }
+ * ```
+ *
+ */
+export const proxy = <T extends object, Z extends object>(target: T, bindTarget: Z): T => {
+  return new Proxy(target, {
+    get(obj, key, receiver) {
+      const prop = Reflect.get(obj, key, receiver);
+      if (typeof prop === "function") {
+        return prop.bind(bindTarget);
+      }
+      return prop;
+    },
+  });
+};
