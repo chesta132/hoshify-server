@@ -24,7 +24,7 @@ export class TodoService<ExtArgs extends InternalArgs, ClientOptions> extends Ba
         status: { enum: todoStatus },
       }),
     ];
-    return applyPlugins(this, new SoftDeletePlugin(model, "todo"));
+    return applyPlugins(this, ...plugins);
   }
 }
 
