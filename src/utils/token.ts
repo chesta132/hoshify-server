@@ -1,24 +1,21 @@
 import { CookieOptions } from "express";
 import jwt from "jsonwebtoken";
 import type { StringValue } from "ms";
-import { NODE_ENV } from "../app";
-
-export const oneWeeks = 7 * 24 * 60 * 60 * 1000;
-export const oneMin = 1 * 60 * 1000;
-export const fiveMin = oneMin * 5;
+import { NODE_ENV } from "@/config";
+import { timeInMs } from "./manipulate/number";
 
 export const resAccessToken: CookieOptions = {
   httpOnly: true,
   secure: NODE_ENV === "production",
   sameSite: "strict",
-  maxAge: fiveMin,
+  maxAge: timeInMs({ minute: 5 }),
 };
 
 export const resRefreshToken: CookieOptions = {
   httpOnly: true,
   secure: NODE_ENV === "production",
   sameSite: "strict",
-  maxAge: oneWeeks * 2,
+  maxAge: timeInMs({ week: 2 }),
 };
 
 export const resRefreshTokenSessionOnly: CookieOptions = {

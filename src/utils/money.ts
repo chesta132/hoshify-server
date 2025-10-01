@@ -42,3 +42,17 @@ export const formatCurrency = (amount: number, currency: string): string => {
 export const currencyFields: CurrencyFields[] = ["amount", "income", "outcome", "total"];
 export type CurrencyFields = "amount" | "income" | "outcome" | "total";
 export type ModifiedCurrency<T extends RequireAtLeastOne<Record<CurrencyFields, any>>> = ConditionalField<T, CurrencyFields, CurrencyFields, string>;
+
+/**
+ * Converts a currency string to a number.
+ *
+ * @param str - The currency string to convert.
+ * @returns The numeric value of the currency string.
+ *
+ * @example
+ * currencyToNumber("Rp 1.000,00") // 1000000
+ * currencyToNumber("$1,000.00") // 1000
+ */
+export const currencyToNumber = (str: string) => {
+  return Number(str.replace(/[^\d,-]/g, "").replace(",", "."));
+};

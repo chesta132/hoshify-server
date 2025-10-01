@@ -1,7 +1,7 @@
 import { omit } from "./object";
 import { NormalizedUser, RequireAtLeastOne } from "@/types";
-import { IUser, USER_CRED } from "@/models/User";
 import { currencyFields, CurrencyFields, formatCurrency, ModifiedCurrency } from "../money";
+import { TUser, UserCred, UserCreds } from "@/services/db/User";
 
 const shouldProcess = (data: any): boolean => {
   return data?._id || Array.isArray(data);
@@ -33,27 +33,21 @@ const normalize = <T extends object | object[]>(data: T): IsArray<T, Omit<Extrac
 
 export const normalizeQuery = <T extends Record<string, any> | Record<string, any>[]>(queryData: T) => {
   if (Array.isArray(queryData)) {
-    const normalizedData = queryData.map((dat) => {
-      const data = { ...dat };
-      return normalize(data);
-    });
-    return normalizedData;
+    return queryData.map((data) => normalize({ ...data }));
+  } else {
+    return normalize({ ...queryData });
   }
-
-  const data = { ...queryData };
-  const normalizedData = normalize(data);
-  return normalizedData;
 };
 
-export const normalizeUserQuery = <T extends Partial<IUser>>(queryData: T, options?: { isGuest?: boolean }) => {
-  let data = omit(queryData, USER_CRED) as NormalizedUser<T>;
+export const normalizeUserQuery = <T extends Partial<TUser>, G extends boolean>(queryData: T, options?: { isGuest?: G }) => {
+  let data = omit(queryData, UserCreds);
   if (options?.isGuest) {
     delete data.gmail;
     delete data.email;
     delete data.verified;
     delete data.createdAt;
   }
-  return data;
+  return data as G extends true ? Omit<T, UserCred | "gmail" | "email" | "verified" | "createdAt"> : Omit<T, UserCred>;
 };
 
 type NormalizeCurrecyData = RequireAtLeastOne<Record<CurrencyFields, number>>;

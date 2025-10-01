@@ -1,19 +1,13 @@
 import { CodeError, EitherWithKeys, Fields, OneFieldOnly } from "../types";
 import { CookieOptions, Response, Request } from "express";
-import {
-  createAccessToken,
-  createRefreshToken,
-  fiveMin,
-  oneWeeks,
-  resAccessToken,
-  resRefreshToken,
-  resRefreshTokenSessionOnly,
-} from "../utils/token";
-import { USER_CRED, UserRole } from "@/models/User";
+import { createAccessToken, createRefreshToken, resAccessToken, resRefreshToken, resRefreshTokenSessionOnly } from "../utils/token";
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "@/config";
 import { normalizeCurrency, normalizable, normalizeQuery, normalizeUserQuery } from "@/utils/manipulate/normalize";
 import { capital } from "@/utils/manipulate/string";
 import { currencyFields } from "@/utils/money";
+import { $Enums } from "@prisma/client";
+import { UserCred, UserCreds } from "@/services/db/User";
+import { timeInMs } from "@/utils/manipulate/number";
 
 /**
  * Authentication-related error codes.
@@ -111,7 +105,7 @@ export type ResType<SuccessReady extends boolean, ErrorReady extends boolean> = 
   IsTruthy<ErrorReady, () => Responded>
 >;
 
-type CookieUserBase = { id: string | unknown; verified: boolean; role: UserRole };
+type CookieUserBase = { id: string | unknown; verified: boolean; role: $Enums.UserRole };
 type CookieUser<T> = T extends CookieUserBase ? { user?: CookieUserBase } : { user: CookieUserBase };
 
 type CookieType<T = undefined> = EitherWithKeys<
@@ -169,7 +163,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     if (success && typeof this._body === "object" && this._body !== null) {
       const body = this._body as Record<string, any> | any[];
       const checkCurrencyField = (body: any) => currencyFields.some((field) => typeof body[field] === "number");
-      const checkUserCred = (body: any) => Object.keys(body).some((key) => USER_CRED.includes(key as (typeof USER_CRED)[number]));
+      const checkUserCred = (body: any) => Object.keys(body).some((key) => UserCreds.includes(key as UserCred));
 
       const needToNormalize = Array.isArray(body) ? body.some((b) => normalizable.includes(b)) : normalizable.includes(body as any);
       const isUserCred = Array.isArray(body) ? body.some((body) => checkUserCred(body)) : checkUserCred(body);
@@ -181,8 +175,8 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
         } else this._body = normalizeUserQuery(body) as SuccessType;
       } else if (hasCurrencyField && this._req.user) {
         if (Array.isArray(body)) {
-          this._body = body.map((body) => normalizeCurrency(body, this._req.user!.currency));
-        } else this._body = normalizeCurrency(body as any, this._req.user.currency);
+          this._body = body.map((body) => normalizeCurrency(body, this._req.user!.currency as string));
+        } else this._body = normalizeCurrency(body as any, this._req.user.currency as string);
       } else if (needToNormalize) {
         this._body = normalizeQuery(body) as SuccessType;
       }
@@ -287,11 +281,11 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     this._accessToken = createAccessToken({
       userId: id as string,
       verified,
-      expires: new Date(Date.now() + (Number(ACCESS_TOKEN_EXPIRY) || fiveMin)),
+      expires: new Date(Date.now() + (Number(ACCESS_TOKEN_EXPIRY) || timeInMs({ minute: 5 }))),
       role,
     });
     this._refreshToken = createRefreshToken(
-      { userId: id as string, verified, expires: new Date(Date.now() + (Number(REFRESH_TOKEN_EXPIRY) || oneWeeks)), role },
+      { userId: id as string, verified, expires: new Date(Date.now() + (Number(REFRESH_TOKEN_EXPIRY) || timeInMs({ week: 1 }))), role },
       this._rememberMe ? undefined : null
     );
     return this;
@@ -477,16 +471,19 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return this;
   }) as any;
 
+  /** @deprecated Use AppError */
   tempMissingFields(fields: string, restErr?: RestError) {
     const body = this.body({ error: { ...restErr, title: "Missing Fields", message: `${capital(fields)} is required`, code: "MISSING_FIELDS" } });
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempClientField(field: ErrorResponseType["field"], message: string, restErr?: RestError) {
     const body = this.body({ error: { ...restErr, field, message, code: "CLIENT_FIELD" } });
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempClientType(field: string, details?: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -499,6 +496,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempInvalidOTP(restErr?: Omit<RestError, "field">) {
     const body = this.body({
       error: {
@@ -512,6 +510,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempInvalidVerifyToken(restErr?: Omit<RestError, "field">) {
     const body = this.body({
       error: {
@@ -525,6 +524,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempInvalidAuth(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -537,6 +537,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempInvalidRole(role: string, restErr?: RestError) {
     const body = this.body({
       error: { ...restErr, code: "INVALID_ROLE", message: `${capital(role.toLowerCase())} role needed`, title: "Invalid Role" },
@@ -544,6 +545,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempInvalidToken(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -556,6 +558,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempNotFound(item: string, desc?: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -568,6 +571,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempIsBound = (provider?: string, restErr?: RestError) => {
     const body = this.body({
       error: { ...restErr, code: "IS_BOUND", message: `Account is already bound to ${provider ?? "local"}`, title: "Account already bounded" },
@@ -575,6 +579,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   };
 
+  /** @deprecated Use AppError */
   tempNotBound(provider?: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -587,6 +592,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempTooMuchReq(desc?: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -599,6 +605,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempLimitSendEmail(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -611,11 +618,13 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempIsVerified(restErr?: RestError) {
     const body = this.body({ error: { ...restErr, message: "Your email has been verified", code: "IS_VERIFIED", title: "You have been verified" } });
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempNotVerified(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -628,6 +637,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempSelfReq(restErr?: RestError) {
     const body = this.body({
       error: {
@@ -640,6 +650,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempIsRecycled(name: string, restErr?: RestError) {
     const body = this.body({
       error: {
@@ -651,6 +662,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
     return body;
   }
 
+  /** @deprecated Use AppError */
   tempNotRecycled(name: string, restErr?: RestError) {
     const body = this.body({
       error: {

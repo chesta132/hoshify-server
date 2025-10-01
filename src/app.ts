@@ -12,10 +12,10 @@ import session from "express-session";
 import { timeInMs } from "./utils/manipulate/number";
 import { CLIENT_URL, NODE_ENV } from "./config";
 import { AppError } from "./class/Error";
-import { handleAppError } from "./utils/handleError";
 import "./services/auth/passport";
 import "./services/db/index";
 import "./utils/extends";
+import { handleError } from "./utils/handleError";
 
 const app = express();
 app.set("trust proxy", ["loopback", "linklocal"]);
@@ -64,21 +64,19 @@ app.use("*", (req) => {
   throw new AppError("NOT_FOUND", { item: `Can not ${req.method} ${req.url}` });
 });
 
-app.use(handleAppError);
+app.use(handleError);
 
 const PORT = parseInt(process.env.PORT || "5000");
 const HOST = process.env.HOST || "localhost";
 
 app.listen(PORT, HOST, () => {
   const box = `
-  ______________________________
-  |                             |
-  | 🚀 Server is running       |+|
-  | @ Hoshify                   |
-  | Host    : ${HOST}           |
-  | Port    : ${PORT}           |
-  | Network : ${NODE_ENV === "production" ? "https" : "http"}://${HOST}:${PORT}
-  |_____________________________|
+  🚀 Server is running
+  @ Hoshify
+
+  Host    : ${HOST}
+  Port    : ${PORT}
+  Network : ${NODE_ENV === "production" ? "https" : "http"}://${HOST}:${PORT}
   `;
   console.log(box);
 });

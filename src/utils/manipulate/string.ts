@@ -1,28 +1,13 @@
-import { getMaxChar, type CharOptions } from "./number";
-
-type WidthOptions = { px: number } & Omit<CharOptions, "text">;
-
 /**
  * Truncates the string and appends an ellipsis (`...`) if it exceeds the specified maximum length.
  *
  * @param string - Original string.
- * Two ways to define the limit:
- * - `max`: Maximum number of characters allowed.
- * - `width`: Maximum pixel width, measured with the given font settings.
- *   This uses `canvas.measureText` internally for accurate results.
+ * @param max - Maximum number of characters allowed.
  *
- * If both `max` and `width` are provided, `width` takes precedence.
- * @returns The truncated string with an ellipsis if it exceeded the maximum length, otherwise the original string.
+ * @returns The truncated string with an ellipsis if it exceeded the maximum length.
  */
-export function ellipsis(string: string, max: number): string;
-export function ellipsis(string: string, width: WidthOptions): string;
-export function ellipsis(string: string, max: number | WidthOptions) {
+export function ellipsis(string: string, max: number) {
   let limit = max as number;
-  const width = typeof max !== "number" && max;
-  if (width) {
-    const { fontSize, px, fontFamily } = width;
-    limit = getMaxChar(px, { text: string, fontSize, fontFamily });
-  }
 
   if (limit <= 0) return "";
   if (string.length <= limit) return string;
@@ -132,43 +117,6 @@ export const kebab = (str: string) => {
 };
 
 /**
- * Inserts line breaks into a string so that each line fits within the specified pixel width.
- *
- * @param text - The original string to wrap.
- * @param width - Options for measuring text width.
- * @returns The string with line breaks (`\n`) inserted at appropriate points.
- *
- * @example
- * newLiner("konnichiwa minasan", { px: 50, fontSize: 14, fontFamily: "Arial" })
- * // "konnichi\nwa minasan"
- */
-export const newLiner = (text: string, width: WidthOptions & { maxSlice?: number }): string => {
-  const { fontSize, px, fontFamily, maxSlice } = width;
-  const limit = getMaxChar(px, { text, fontSize, fontFamily });
-
-  if (text.length <= limit) return text;
-
-  const hasLatin = /[a-zA-Z]/.test(text);
-
-  let cut = limit;
-
-  if (hasLatin) {
-    const vocal = ["a", "i", "u", "e", "o"];
-    const lastVocal = vocal.map((v) => text.slice(0, limit).lastIndexOf(v)).sort((a, b) => b - a)[0];
-
-    if (lastVocal > 0) {
-      cut = lastVocal + 1;
-    }
-  }
-
-  if (maxSlice && text.length - cut > maxSlice) {
-    cut = limit;
-  }
-
-  return text.slice(0, cut) + "\n" + newLiner(text.slice(cut), width);
-};
-
-/**
  * Checks whether a given string is a valid HTTP or HTTPS URL.
  *
  * @param str - The string to validate as a URL.
@@ -185,18 +133,4 @@ export const isValidUrl = (str: string) => {
   } catch {
     return false;
   }
-};
-
-/**
- * Converts a currency string to a number.
- *
- * @param str - The currency string to convert.
- * @returns The numeric value of the currency string.
- *
- * @example
- * currencyToNumber("Rp 1.000,00") // 1000000
- * currencyToNumber("$1,000.00") // 1000
- */
-export const currencyToNumber = (str: string) => {
-  return Number(str.replace(/[^\d,-]/g, "").replace(",", "."));
 };
