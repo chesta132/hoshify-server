@@ -6,7 +6,7 @@ import { sendCredentialChanges } from "../../utils/email/send";
 import { Verify } from "../../models/Verify";
 import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
-import { AppError } from "@/class/Error";
+import { AppError } from "@/services/error/Error";
 import db from "@/services/crud";
 
 export const resetPassword = async (req: Request, { res }: Response) => {

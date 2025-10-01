@@ -1,5 +1,5 @@
 import { spacing } from "./manipulate/string";
-import { AppError } from "@/class/Error";
+import { AppError } from "@/services/error/Error";
 
 export const validateRequires = (neededField: string[], from: any) => {
   const missingFieldsSet: Set<string> = new Set();

@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from "express";
 import passport from "passport";
-import { ErrorResponseType } from "../../class/Response";
+import { ErrorResponseType } from "../../services/respond/Respond";
 import handleError from "../../utils/handleError";
 import { normalizeCurrency, normalizeUserQuery } from "../../utils/manipulate/normalize";
 import { IUser, UserPopulateField } from "../../models/User";

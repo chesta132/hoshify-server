@@ -5,7 +5,7 @@ import { decrypt } from "@/utils/crypto";
 import { User, UserRole } from "@/models/User";
 import { normalizeUserQuery, userProject } from "@/utils/manipulate/normalize";
 import { sendRoleGranted } from "@/utils/email/send";
-import { AppError } from "@/class/Error";
+import { AppError } from "@/services/error/Error";
 import { getOne } from "@/services/crud/read";
 import { updateById } from "@/services/crud/update";
 import { deleteOne } from "@/services/crud/delete";

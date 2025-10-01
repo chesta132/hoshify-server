@@ -1,6 +1,8 @@
-import { Respond, RestError } from "./Response";
-import { Fields, RequireAtLeastOne } from "@/types";
+import { Respond } from "../respond/Respond";
+import { RequireAtLeastOne } from "@/types";
+import { Fields } from "@/types/client";
 import { capital } from "@/utils/manipulate/string";
+import { RestError } from "../respond/types";
 
 export type AppErrorConfig =
   | { code: "CLIENT_FIELD"; deps: [err: { field: Fields; message: string } & RestError] }

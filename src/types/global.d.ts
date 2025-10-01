@@ -1,5 +1,5 @@
 import { TUser } from "@/services/db/User";
-import { Respond } from "../class/Response";
+import { Respond } from "../services/respond/Respond";
 import { $Enums } from "@prisma/client";
 
 declare global {

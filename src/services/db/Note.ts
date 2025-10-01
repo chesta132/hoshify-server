@@ -4,7 +4,7 @@ import { BaseService } from "./Base";
 import { applyPlugins } from "@/utils/manipulate/object";
 import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
 import { InternalArgs } from "@prisma/client/runtime/library";
-import { ExtendPlugins, InferByDelegate } from "@/types/db";
+import { ExtendPlugins, InferByDelegate } from "@/services/db/types";
 import { DummyPlugin } from "./plugins/DummyPlugin";
 
 export class NoteService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<Prisma.NoteDelegate<ExtArgs, ClientOptions>, "note"> {

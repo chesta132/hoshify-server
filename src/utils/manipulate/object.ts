@@ -23,7 +23,8 @@ export const pick = <T extends Record<string, any>, Z extends (keyof T)[] = []>(
  * @param omits - Keys of data to omit.
  * @returns The object with omitted properties.
  */
-export const omit = <T extends Record<string, any>, Z extends (keyof T)[] = []>(data: T, omits?: Z): Omit<T, Z[number]> => {
+export const omit = <T extends Record<string, any>, Z extends (keyof T)[] = []>(data?: T, omits?: Z): Omit<T, Z[number]> => {
+  if (!data) return data as any;
   const omittedData = { ...data };
   if (omits)
     for (const omit of omits) {

@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { buildUserPopulate, IUser, User, UserPopulateField } from "../../models/User";
 import { Money } from "@/models/Money";
 import { validateRequires } from "@/utils/validate";
-import { AppError } from "@/class/Error";
+import { AppError } from "@/services/error/Error";
 import db from "@/services/crud";
 import { initialPopulateConfig } from "../user/initiateUser";
 import { normalizeCurrency } from "@/utils/manipulate/normalize";

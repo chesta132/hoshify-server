@@ -1,4 +1,4 @@
-import { AppError } from "@/class/Error";
+import { AppError } from "@/services/error/Error";
 import { Prisma } from "@prisma/client";
 
 type PrismaErrorCode = "P2025" | "P2002" | "P2003" | "P2021" | "P2022";

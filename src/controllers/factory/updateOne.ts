@@ -1,42 +1,37 @@
-import { Request, Response } from "express";
-import handleError from "@/utils/handleError";
-import { isValidObjectId, Model } from "mongoose";
-import { ControllerConfig, ControllerOptions, Normalized } from "@/types";
-import { unEditableField } from "@/utils/database/plugin";
-import { omit, pick } from "@/utils/manipulate/object";
+import { NextFunction, Request, Response } from "express";
+import { ControllerConfig, ControllerOptions } from "../types";
+import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 import { validateRequires } from "@/utils/validate";
-import { updateOne } from "@/services/crud/update";
+import { omit, pick } from "@/utils/manipulate/object";
+import { unEditableField } from "@/services/db/Base";
 
-export const updateOneFactory = <T, F extends string>(
-  model: Model<T>,
-  { neededField, acceptableField }: ControllerConfig<T, F>,
-  options?: ControllerOptions<T>
+export const updateManyFactory = <
+  M extends Model,
+  NF extends keyof InferByModel<M>,
+  AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
+>(
+  model: M,
+  { neededField, acceptableField }: ControllerConfig<M, NF, AF>,
+  { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>, ArgsOf<M["update"]>, NF, AF>
 ) => {
-  return async (req: Request, { res }: Response) => {
+  return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (neededField) validateRequires(neededField, req.body);
+      if (neededField) validateRequires(neededField as string[], req.body);
       req.body = pick(omit(req.body, unEditableField) as any, [...(neededField || []), ...(acceptableField || [])]);
-      if (!isValidObjectId(id)) {
-        res.tempClientType("Object ID").respond();
-        return;
-      }
 
-      if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
+      if (funcInitiator) if ((await funcInitiator(req, res)) === "stop") return;
 
-      const data = (await updateOne(model, { _id: id, userId: req.user!.id, ...options?.filter }, req.body, {
-        options: { new: true, runValidators: true },
-        ...options?.settings,
-      })) as Normalized<T>;
+      const data = await (model.update as Function)({ ...query, where: { id, userId: req.user!.id, ...query?.where } });
 
-      if (options?.funcBeforeRes) await options.funcBeforeRes(data, req, res);
+      if (funcBeforeRes) await funcBeforeRes(data, req, res);
 
       res
         .body({ success: data })
-        .info(`${(data as any).title || model.getName()}`)
+        .info(`${(data as any).title || model.modelName}`)
         .respond();
     } catch (err) {
-      handleError(err, res);
+      next(err);
     }
   };
 };

@@ -3,9 +3,9 @@ import handleError from "../utils/handleError";
 import { verifyAccessToken, verifyRefreshToken } from "../utils/token";
 import { Revoked } from "../models/Revoked";
 import { User, UserRole } from "../models/User";
-import { Respond } from "@/class/Response";
+import { Respond } from "@/services/respond/Respond";
 import db from "@/services/crud";
-import { AppError } from "@/class/Error";
+import { AppError } from "@/services/error/Error";
 
 const isRefreshSafe = async (refreshToken: string) => {
   const refreshPayload = verifyRefreshToken(refreshToken);

@@ -1,38 +1,38 @@
-import { Request, Response } from "express";
-import handleError from "@/utils/handleError";
-import { Model } from "mongoose";
-import { ControllerOptions } from "@/types";
 import pluralize from "pluralize";
-import { validateIds } from "@/utils/validate";
-import { getMany } from "@/services/crud/read";
-import { updateMany } from "@/services/crud/update";
+import { NextFunction, Request, Response } from "express";
+import { ControllerOptions } from "../types";
+import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 
-export const restoreManyFactory = <T extends { isRecycled: boolean; deleteAt: Date | null }>(model: Model<T>, options?: ControllerOptions<T, []>) => {
-  return async (req: Request, { res }: Response) => {
+export const restoreManyFactory = <
+  M extends Model<"note" | "transaction" | "todo" | "schedule">,
+  NF extends keyof InferByModel<M>,
+  AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
+>(
+  model: M,
+  { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>[], ArgsOf<M["create"]>, NF, AF>
+) => {
+  return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
       const ids: string[] = req.body;
-      validateIds(ids);
 
-      if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
+      if (funcInitiator) if ((await funcInitiator(req, res)) === "stop") return;
 
-      const unUpdated = await getMany(model, { _id: { $in: ids }, userId: req.user!.id, isRecycled: true });
+      const unUpdated = await model.findMany({ where: { id: { in: ids }, userId: req.user!.id as string } });
 
-      await updateMany(
-        model,
-        { _id: { $in: ids }, userId: req.user!.id, isRecycled: true, ...options?.filter },
-        { isRecycled: false, deleteAt: null },
-        { options: { runValidators: true }, ...options?.settings }
-      );
+      await model.restore({
+        ...query,
+        where: { id: { in: ids }, userId: req.user!.id, isRecycled: true, ...(query as any)?.where },
+      });
 
-      const updatedData = unUpdated.map((data) => ({ ...data, isRecycled: false, deleteAt: null }));
-      if (options?.funcBeforeRes) await options.funcBeforeRes(updatedData, req, res);
+      const updatedData = unUpdated.map((data) => ({ ...data, isRecycled: false, deleteAt: null })) as any;
+      if (funcBeforeRes) await funcBeforeRes(updatedData, req, res);
 
       res
         .body({ success: updatedData })
-        .info(`${updatedData.length} ${pluralize(model.getName(), updatedData.length)} deleted`)
+        .info(`${updatedData.length} ${pluralize(model.modelName, updatedData.length)} deleted`)
         .respond();
     } catch (err) {
-      handleError(err, res);
+      next(err);
     }
   };
 };

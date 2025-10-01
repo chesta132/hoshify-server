@@ -1,5 +1,5 @@
-import { AppError } from "@/class/Error";
-import { Respond } from "@/class/Response";
+import { AppError } from "@/services/error/Error";
+import { Respond } from "@/services/respond/Respond";
 import { Prisma } from "@prisma/client";
 import { NextFunction, Response, Request } from "express";
 

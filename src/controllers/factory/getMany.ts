@@ -1,26 +1,31 @@
-import { Request, Response } from "express";
-import handleError from "@/utils/handleError";
-import { ControllerOptions } from "@/types";
-import { Model } from "mongoose";
-import { getMany } from "@/services/crud/read";
-import { omit } from "@/utils/manipulate/object";
+import { NextFunction, Request, Response } from "express";
+import { ControllerOptions } from "../types";
+import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 
-export const getManyFactory = <T extends Record<string, any>>(model: Model<T>, options?: Omit<ControllerOptions<T[]>, "funcInitiator">) => {
-  return async (req: Request, { res }: Response) => {
+export const getManyFactory = <
+  M extends Model,
+  NF extends keyof InferByModel<M>,
+  AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
+>(
+  model: M,
+  { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>[], ArgsOf<M["create"]>, NF, AF>
+) => {
+  return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
       const user = req.user!;
       const { offset } = req.query;
       const limit = 30;
       const skip = parseInt(offset?.toString() || "0") || 0;
+      if (funcInitiator) if ((await funcInitiator(req, res)) === "stop") return;
 
-      const data = await getMany(
-        model,
-        { userId: user.id, ...options?.filter },
-        { options: { limit, skip, ...options?.settings?.options }, ...omit(options?.settings || {}, ["options"]) }
-      );
-      if (options?.funcBeforeRes) {
-        await options.funcBeforeRes(data, req, res);
+      const data = (await model.findMany({
+        ...query,
+        where: { userId: user.id as string, ...(query as any).where },
+      })) as unknown as InferByModel<M>[];
+      if (funcBeforeRes) {
+        await funcBeforeRes(data, req, res);
       }
+
       res
         .body({ success: data })
         .paginate({
@@ -29,7 +34,7 @@ export const getManyFactory = <T extends Record<string, any>>(model: Model<T>, o
         })
         .respond();
     } catch (err) {
-      handleError(err, res);
+      next(err);
     }
   };
 };

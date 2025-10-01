@@ -1,68 +1,16 @@
-import { CodeError, EitherWithKeys, Fields, OneFieldOnly } from "../types";
+import { OneFieldOnly } from "../../types";
 import { CookieOptions, Response, Request } from "express";
-import { createAccessToken, createRefreshToken, resAccessToken, resRefreshToken, resRefreshTokenSessionOnly } from "../utils/token";
+import { createAccessToken, createRefreshToken, resAccessToken, resRefreshToken, resRefreshTokenSessionOnly } from "../../utils/token";
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY } from "@/config";
 import { normalizeCurrency, normalizable, normalizeQuery, normalizeUserQuery } from "@/utils/manipulate/normalize";
 import { capital } from "@/utils/manipulate/string";
 import { currencyFields } from "@/utils/money";
-import { $Enums } from "@prisma/client";
 import { UserCred, UserCreds } from "@/services/db/User";
 import { timeInMs } from "@/utils/manipulate/number";
+import { DataToResponse, CookieUserBase, ErrorResponseType, ResType, RespondOptions, RestError } from "./types";
+import { CodeError } from "../error/types";
 
-/**
- * Authentication-related error codes.
- */
-export const codeErrorAuth = ["INVALID_AUTH", "IS_BOUND", "NOT_BOUND", "INVALID_TOKEN", "INVALID_ROLE"] as const;
-
-/**
- * Field validation-related error codes.
- */
-export const codeErrorField = ["MISSING_FIELDS", "CLIENT_FIELD"] as const;
-
-/**
- * Client-side related error codes.
- */
-export const codeErrorClient = [
-  "TOO_MUCH_REQUEST",
-  "SELF_REQUEST",
-  "CLIENT_REFRESH",
-  "IS_VERIFIED",
-  "NOT_VERIFIED",
-  "INVALID_CLIENT_TYPE",
-  "IS_RECYCLED",
-  "NOT_RECYCLED",
-  "FORBIDDEN",
-] as const;
-
-/**
- * Server-side related error codes.
- */
-export const codeErrorServer = ["SERVER_ERROR", "NOT_FOUND", "BAD_GATEWAY"] as const;
-
-/**
- * All possible error code values.
- */
-export const CodeErrorValues = [...codeErrorAuth, ...codeErrorField, ...codeErrorClient, ...codeErrorServer] as const;
-
-/**
- * Structure of an error response payload.
- */
-export interface ErrorResponseType {
-  /** Unique error code */
-  code: CodeError;
-  /** Human-readable message */
-  message: string;
-  /** Optional UI title for displaying error */
-  title?: string;
-  /** Extra details for debugging */
-  details?: string;
-  /** Optional field reference (useful for forms) */
-  field?: Fields;
-  /** HTTP status code override */
-  status?: number;
-}
-
-export interface RestError extends Omit<ErrorResponseType, "message" | "code"> {}
+const defaultBody = <T>(): DataToResponse<T> => ({ data: {} as T, meta: { status: "ERROR" } });
 
 const statusAlias: {
   code: CodeError[];
@@ -78,54 +26,6 @@ const statusAlias: {
   { code: ["SERVER_ERROR"], status: 500 },
   { code: ["BAD_GATEWAY"], status: 502 },
 ];
-
-/**
- * Standard response envelope.
- */
-export interface DataToResponse<T> {
-  meta: {
-    /** Status of response (SUCCESS/ERROR) */
-    status: "ERROR" | "SUCCESS";
-    /** Indicates whether there is next data (for pagination) */
-    hasNext?: boolean;
-    /** Next offset for pagination */
-    nextOffset?: number | null;
-    /** Optional information message */
-    information?: string;
-  };
-  /** Response payload data */
-  data: T;
-}
-
-type Responded = Respond<unknown, false, false>;
-
-export type ResType<SuccessReady extends boolean, ErrorReady extends boolean> = IsTruthy<
-  SuccessReady,
-  () => Responded,
-  IsTruthy<ErrorReady, () => Responded>
->;
-
-type CookieUserBase = { id: string | unknown; verified: boolean; role: $Enums.UserRole };
-type CookieUser<T> = T extends CookieUserBase ? { user?: CookieUserBase } : { user: CookieUserBase };
-
-type CookieType<T = undefined> = EitherWithKeys<
-  {
-    template: "REFRESH" | "ACCESS" | "REFRESH_ACCESS";
-  },
-  {
-    name: string;
-    val: string;
-    options: CookieOptions;
-  }
-> & { rememberMe?: boolean } & CookieUser<T>;
-
-interface RespondOptions<T = undefined> {
-  cookie: CookieType<T>;
-  paginateMeta: { limit: number; offset: number };
-  notif: string;
-}
-
-const defaultBody = <T>(): DataToResponse<T> => ({ data: {} as T, meta: { status: "ERROR" } });
 
 /**
  * Wrapper for Express Response object with method chaining.

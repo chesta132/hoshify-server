@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import bcrypt from "bcrypt";
-import { ErrorResponseType } from "@/class/Response";
+import { ErrorResponseType } from "@/services/respond/Respond";
 import { buildUserPopulate, IUser, User, UserPopulateField } from "@/models/User";
 import { initialPopulateConfig } from "@/controllers/user/initiateUser";
 import { Money } from "@/models/Money";

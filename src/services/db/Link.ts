@@ -2,7 +2,7 @@ import { prisma } from "@/services/db";
 import { Prisma } from "@prisma/client";
 import { BaseService } from "./Base";
 import { InternalArgs } from "@prisma/client/runtime/library";
-import { InferByDelegate } from "@/types/db";
+import { InferByDelegate } from "@/services/db/types";
 
 export class LinkService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<Prisma.LinkDelegate<ExtArgs, ClientOptions>, "link"> {
   constructor(model: Prisma.LinkDelegate<ExtArgs, ClientOptions>) {

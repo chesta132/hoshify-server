@@ -50,7 +50,7 @@ export const normalizeUserQuery = <T extends Partial<TUser>, G extends boolean>(
   return data as G extends true ? Omit<T, UserCred | "gmail" | "email" | "verified" | "createdAt"> : Omit<T, UserCred>;
 };
 
-type NormalizeCurrecyData = RequireAtLeastOne<Record<CurrencyFields, number>>;
+export type NormalizeCurrecyData = RequireAtLeastOne<Record<CurrencyFields, number>>;
 export const normalizeCurrency = <T extends NormalizeCurrecyData | NormalizeCurrecyData[]>(
   queryData: T,
   currency: string

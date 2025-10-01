@@ -1,92 +1,73 @@
-import { Request, Response } from "express";
-import handleError from "@/utils/handleError";
-import pluralize from "pluralize";
-import { isValidObjectId, Model } from "mongoose";
-import { ControllerConfig, ControllerOptions, NormalizedData } from "@/types";
-import { omit, pick } from "@/utils/manipulate/object";
-import { unEditableField } from "@/utils/database/plugin";
+import { NextFunction, Request, Response } from "express";
+import { ControllerConfig, ControllerOptions } from "../types";
+import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 import { validateRequires } from "@/utils/validate";
-import db from "@/services/crud";
+import { AppError } from "@/services/error/Error";
+import { prisma } from "@/services/db";
+import { omit, pick } from "@/utils/manipulate/object";
+import { unEditableField } from "@/services/db/Base";
+import pluralize from "pluralize";
 
-export const updateManyFactory = <T, F extends string>(
-  model: Model<T>,
-  { neededField, acceptableField }: ControllerConfig<T, F>,
-  options?: Omit<ControllerOptions<T[]>, "filter">
+export const updateManyFactory = <
+  M extends Model,
+  NF extends keyof InferByModel<M>,
+  AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
+>(
+  model: M,
+  { neededField, acceptableField }: ControllerConfig<M, NF, AF>,
+  { funcBeforeRes, funcInitiator }: Omit<ControllerOptions<InferByModel<M>[], ArgsOf<M["create"]>, NF, AF>, "query">
 ) => {
-  return async (req: Request, { res }: Response) => {
+  return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
       const body: any[] = req.body;
       const user = req.user!;
       let invalidDatas: string[] = [];
 
-      const dataIds: string[] = [];
-      body.forEach((data, idx) => {
-        const id = data._id || data.id;
-        if (isValidObjectId(id)) {
-          dataIds.push(id);
-        } else {
-          invalidDatas.push(data?.title || `Index ${idx}`);
-        }
-      });
-
-      if (invalidDatas.length > 0) {
-        res.tempClientType("Object ID", `${invalidDatas.join(", ")} is not ObjectId.`).respond();
-        return;
-      }
+      const dataIds: string[] = body.map((b) => b.id);
 
       if (neededField) {
         body.forEach((item, idx) => {
           try {
-            validateRequires(neededField, item);
+            validateRequires(neededField as string[], item);
           } catch (err) {
             invalidDatas.push(item?.title || `Index ${idx}`);
           }
         });
 
         if (invalidDatas.length > 0) {
-          res.tempClientType("Validation", `Missing required fields in: ${invalidDatas.join(", ")}`).respond();
-          return;
+          throw new AppError("CLIENT_TYPE", { fields: "Ids", details: `Missing required fields in: ${invalidDatas.join(", ")}` });
         }
       }
 
-      if (options?.funcInitiator) {
-        if ((await options.funcInitiator(req, res)) === "stop") return;
+      if (funcInitiator) {
+        if ((await funcInitiator(req, res)) === "stop") return;
       }
 
       const datas = body.map((b, index) => ({
         ...pick(b, [...(neededField || []), ...(acceptableField || [])]),
         userId: user.id,
-        _id: dataIds[index],
+        id: dataIds[index],
       }));
 
-      await model.bulkWrite(
-        datas.map((data) => ({
-          updateOne: {
-            filter: { _id: data._id, userId: user.id },
-            update: omit(data as any, [...unEditableField, "_id"]),
-          },
-        }))
+      const updatedDatas = await prisma.$transaction(
+        datas.map((data) =>
+          (prisma[model.modelName].update as Function)({
+            where: { id: data.id, userId: data.userId },
+            data: omit(data as any, [...unEditableField, "id"]),
+          })
+        )
       );
 
-      const updatedDatas = await db.getMany(
-        model,
-        {
-          _id: { $in: dataIds },
-          userId: user.id,
-        },
-        options?.settings
-      );
-
-      if (options?.funcBeforeRes) {
-        await options.funcBeforeRes(updatedDatas, req, res);
+      if (funcBeforeRes) {
+        await funcBeforeRes(updatedDatas, req, res);
       }
 
       res
         .body({ success: updatedDatas })
-        .info(`${updatedDatas.length} ${pluralize(model.getName(), updatedDatas.length)} updated`)
+        .info(`${updatedDatas.length} ${pluralize(model.modelName, updatedDatas.length)} updated`)
         .respond();
     } catch (err) {
-      handleError(err, res);
+      next(err);
     }
   };
 };

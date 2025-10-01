@@ -11,7 +11,7 @@ import { resMiddleware } from "./middlewares/res";
 import session from "express-session";
 import { timeInMs } from "./utils/manipulate/number";
 import { CLIENT_URL, NODE_ENV } from "./config";
-import { AppError } from "./class/Error";
+import { AppError } from "./services/error/Error";
 import "./services/auth/passport";
 import "./services/db/index";
 import "./utils/extends";

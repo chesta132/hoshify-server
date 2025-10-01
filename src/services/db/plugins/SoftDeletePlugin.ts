@@ -1,9 +1,9 @@
-import { ArgsOf, DefaultModelDelegate, ModelNames, PromiseReturn } from "@/types/db";
+import { ArgsOf, DefaultModelDelegate, ModelNames, PromiseReturn } from "@/services/db/types";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
 import { timeInMs } from "@/utils/manipulate/number";
 
 const deleteTTL = timeInMs({ week: 2 });
-const getDeleteAt = () => new Date(Date.now() + deleteTTL);
+export const getDeleteAt = () => new Date(Date.now() + deleteTTL);
 
 export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelName extends ModelNames> {
   private SDModel: ModelDelegate;
@@ -30,6 +30,16 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
     }
   }
 
+  async softDeleteMany(
+    args: Omit<ArgsOf<ModelDelegate["updateManyAndReturn"]>, "data">
+  ): Promise<PromiseReturn<ModelDelegate["updateManyAndReturn"]>> {
+    try {
+      return await this.SDModel.updateManyAndReturn({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true } });
+    } catch (err) {
+      throw handlePrismaError(err, this.SDModelName);
+    }
+  }
+
   async restore(args: Omit<ArgsOf<ModelDelegate["update"]>, "data">): Promise<PromiseReturn<ModelDelegate["update"]>> {
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: null, isRecycled: false } });
@@ -41,6 +51,14 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
   async restoreById(id: string, args?: Omit<ArgsOf<ModelDelegate["update"]>, "data" | "where">): Promise<PromiseReturn<ModelDelegate["update"]>> {
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: null, isRecycled: false }, where: { id } });
+    } catch (err) {
+      throw handlePrismaError(err, this.SDModelName);
+    }
+  }
+
+  async restoreMany(args: Omit<ArgsOf<ModelDelegate["updateManyAndReturn"]>, "data">): Promise<PromiseReturn<ModelDelegate["updateManyAndReturn"]>> {
+    try {
+      return await this.SDModel.updateManyAndReturn({ ...args, data: { deleteAt: null, isRecycled: false } });
     } catch (err) {
       throw handlePrismaError(err, this.SDModelName);
     }

@@ -1,9 +1,9 @@
-import { ArgsOf, ArgsOfById, DefaultModelDelegate, ModelNames, PromiseReturn } from "@/types/db";
+import { ArgsOf, ArgsOfById, DefaultModelDelegate, ModelNames, PromiseReturn } from "@/services/db/types";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
 
 export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, ModelName extends ModelNames> {
   private model: ModelDelegate;
-  private modelName: ModelName;
+  modelName: ModelName;
   prisma: ModelDelegate;
 
   constructor(model: ModelDelegate, modelName: ModelName) {
@@ -51,11 +51,11 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
   }
 
   async update(args: ArgsOf<ModelDelegate["update"]>): Promise<PromiseReturn<ModelDelegate["update"]>>;
-  async update(args: ArgsOf<ModelDelegate["updateMany"]>): Promise<PromiseReturn<ModelDelegate["updateMany"]>>;
+  async update(args: ArgsOf<ModelDelegate["updateManyAndReturn"]>): Promise<PromiseReturn<ModelDelegate["updateManyAndReturn"]>>;
   async update(args: ArgsOf<ModelDelegate["update"]>): Promise<PromiseReturn<ModelDelegate["update"]>> {
     try {
       if (Array.isArray(args.data)) {
-        return await this.model.updateMany(args);
+        return await this.model.updateManyAndReturn(args);
       } else {
         return await this.model.update(args);
       }
@@ -115,3 +115,5 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     }
   }
 }
+
+export const unEditableField = ["userId", "id", "deleteAt", "isRecycled", "dummy"];

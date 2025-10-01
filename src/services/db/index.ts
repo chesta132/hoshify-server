@@ -7,7 +7,7 @@ import { Todo } from "@/services/db/Todo";
 import { Transaction } from "@/services/db/Transaction";
 import { User } from "@/services/db/User";
 import { Verify } from "@/services/db/Verify";
-import { Models } from "@/types/db";
+import { Models } from "@/services/db/types";
 import { PrismaClient } from "@prisma/client";
 
 export const prisma = new PrismaClient();

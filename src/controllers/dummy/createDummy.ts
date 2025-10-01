@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { NODE_ENV } from "@/config";
-import { AppError } from "@/class/Error";
-import { Model } from "@/types/db";
+import { AppError } from "@/services/error/Error";
+import { Model } from "@/services/db/types";
 
 export const createDummy = <M extends Model, T extends { dummy: boolean }>(model: M) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {

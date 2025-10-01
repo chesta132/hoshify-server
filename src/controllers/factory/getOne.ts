@@ -1,25 +1,30 @@
-import { Request, Response } from "express";
-import handleError from "@/utils/handleError";
-import { isValidObjectId, Model } from "mongoose";
-import { ControllerOptions, Normalized } from "@/types";
-import { getOne } from "@/services/crud/read";
+import { NextFunction, Request, Response } from "express";
+import { ControllerOptions } from "../types";
+import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 
-export const getOneFactory = <T extends Record<string, any>>(model: Model<T>, options?: Omit<ControllerOptions<T>, "funcInitiator">) => {
-  return async (req: Request, { res }: Response) => {
+export const getOneFactory = <
+  M extends Model,
+  NF extends keyof InferByModel<M>,
+  AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
+>(
+  model: M,
+  { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>, ArgsOf<M["create"]>, NF, AF>
+) => {
+  return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!isValidObjectId(id)) {
-        res.tempClientType("Object ID").respond();
-        return;
-      }
+      if (funcInitiator) if ((await funcInitiator(req, res)) === "stop") return;
 
-      const data = (await getOne<any, any>(model, { _id: id, userId: req.user!.id, ...options?.filter }, options?.settings)) as Normalized<T>;
+      const data = (await model.findFirst({
+        ...query,
+        where: { id, ...(query as any).where },
+      })) as any;
 
-      if (options?.funcBeforeRes) await options.funcBeforeRes(data, req, res);
+      if (funcBeforeRes) await funcBeforeRes(data, req, res);
 
       res.body({ success: data }).respond();
     } catch (err) {
-      handleError(err, res);
+      next(err);
     }
   };
 };

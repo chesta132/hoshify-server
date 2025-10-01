@@ -1,4 +1,4 @@
-import { AppError } from "@/class/Error";
+import { AppError } from "@/services/error/Error";
 import { NextFunction, Request, Response } from "express";
 
 export const polyBody = (fObject: (req: Request, res: Response) => any, fArray: (req: Request, res: Response) => any) => {

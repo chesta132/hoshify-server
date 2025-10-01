@@ -1,5 +1,3 @@
-import { ITransaction, Transaction, transactionType } from "@/models/Transaction";
-import { updateMoney, updateMoneyMany } from "@/models/Money";
 import { createManyFactory } from "../factory/createMany";
 import { getManyFactory } from "../factory/getMany";
 import { getOneFactory } from "../factory/getOne";
@@ -7,10 +5,9 @@ import { restoreOneFactory } from "../factory/restoreOne";
 import { restoreManyFactory } from "../factory/restoreMany";
 import { softDeleteOneFactory } from "../factory/softDeleteOne";
 import { softDeleteManyFactory } from "../factory/softDeleteMany";
-import { createOneFactory } from "../factory/createOne";
-import { normalizeCurrency } from "@/utils/manipulate/normalize";
-import { Normalized } from "@/types";
+import { NormalizeCurrecyData, normalizeCurrency } from "@/utils/manipulate/normalize";
 import { Request } from "express";
+import { Transaction, transactionType, TTransaction } from "@/services/db/Transaction";
 
 const isLowerThanZero = (data: any) => {
   const { amount, type } = data;
@@ -20,9 +17,9 @@ const isLowerThanZero = (data: any) => {
   }
 };
 
-const amountToCurrency = (data: Normalized<ITransaction>, req: Request) => {
-  const normalized = normalizeCurrency(data, req.user!.currency);
-  data.amount = normalized.amount as any;
+const amountToCurrency = (data: TTransaction, req: Request) => {
+  const normalized = normalizeCurrency(data as NormalizeCurrecyData, req.user!.currency as string);
+  data.amount = normalized.amount;
 };
 
 export const createTrans = createManyFactory(

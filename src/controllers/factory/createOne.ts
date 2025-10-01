@@ -1,34 +1,37 @@
-import { Request, Response } from "express";
-import handleError from "@/utils/handleError";
-import { ellipsis } from "@/utils/manipulate/string";
-import { Model } from "mongoose";
-import { ControllerConfig, ControllerOptions } from "@/types";
+import { NextFunction, Request, Response } from "express";
 import { validateRequires } from "@/utils/validate";
-import { create } from "@/services/crud/create";
 import { pick } from "@/utils/manipulate/object";
+import { ControllerConfig, ControllerOptions } from "../types";
+import { ArgsOf, InferByModel, Model } from "@/services/db/types";
+import { ellipsis } from "@/utils/manipulate/string";
 
-export const createOneFactory = <T, F extends keyof T>(
-  model: Model<T>,
-  { neededField, acceptableField }: ControllerConfig<T, F>,
-  options?: Omit<ControllerOptions<T>, "filter" | "settings">
+export const createManyFactory = <
+  M extends Model,
+  NF extends keyof InferByModel<M>,
+  AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
+>(
+  model: M,
+  { neededField, acceptableField }: ControllerConfig<M, NF, AF>,
+  { query, funcBeforeRes, funcInitiator, transformData }: ControllerOptions<InferByModel<M>, ArgsOf<M["create"]>, NF, AF, "transformData">
 ) => {
-  return async (req: Request, { res }: Response) => {
+  return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
       const user = req.user!;
       if (neededField) validateRequires(neededField as string[], req.body);
-      if (options?.funcInitiator) if ((await options.funcInitiator(req, res)) === "stop") return;
+      if (funcInitiator) if ((await funcInitiator(req, res)) === "stop") return;
 
-      const datas = { ...pick(req.body, [...(neededField || []), ...(acceptableField || [])]), userId: user.id } as T;
+      let data = { ...pick(req.body, [...(neededField || []), ...(acceptableField || [])]), userId: user.id } as any;
+      if (transformData) data = transformData(data, req, res);
 
-      const createdData = await create(model, datas);
+      const createdData = await (model.create as Function)({ ...query, data });
 
-      if (options?.funcBeforeRes) await options.funcBeforeRes(createdData, req, res);
+      if (funcBeforeRes) await funcBeforeRes(createdData, req, res);
       res
         .body({ success: createdData })
-        .info(`${ellipsis((createdData as any).title || model.getName(), 30)} added`)
+        .info(`${ellipsis(createdData.title || model.modelName, 30)} added`)
         .created();
     } catch (err) {
-      handleError(err, res);
+      next(err);
     }
   };
 };

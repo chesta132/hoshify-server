@@ -1,7 +1,7 @@
-import { AppError } from "@/class/Error";
+import { AppError } from "@/services/error/Error";
 import { NODE_ENV } from "@/config";
 import { OneFieldOnly } from "@/types";
-import { DefaultModelDelegate, InferByDelegate, ModelNames, PromiseReturn } from "@/types/db";
+import { DefaultModelDelegate, InferByDelegate, ModelNames, PromiseReturn } from "@/services/db/types";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
 import { timeInMs } from "@/utils/manipulate/number";
 import { randomDate, randomNumber, shortId } from "@/utils/random";

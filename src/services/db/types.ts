@@ -11,7 +11,7 @@ import { ModelTransaction } from "@/services/db/Transaction";
 import { ModelUser } from "@/services/db/User";
 import { ModelVerify } from "@/services/db/Verify";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { UnionToInter } from ".";
+import { UnionToInter } from "../../types";
 
 export type PrismaModels = Omit<PrismaClient, `$${string}`>;
 export type PrismaModel = PrismaModels[keyof PrismaModels];
@@ -27,7 +27,7 @@ export type Models = {
   readonly verify: ModelVerify;
   readonly revoked: ModelRevoked;
 };
-export type Model<K extends keyof Models = never> = K extends never ? Models[keyof Models] : Models[K];
+export type Model<K extends keyof Models = keyof Models> = Models[K];
 export type ModelNames = Lowercase<Prisma.ModelName>;
 
 type Func = (...args: any) => any;
@@ -38,7 +38,7 @@ export type DefaultModelDelegate = {
   update: Func;
   delete: Func;
   findMany: Func;
-  updateMany: Func;
+  updateManyAndReturn: Func;
   deleteMany: Func;
   createMany: Func;
 };
@@ -56,3 +56,4 @@ type Infer<F extends Func> = ArgsOf<F>["data"];
 export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M["update"]> = never> = Infer<M["update"]> extends infer F
   ? Required<Omit<F, O>> & Partial<Pick<F, O>>
   : never;
+export type InferByModel<M extends Model, O extends keyof Infer<M["prisma"]["update"]> = never> = InferByDelegate<M["prisma"], O>;

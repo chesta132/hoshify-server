@@ -4,7 +4,7 @@ import { InternalArgs } from "@prisma/client/runtime/library";
 import { BaseService } from "./Base";
 import { applyPlugins } from "@/utils/manipulate/object";
 import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
-import { ExtendPlugins, InferByDelegate } from "@/types/db";
+import { ExtendPlugins, InferByDelegate } from "@/services/db/types";
 import { DummyPlugin } from "./plugins/DummyPlugin";
 import { timeInMs } from "@/utils/manipulate/number";
 
