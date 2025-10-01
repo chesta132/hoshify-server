@@ -1,4 +1,4 @@
-import { ArgsOf, DefaultModelDelegate, ModelNames, PromiseReturn } from "@/services/db/types";
+import { ArgsOf, DefaultModelDelegate, ModelNames, PromiseReturn, ServiceError, ServiceOptions, ServiceResult } from "@/services/db/types";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
 import { timeInMs } from "@/utils/manipulate/number";
 
@@ -14,53 +14,89 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
     this.SDModelName = modelName;
   }
 
-  async softDelete(args: Omit<ArgsOf<ModelDelegate["update"]>, "data">): Promise<PromiseReturn<ModelDelegate["update"]>> {
+  async softDelete<E extends ServiceError>(
+    args: Omit<ArgsOf<ModelDelegate["update"]>, "data">,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["update"], E>> {
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true } });
     } catch (err) {
-      throw handlePrismaError(err, this.SDModelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.SDModelName, options?.error);
     }
   }
 
-  async softDeleteById(id: string, args?: Omit<ArgsOf<ModelDelegate["update"]>, "data" | "where">): Promise<PromiseReturn<ModelDelegate["update"]>> {
+  async softDeleteById<E extends ServiceError>(
+    id: string,
+    args?: Omit<ArgsOf<ModelDelegate["update"]>, "data" | "where">,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["update"], E>> {
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true }, where: { id } });
     } catch (err) {
-      throw handlePrismaError(err, this.SDModelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.SDModelName, options?.error);
     }
   }
 
-  async softDeleteMany(
-    args: Omit<ArgsOf<ModelDelegate["updateManyAndReturn"]>, "data">
-  ): Promise<PromiseReturn<ModelDelegate["updateManyAndReturn"]>> {
+  async softDeleteMany<E extends ServiceError>(
+    args: Omit<ArgsOf<ModelDelegate["updateManyAndReturn"]>, "data">,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["updateManyAndReturn"], E>> {
     try {
       return await this.SDModel.updateManyAndReturn({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true } });
     } catch (err) {
-      throw handlePrismaError(err, this.SDModelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.SDModelName, options?.error);
     }
   }
 
-  async restore(args: Omit<ArgsOf<ModelDelegate["update"]>, "data">): Promise<PromiseReturn<ModelDelegate["update"]>> {
+  async restore<E extends ServiceError>(
+    args: Omit<ArgsOf<ModelDelegate["update"]>, "data">,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["update"], E>> {
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: null, isRecycled: false } });
     } catch (err) {
-      throw handlePrismaError(err, this.SDModelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.SDModelName, options?.error);
     }
   }
 
-  async restoreById(id: string, args?: Omit<ArgsOf<ModelDelegate["update"]>, "data" | "where">): Promise<PromiseReturn<ModelDelegate["update"]>> {
+  async restoreById<E extends ServiceError>(
+    id: string,
+    args?: Omit<ArgsOf<ModelDelegate["update"]>, "data" | "where">,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["update"], E>> {
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: null, isRecycled: false }, where: { id } });
     } catch (err) {
-      throw handlePrismaError(err, this.SDModelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.SDModelName, options?.error);
     }
   }
 
-  async restoreMany(args: Omit<ArgsOf<ModelDelegate["updateManyAndReturn"]>, "data">): Promise<PromiseReturn<ModelDelegate["updateManyAndReturn"]>> {
+  async restoreMany<E extends ServiceError>(
+    args: Omit<ArgsOf<ModelDelegate["updateManyAndReturn"]>, "data">,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["updateManyAndReturn"], E>> {
     try {
       return await this.SDModel.updateManyAndReturn({ ...args, data: { deleteAt: null, isRecycled: false } });
     } catch (err) {
-      throw handlePrismaError(err, this.SDModelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.SDModelName, options?.error);
     }
   }
 }

@@ -1,3 +1,4 @@
+import { ServiceError } from "@/services/db/types";
 import { AppError } from "@/services/error/Error";
 import { Prisma } from "@prisma/client";
 
@@ -14,21 +15,22 @@ const getErrorCode = (err: unknown): PrismaErrorCode | null => {
   return null;
 };
 
-export const handlePrismaError = (err: unknown, modelName: string) => {
+export const handlePrismaError = (err: unknown, modelName: string, error?: ServiceError) => {
   const code = getErrorCode(err);
 
   switch (code) {
     case "P2025":
-      throw new AppError("NOT_FOUND", { item: modelName });
+      if (error) return error;
+      return new AppError("NOT_FOUND", { item: modelName });
 
     case "P2003":
-      throw new AppError("NOT_FOUND", {
+      return new AppError("NOT_FOUND", {
         item: "related record",
         desc: "Foreign key constraint failed",
         details: isPrismaError(err) ? err.message : undefined,
       });
 
     default:
-      throw err;
+      return err;
   }
 };

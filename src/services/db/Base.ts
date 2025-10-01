@@ -1,4 +1,13 @@
-import { ArgsOf, ArgsOfById, DefaultModelDelegate, ModelNames, PromiseReturn } from "@/services/db/types";
+import {
+  ArgsOf,
+  ArgsOfById,
+  DefaultModelDelegate,
+  ModelNames,
+  PromiseReturn,
+  ServiceError,
+  ServiceOptions,
+  ServiceResult,
+} from "@/services/db/types";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
 
 export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, ModelName extends ModelNames> {
@@ -12,33 +21,57 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     this.prisma = model;
   }
 
-  async findFirst(args?: ArgsOf<ModelDelegate["findFirstOrThrow"]>): Promise<PromiseReturn<ModelDelegate["findFirstOrThrow"]>> {
+  async findFirst<E extends ServiceError>(
+    args?: ArgsOf<ModelDelegate["findFirstOrThrow"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["findFirstOrThrow"], E>> {
     try {
       return await this.model.findFirstOrThrow(args);
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async findUnique(args: ArgsOf<ModelDelegate["findUniqueOrThrow"]>): Promise<PromiseReturn<ModelDelegate["findUniqueOrThrow"]>> {
+  async findUnique<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["findUniqueOrThrow"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["findUniqueOrThrow"], E>> {
     try {
       return await this.model.findUniqueOrThrow(args);
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async findMany(args?: ArgsOf<ModelDelegate["findMany"]>): Promise<PromiseReturn<ModelDelegate["findMany"]>> {
+  async findMany<E extends ServiceError>(
+    args?: ArgsOf<ModelDelegate["findMany"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["findMany"], E>> {
     try {
       return await this.model.findMany(args);
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async create(args: ArgsOf<ModelDelegate["create"]>): Promise<PromiseReturn<ModelDelegate["create"]>>;
-  async create(args: ArgsOf<ModelDelegate["createMany"]>): Promise<PromiseReturn<ModelDelegate["createMany"]>>;
-  async create(args: any): Promise<any> {
+  async create<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["create"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["create"], E>>;
+  async create<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["createMany"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["createMany"], E>>;
+  async create<E extends ServiceError>(args: any, options?: ServiceOptions<E>): Promise<any> {
     try {
       if (Array.isArray(args.data)) {
         return await this.model.createMany(args);
@@ -46,13 +79,25 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
         return await this.model.create(args);
       }
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async update(args: ArgsOf<ModelDelegate["update"]>): Promise<PromiseReturn<ModelDelegate["update"]>>;
-  async update(args: ArgsOf<ModelDelegate["updateManyAndReturn"]>): Promise<PromiseReturn<ModelDelegate["updateManyAndReturn"]>>;
-  async update(args: ArgsOf<ModelDelegate["update"]>): Promise<PromiseReturn<ModelDelegate["update"]>> {
+  async update<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["update"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["update"], E>>;
+  async update<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["updateManyAndReturn"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["updateManyAndReturn"], E>>;
+  async update<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["update"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["update"], E>> {
     try {
       if (Array.isArray(args.data)) {
         return await this.model.updateManyAndReturn(args);
@@ -60,58 +105,101 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
         return await this.model.update(args);
       }
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async delete(args: ArgsOf<ModelDelegate["delete"]>): Promise<PromiseReturn<ModelDelegate["delete"]>> {
+  async delete<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["delete"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["delete"], E>> {
     try {
       return await this.model.delete(args);
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async deleteMany(args: ArgsOf<ModelDelegate["deleteMany"]>): Promise<PromiseReturn<ModelDelegate["deleteMany"]>> {
+  async deleteMany<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["deleteMany"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["deleteMany"], E>> {
     try {
       return await this.model.deleteMany(args);
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async findById(id: string, args?: ArgsOfById<ModelDelegate["findUniqueOrThrow"]>): Promise<PromiseReturn<ModelDelegate["findUniqueOrThrow"]>> {
+  async findById<E extends ServiceError>(
+    id: string,
+    args?: ArgsOfById<ModelDelegate["findUniqueOrThrow"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["findUniqueOrThrow"], E>> {
     try {
       return await this.model.findUniqueOrThrow({ where: { id }, ...args });
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async findManyByIds(ids: string[], args?: ArgsOfById<ModelDelegate["findMany"]>): Promise<PromiseReturn<ModelDelegate["findMany"]>> {
+  async findManyByIds<E extends ServiceError>(
+    ids: string[],
+    args?: ArgsOfById<ModelDelegate["findMany"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["findMany"], E>> {
     try {
       return this.model.findMany({ where: { id: { in: ids } }, ...args });
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async updateById(id: string, args: ArgsOfById<ModelDelegate["update"]>): Promise<PromiseReturn<ModelDelegate["update"]>> {
+  async updateById<E extends ServiceError>(
+    id: string,
+    args: ArgsOfById<ModelDelegate["update"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["update"], E>> {
     try {
       return this.model.update({ where: { id }, ...args });
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 
-  async deleteById(id: string, args?: ArgsOfById<ModelDelegate["delete"]>): Promise<PromiseReturn<ModelDelegate["delete"]>> {
+  async deleteById<E extends ServiceError>(
+    id: string,
+    args?: ArgsOfById<ModelDelegate["delete"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["delete"], E>> {
     try {
       return await this.model.delete({
         where: { id },
         ...args,
       });
     } catch (err) {
-      throw handlePrismaError(err, this.modelName);
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
     }
   }
 }
