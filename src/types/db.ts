@@ -51,4 +51,8 @@ export type AvailablePlugins<M extends DefaultModelDelegate, N extends ModelName
 export type ExtendPlugins<M extends DefaultModelDelegate, N extends ModelNames, P extends keyof AvailablePlugins<M, N>> = UnionToInter<
   AvailablePlugins<M, N>[P]
 >;
-export type InferByDelegate<M extends DefaultModelDelegate> = ArgsOf<M["update"]>["data"];
+
+type Infer<F extends Func> = ArgsOf<F>["data"];
+export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M["update"]> = never> = Infer<M["update"]> extends infer F
+  ? Required<Omit<F, O>> & Partial<Pick<F, O>>
+  : never;

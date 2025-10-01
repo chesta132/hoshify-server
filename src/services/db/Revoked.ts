@@ -2,6 +2,7 @@ import { prisma } from "@/services/db";
 import { Prisma } from "@prisma/client";
 import { InternalArgs } from "@prisma/client/runtime/library";
 import { BaseService } from "./Base";
+import { InferByDelegate } from "@/types/db";
 
 export class RevokedService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<
   Prisma.RevokedDelegate<ExtArgs, ClientOptions>,
@@ -14,3 +15,4 @@ export class RevokedService<ExtArgs extends InternalArgs, ClientOptions> extends
 
 export const Revoked = new RevokedService(prisma.revoked);
 export type ModelRevoked = typeof Revoked;
+export type TRevoked = InferByDelegate<typeof prisma.revoked>;

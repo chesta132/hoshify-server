@@ -4,7 +4,7 @@ import { InternalArgs } from "@prisma/client/runtime/library";
 import { BaseService } from "./Base";
 import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
 import { applyPlugins } from "@/utils/manipulate/object";
-import { ExtendPlugins } from "@/types/db";
+import { ExtendPlugins, InferByDelegate } from "@/types/db";
 import { DummyPlugin } from "./plugins/DummyPlugin";
 import { timeInMs } from "@/utils/manipulate/number";
 
@@ -35,3 +35,4 @@ export interface ScheduleService<ExtArgs extends InternalArgs, ClientOptions>
 
 export const Schedule = new ScheduleService(prisma.schedule);
 export type ModelSchedule = typeof Schedule;
+export type TSchedule = InferByDelegate<typeof prisma.schedule>;

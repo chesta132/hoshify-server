@@ -4,7 +4,7 @@ import { InternalArgs } from "@prisma/client/runtime/library";
 import { BaseService } from "./Base";
 import { applyPlugins } from "@/utils/manipulate/object";
 import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
-import { ExtendPlugins } from "@/types/db";
+import { ExtendPlugins, InferByDelegate } from "@/types/db";
 import { DummyPlugin } from "./plugins/DummyPlugin";
 
 export const transactionType: $Enums.TransactionType[] = ["INCOME", "OUTCOME"];
@@ -35,3 +35,4 @@ export interface TransactionService<ExtArgs extends InternalArgs, ClientOptions>
 
 export const Transaction = new TransactionService(prisma.transaction);
 export type ModelTransaction = typeof Transaction;
+export type TTransaction = InferByDelegate<typeof prisma.transaction>;

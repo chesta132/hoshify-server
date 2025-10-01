@@ -1,9 +1,10 @@
+import { TUser } from "@/services/db/User";
 import { Respond } from "../class/Response";
-import { IUser, UserRole } from "../models/User";
+import { $Enums } from "@prisma/client";
 
 declare global {
   namespace Express {
-    interface User extends IUser {}
+    interface User extends TUser {}
     interface Response {
       res: Respond;
     }
@@ -12,7 +13,7 @@ declare global {
     userId: string;
     expires: Date;
     verified: boolean;
-    role: UserRole;
+    role: $Enums.UserRole;
   }
 
   interface Console {

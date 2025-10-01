@@ -4,7 +4,7 @@ import { InternalArgs } from "@prisma/client/runtime/library";
 import { BaseService } from "./Base";
 import { applyPlugins } from "@/utils/manipulate/object";
 import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
-import { ExtendPlugins } from "@/types/db";
+import { ExtendPlugins, InferByDelegate } from "@/types/db";
 import { DummyPlugin } from "./plugins/DummyPlugin";
 import { timeInMs } from "@/utils/manipulate/number";
 
@@ -33,3 +33,4 @@ export interface TodoService<ExtArgs extends InternalArgs, ClientOptions>
 
 export const Todo = new TodoService(prisma.todo);
 export type ModelTodo = typeof Todo;
+export type TTodo = InferByDelegate<typeof prisma.todo>;

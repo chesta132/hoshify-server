@@ -13,16 +13,16 @@ type CustomData<T> = Date extends T
   : T extends string
   ? { dynamicString: T; timestamp: boolean }
   : never;
-type DataDummy<M extends DefaultModelDelegate> = {
+type DataDummy<M extends Partial<DefaultModelDelegate>> = {
   [K in keyof M]: OneFieldOnly<{ fixed: M[K]; enum: M[K][] } & CustomData<M[K]>>;
 };
 
 export class DummyPlugin<ModelDelegate extends DefaultModelDelegate, ModelName extends ModelNames> {
   private DModel: ModelDelegate;
   private DModelName: ModelName;
-  private seed: DataDummy<ModelDelegate>;
+  private seed: DataDummy<Partial<InferByDelegate<ModelDelegate>>>;
 
-  constructor(model: ModelDelegate, modelName: ModelName, seed: DataDummy<InferByDelegate<ModelDelegate>>) {
+  constructor(model: ModelDelegate, modelName: ModelName, seed: DataDummy<Partial<InferByDelegate<ModelDelegate>>>) {
     this.DModel = model;
     this.DModelName = modelName;
     this.seed = seed;
@@ -35,12 +35,12 @@ export class DummyPlugin<ModelDelegate extends DefaultModelDelegate, ModelName e
       length = 30,
     }: {
       length?: number;
-      seed?: Partial<DataDummy<InferByDelegate<ModelDelegate>>>;
+      seed?: Partial<DataDummy<Partial<InferByDelegate<ModelDelegate>>>>;
     } = {}
   ): Promise<PromiseReturn<ModelDelegate["createMany"]>> {
     try {
       if (NODE_ENV !== "development") throw new AppError("FORBIDDEN", { message: "Can not create dummy data right now." });
-      const seeds = { ...this.seed, ...seed } as DataDummy<ModelDelegate>;
+      const seeds = { ...this.seed, ...seed } as Record<string, any>;
 
       const dummys = Array.from(new Array(length)).map((_, idx) => {
         const customized: Record<string, any> = {};
