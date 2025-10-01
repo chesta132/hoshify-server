@@ -15,7 +15,7 @@ export const updateManyFactory = <
 >(
   model: M,
   { neededField, acceptableField }: ControllerConfig<M, NF, AF>,
-  { funcBeforeRes, funcInitiator }: Omit<ControllerOptions<InferByModel<M>[], ArgsOf<M["create"]>, NF, AF>, "query">
+  { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>[], ArgsOf<M["update"]>, NF, AF>
 ) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
@@ -52,8 +52,9 @@ export const updateManyFactory = <
       const updatedDatas = await prisma.$transaction(
         datas.map((data) =>
           (prisma[model.modelName].update as Function)({
-            where: { id: data.id, userId: data.userId },
-            data: omit(data as any, [...unEditableField, "id"]),
+            ...query,
+            where: { id: data.id, userId: data.userId, ...query?.where },
+            data: { ...omit(data as any, [...unEditableField, "id"]), ...query?.data },
           })
         )
       );

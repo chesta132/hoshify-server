@@ -8,7 +8,7 @@ export const getOneFactory = <
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(
   model: M,
-  { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>, ArgsOf<M["create"]>, NF, AF>
+  { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>, ArgsOf<M["findFirst"]>, NF, AF>
 ) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
