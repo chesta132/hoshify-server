@@ -1,53 +1,11 @@
-import { AppError, ServerError } from "@/class/Error";
+import { AppError } from "@/class/Error";
 import { Respond } from "@/class/Response";
 import { Prisma } from "@prisma/client";
 import { NextFunction, Response, Request } from "express";
 
-/**
- * @deprecated Use NextFunction instead.
- */
-export default function handleError(error: unknown, res: Response["res"]) {
-  const err = error as Error | ServerError<any>;
-  const createdError = new Error();
-  const callerLine = createdError.stack?.split("\n")[2];
-
-  console.error(`\n\n\nError found ${callerLine?.trim()}:\n`, err);
-  if (err instanceof ServerError) {
-    new ServerError(err.error, res).execute();
-    return;
-  } else if (err instanceof AppError) {
-    new AppError(err, res).exec();
-    return;
-  } else if (err && err.name === "ValidationError") {
-    res
-      .body({
-        error: {
-          message: err.message,
-          title: "Validation Error",
-          code: "SERVER_ERROR",
-        },
-      })
-      .error();
-  } else if (err.name === "VersionError") {
-    res
-      .body({
-        error: {
-          title: "Version Error",
-          message: "This item was modified by another user/process. Please refresh and try again",
-          code: "SERVER_ERROR",
-        },
-      })
-      .error();
-  } else res.body({ error: { message: "Internal Server Error", code: "SERVER_ERROR", details: err.message } }).error();
-}
-
-export const handleAppError = (err: unknown, req: Request, response: Response, next: NextFunction) => {
+export const handleError = (err: unknown, req: Request, response: Response, next: NextFunction) => {
   const res = new Respond(req, response);
-
-  if (err instanceof ServerError) {
-    new ServerError(err.error, res).execute();
-    return;
-  } else if (err instanceof AppError) {
+  if (err instanceof AppError) {
     new AppError(err, res).exec();
     return;
   } else if (err instanceof Prisma.PrismaClientValidationError) {
