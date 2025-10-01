@@ -1,10 +1,10 @@
 import pluralize from "pluralize";
 import { NextFunction, Request, Response } from "express";
 import { ControllerOptions } from "../types";
-import { ArgsOf, InferByModel, Model } from "@/services/db/types";
+import { ArgsOf, InferByModel, Model, ModelSoftDeletable } from "@/services/db/types";
 
 export const restoreManyFactory = <
-  M extends Model<"note" | "transaction" | "todo" | "schedule">,
+  M extends Model<ModelSoftDeletable>,
   NF extends keyof InferByModel<M>,
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(
@@ -20,7 +20,7 @@ export const restoreManyFactory = <
       const updatedData = await model.restoreMany({
         ...query,
         where: { id: { in: ids }, userId: req.user!.id, isRecycled: true, ...(query as any)?.where },
-      }) 
+      });
 
       if (funcBeforeRes) await funcBeforeRes(updatedData as any, req, res);
 

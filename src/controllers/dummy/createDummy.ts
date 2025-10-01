@@ -1,28 +1,23 @@
 import { NextFunction, Request, Response } from "express";
 import { NODE_ENV } from "@/config";
 import { AppError } from "@/services/error/Error";
-import { Model } from "@/services/db/types";
+import { Model, ModelDummyable } from "@/services/db/types";
+import pluralize from "pluralize";
 
-export const createDummy = <M extends Model, T extends { dummy: boolean }>(model: M) => {
+export const createDummy = <M extends Model<ModelDummyable>>(model: M) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
       const user = req.user!;
       const { length } = req.query;
       if (NODE_ENV !== "development") throw new AppError("FORBIDDEN", { message: "ENV is not in development" });
 
-      // WIP
-      // const dummys = await model.generateDummy(parseInt(length?.toString() || "0"), {
-      //   userId: { fixed: user.id },
-      //   title: { dynamicString: `Dummy ${capitalEach(name)}` },
-      //   details: { fixed: `Dummy created At ${formatDate(new Date(), { includeHour: true })}` },
-      //   start: { dynamicDate: { end: new Date(Date.now() + timeInMs({ week: 2 })) } },
-      //   dueDate: { dynamicDate: { end: new Date(Date.now() + timeInMs({ week: 2 })) } },
-      //   type: transactionType ? { fixed: transactionType } : { enum: enumTranType },
-      //   status: todoStatus ? { fixed: todoStatus } : { enum: enumTodoStatus },
-      // });
-      // console.warn(`${dummys?.length} created by ${user.fullName}:\n`, dummys);
+      const dummys = await model.createDummy(user.id.toString(), { length: Number(length?.toString()) || undefined, seed: req.body });
+      console.warn(`${dummys?.length} created by ${user.fullName}:\n`, dummys);
 
-      throw new AppError("FORBIDDEN", { message: "Controller WIP" });
+      res
+        .body({ success: dummys })
+        .info(`${length} ${model.modelName} ${pluralize("dummy", dummys?.length)} added`)
+        .respond();
     } catch (err) {
       next(err);
     }

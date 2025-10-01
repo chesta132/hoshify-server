@@ -37,7 +37,7 @@ export class DummyPlugin<ModelDelegate extends DefaultModelDelegate, ModelName e
       length?: number;
       seed?: Partial<DataDummy<Partial<InferByDelegate<ModelDelegate>>>>;
     } = {}
-  ): Promise<PromiseReturn<ModelDelegate["createMany"]>> {
+  ): Promise<PromiseReturn<ModelDelegate["createManyAndReturn"]>> {
     try {
       if (NODE_ENV !== "development") throw new AppError("FORBIDDEN", { message: "Can not create dummy data right now." });
       const seeds = { ...this.seed, ...seed } as Record<string, any>;
@@ -68,16 +68,16 @@ export class DummyPlugin<ModelDelegate extends DefaultModelDelegate, ModelName e
         return { ...customized, dummy: true, userId };
       });
 
-      return await this.DModel.create({ data: dummys });
+      return await this.DModel.createManyAndReturn({ data: dummys });
     } catch (err) {
       throw handlePrismaError(err, this.DModelName);
     }
   }
 
-  async deleteDummy(length: number): Promise<PromiseReturn<ModelDelegate["deleteMany"]>> {
+  async deleteDummy(userId: string, length: number | "all"): Promise<PromiseReturn<ModelDelegate["deleteMany"]>> {
     try {
       if (NODE_ENV !== "development") throw new AppError("FORBIDDEN", { message: "Can not delete dummy data right now." });
-      return await this.DModel.deleteMany({ where: { dummy: true }, limit: length });
+      return await this.DModel.deleteMany({ where: { dummy: true }, limit: length === "all" ? undefined : length });
     } catch (err) {
       throw handlePrismaError(err, this.DModelName);
     }

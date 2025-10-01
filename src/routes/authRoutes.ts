@@ -11,7 +11,7 @@ import { resendOTP } from "../controllers/auth/resendOTP";
 import { changeEmail } from "../controllers/auth/changeEmail";
 import { resetPassword } from "../controllers/auth/resetPassword";
 import { changePassword } from "../controllers/auth/changePassword";
-import { CLIENT_URL } from "../app";
+import { CLIENT_URL } from "../config";
 import { googleCallback } from "../controllers/auth/google";
 import { requestRole } from "@/controllers/auth/requestRole";
 import { acceptRequestRole } from "@/controllers/auth/acceptRequestRole";

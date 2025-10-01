@@ -1,17 +1,17 @@
 import { createDummy } from "@/controllers/dummy/createDummy";
 import { deleteDummy } from "@/controllers/dummy/deleteDummy";
-import { Link } from "@/models/Link";
-import { Note } from "@/models/Note";
-import { Schedule } from "@/models/Schedule";
-import { Todo } from "@/models/Todo";
-import { Transaction } from "@/models/Transaction";
+import { Note } from "@/services/db/Note";
+import { Schedule } from "@/services/db/Schedule";
+import { Todo } from "@/services/db/Todo";
+import { Transaction } from "@/services/db/Transaction";
+import { Model, ModelDummyable } from "@/services/db/types";
 import { Router } from "express";
 
 export const dummyRoutes = Router();
 
-const supportDummy = [Note, Todo, Schedule, Transaction];
+const supportDummy: Model<ModelDummyable>[] = [Note, Todo, Schedule, Transaction];
 
 supportDummy.forEach((model) => {
-  dummyRoutes.post(`/${model.getName()}`, createDummy(model as any));
-  dummyRoutes.delete(`/${model.getName()}`, deleteDummy(model as any));
+  dummyRoutes.post(`/${model.modelName}`, createDummy(model));
+  dummyRoutes.delete(`/${model.modelName}`, deleteDummy(model));
 });

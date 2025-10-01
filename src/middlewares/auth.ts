@@ -1,18 +1,17 @@
 import { Response, Request, NextFunction } from "express";
-import handleError from "../utils/handleError";
 import { verifyAccessToken, verifyRefreshToken } from "../utils/token";
-import { Revoked } from "../models/Revoked";
-import { User, UserRole } from "../models/User";
 import { Respond } from "@/services/respond/Respond";
-import db from "@/services/crud";
 import { AppError } from "@/services/error/Error";
+import { Revoked } from "@/services/db/Revoked";
+import { User } from "@/services/db/User";
+import { UserRole } from "@prisma/client";
 
 const isRefreshSafe = async (refreshToken: string) => {
   const refreshPayload = verifyRefreshToken(refreshToken);
 
   if (!refreshPayload) throw new AppError("INVALID_TOKEN");
-  await db.getOne(Revoked, { value: refreshToken }, { error: null });
-  return { refreshPayload };
+  await Revoked.findFirst({ where: { value: refreshToken } }, { error: null });
+  return refreshPayload;
 };
 
 export const authMiddleware = async (req: Request, response: Response, next: NextFunction) => {
@@ -21,14 +20,14 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
     const { refreshToken, accessToken } = req.cookies;
 
     // refresh token validation
-    const { refreshPayload } = await isRefreshSafe(refreshToken);
+    const refreshPayload = await isRefreshSafe(refreshToken);
 
     // access token validation
     const payload = verifyAccessToken(accessToken);
 
     if (!payload) {
       // Check if refresh token exists in database
-      const user = await db.getById(User, refreshPayload.userId, { error: { code: "INVALID_TOKEN" } });
+      const user = await User.findById(refreshPayload.userId, {}, { error: new AppError("INVALID_TOKEN") });
 
       // Set new access token in cookie
       res.sendCookie({ template: "ACCESS", user });
@@ -39,9 +38,11 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
       return next();
     }
 
-    const user = await db.getById(User, payload.userId, {
-      error: { code: "NOT_FOUND", item: "user", desc: "please back to dashboard or sign in page" },
-    });
+    const user = await User.findById(
+      payload.userId,
+      {},
+      { error: new AppError("NOT_FOUND", { item: "user", desc: "Please back to dashboard or sign in page" }) }
+    );
 
     // refresh token if payload is expires
     if (new Date(refreshPayload.expires) <= new Date()) {
@@ -53,7 +54,7 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
     response.res = new Respond(req, response);
     next();
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };
 
@@ -64,13 +65,13 @@ export const requireVerified = async (req: Request, { res }: Response, next: Nex
       else throw new AppError("NOT_VERIFIED");
     } else {
       const { refreshToken } = req.cookies;
-      const { refreshPayload } = await isRefreshSafe(refreshToken);
+      const refreshPayload = await isRefreshSafe(refreshToken);
 
       if (refreshPayload.verified) next();
-      else res.tempNotVerified().respond();
+      else throw new AppError("NOT_VERIFIED");
     }
   } catch (err) {
-    handleError(err, res);
+    next(err);
   }
 };
 
@@ -79,19 +80,19 @@ export const requireRole = (role: UserRole | UserRole[]) => {
     try {
       const error = new AppError("INVALID_ROLE", { role: typeof role === "string" ? role : role.join(", ") });
       if (req.user?.role) {
-        if (typeof role === "string" ? req.user.role === role : role.includes(req.user.role)) {
+        if (typeof role === "string" ? req.user.role === role : role.includes(req.user.role as UserRole)) {
           next();
         } else {
           throw error;
         }
       } else {
         const { refreshToken } = req.cookies;
-        const { refreshPayload } = await isRefreshSafe(refreshToken);
+        const refreshPayload = await isRefreshSafe(refreshToken);
         if (typeof role === "string" ? refreshPayload.role === role : role.includes(refreshPayload.role)) next();
         else throw error;
       }
     } catch (err) {
-      handleError(err, res);
+      next(err);
     }
   };
 };

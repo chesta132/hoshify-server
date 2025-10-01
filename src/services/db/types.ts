@@ -12,6 +12,7 @@ import { ModelUser } from "@/services/db/User";
 import { ModelVerify } from "@/services/db/Verify";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { UnionToInter } from "../../types";
+import { AppError } from "../error/Error";
 
 export type PrismaModels = Omit<PrismaClient, `$${string}`>;
 export type PrismaModel = PrismaModels[keyof PrismaModels];
@@ -38,9 +39,11 @@ export type DefaultModelDelegate = {
   update: Func;
   delete: Func;
   findMany: Func;
+  updateMany: Func;
   updateManyAndReturn: Func;
   deleteMany: Func;
   createMany: Func;
+  createManyAndReturn: Func;
 };
 
 export type ArgsOf<F extends Func> = Parameters<F>[0];
@@ -57,3 +60,13 @@ export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infe
   ? Required<Omit<F, O>> & Partial<Pick<F, O>>
   : never;
 export type InferByModel<M extends Model, O extends keyof Infer<M["prisma"]["update"]> = never> = InferByDelegate<M["prisma"], O>;
+
+export type ServiceError = AppError<any, any> | null;
+export type ServiceOptions<E extends ServiceError> = {
+  error?: E;
+};
+
+export type ServiceResult<F extends Func, E extends ServiceError> = [E] extends [null] ? PromiseReturn<F> | null : PromiseReturn<F>;
+
+export type ModelSoftDeletable = "note" | "transaction" | "todo" | "schedule";
+export type ModelDummyable = "note" | "transaction" | "todo" | "schedule";

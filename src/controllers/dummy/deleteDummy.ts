@@ -1,20 +1,21 @@
-import { Request, Response } from "express";
-import handleError from "@/utils/handleError";
-import { Model } from "mongoose";
+import { Model, ModelDummyable } from "@/services/db/types";
+import { NextFunction, Request, Response } from "express";
+import pluralize from "pluralize";
 
-export const deleteDummy = <T extends { dummy: boolean }>(model: Model<T>) => {
-  return async (req: Request, { res }: Response) => {
+export const deleteDummy = <M extends Model<ModelDummyable>>(model: M) => {
+  return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
       const user = req.user!;
-      const dummys = await model.deleteMany({ userId: user.id, dummy: true });
-      const name = model.getName();
+      const { length } = req.query;
+      const dummys = await model.deleteDummy(user.id.toString(), Number(length) || "all");
+      const name = model.modelName;
 
       res
         .body({ success: dummys })
-        .info(`${dummys.deletedCount} ${name} ${dummys.deletedCount === 1 ? "dummy" : "dummys"} deleted`)
+        .info(`${dummys.count} ${name} ${pluralize("dummy", dummys.count)} deleted`)
         .respond();
     } catch (err) {
-      handleError(err, res);
+      next(err);
     }
   };
 };

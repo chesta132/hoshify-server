@@ -3,7 +3,6 @@ import {
   ArgsOfById,
   DefaultModelDelegate,
   ModelNames,
-  PromiseReturn,
   ServiceError,
   ServiceOptions,
   ServiceResult,
@@ -86,24 +85,52 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     }
   }
 
+  async createManyAndReturn<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["createManyAndReturn"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["createManyAndReturn"], E>> {
+    try {
+      return await this.model.createManyAndReturn(args);
+    } catch (err) {
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
+    }
+  }
+
   async update<E extends ServiceError>(
     args: ArgsOf<ModelDelegate["update"]>,
     options?: ServiceOptions<E>
   ): Promise<ServiceResult<ModelDelegate["update"], E>>;
   async update<E extends ServiceError>(
-    args: ArgsOf<ModelDelegate["updateManyAndReturn"]>,
+    args: ArgsOf<ModelDelegate["updateMany"]>,
     options?: ServiceOptions<E>
-  ): Promise<ServiceResult<ModelDelegate["updateManyAndReturn"], E>>;
+  ): Promise<ServiceResult<ModelDelegate["updateMany"], E>>;
   async update<E extends ServiceError>(
     args: ArgsOf<ModelDelegate["update"]>,
     options?: ServiceOptions<E>
   ): Promise<ServiceResult<ModelDelegate["update"], E>> {
     try {
       if (Array.isArray(args.data)) {
-        return await this.model.updateManyAndReturn(args);
+        return await this.model.updateMany(args);
       } else {
         return await this.model.update(args);
       }
+    } catch (err) {
+      if (options?.error === null) {
+        return null as any;
+      }
+      throw handlePrismaError(err, this.modelName, options?.error);
+    }
+  }
+
+  async updateManyAndReturn<E extends ServiceError>(
+    args: ArgsOf<ModelDelegate["updateManyAndReturn"]>,
+    options?: ServiceOptions<E>
+  ): Promise<ServiceResult<ModelDelegate["updateManyAndReturn"], E>> {
+    try {
+      return await this.model.updateManyAndReturn(args);
     } catch (err) {
       if (options?.error === null) {
         return null as any;

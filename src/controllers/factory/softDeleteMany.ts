@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { ControllerOptions } from "../types";
-import { ArgsOf, InferByModel, Model } from "@/services/db/types";
+import { ArgsOf, InferByModel, Model, ModelSoftDeletable } from "@/services/db/types";
 import pluralize from "pluralize";
 
 export const softDeleteManyFactory = <
-  M extends Model<"note" | "transaction" | "todo" | "schedule">,
+  M extends Model<ModelSoftDeletable>,
   NF extends keyof InferByModel<M>,
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(

@@ -30,3 +30,4 @@ export type TUser = InferByDelegate<typeof prisma.user, keyof UserRelations>;
 
 export type UserCred = "password" | "googleId";
 export const UserCreds: UserCred[] = ["password", "googleId"];
+const t = User.findFirst({});
