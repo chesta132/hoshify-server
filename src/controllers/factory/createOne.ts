@@ -5,14 +5,14 @@ import { ControllerConfig, ControllerOptions } from "../types";
 import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 import { ellipsis } from "@/utils/manipulate/string";
 
-export const createManyFactory = <
+export const createOneFactory = <
   M extends Model,
   NF extends keyof InferByModel<M>,
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(
   model: M,
   { neededField, acceptableField }: ControllerConfig<M, NF, AF>,
-  { query, funcBeforeRes, funcInitiator, transformData }: ControllerOptions<InferByModel<M>, ArgsOf<M["create"]>, NF, AF, "transformData">
+  { query, funcBeforeRes, funcInitiator, transformData }: ControllerOptions<InferByModel<M>, ArgsOf<M["create"]>, NF, AF, "transformData"> = {}
 ) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
     try {

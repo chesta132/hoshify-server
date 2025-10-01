@@ -5,14 +5,14 @@ import { validateRequires } from "@/utils/validate";
 import { omit, pick } from "@/utils/manipulate/object";
 import { unEditableField } from "@/services/db/Base";
 
-export const updateManyFactory = <
+export const updateOneFactory = <
   M extends Model,
   NF extends keyof InferByModel<M>,
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(
   model: M,
   { neededField, acceptableField }: ControllerConfig<M, NF, AF>,
-  { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>, ArgsOf<M["update"]>, NF, AF>
+  { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>, ArgsOf<M["update"]>, NF, AF> = {}
 ) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
     try {

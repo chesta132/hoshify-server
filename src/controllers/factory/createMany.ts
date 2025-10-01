@@ -12,7 +12,7 @@ export const createManyFactory = <
 >(
   model: M,
   { neededField, acceptableField }: ControllerConfig<M, NF, AF>,
-  { query, funcBeforeRes, funcInitiator, transformData }: ControllerOptions<InferByModel<M>[], ArgsOf<M["create"]>, NF, AF, "transformData">
+  { query, funcBeforeRes, funcInitiator, transformData }: ControllerOptions<InferByModel<M>[], ArgsOf<M["create"]>, NF, AF, "transformData"> = {}
 ) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
     try {

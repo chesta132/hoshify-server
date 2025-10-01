@@ -9,7 +9,7 @@ export const softDeleteManyFactory = <
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(
   model: M,
-  { query, funcInitiator, funcBeforeRes }: ControllerOptions<InferByModel<M>[], ArgsOf<M["softDeleteMany"]>, NF, AF>
+  { query, funcInitiator, funcBeforeRes }: ControllerOptions<InferByModel<M>[], ArgsOf<M["softDeleteMany"]>, NF, AF> = {}
 ) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
     try {
