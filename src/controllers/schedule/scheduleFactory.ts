@@ -1,5 +1,4 @@
 import { createManyFactory } from "../factory/createMany";
-import { Schedule } from "@/models/Schedule";
 import { getManyFactory } from "../factory/getMany";
 import { getOneFactory } from "../factory/getOne";
 import { restoreManyFactory } from "../factory/restoreMany";
@@ -9,6 +8,7 @@ import { softDeleteManyFactory } from "../factory/softDeleteMany";
 import { updateManyFactory } from "../factory/updateMany";
 import { createOneFactory } from "../factory/createOne";
 import { updateOneFactory } from "../factory/updateOne";
+import { Schedule } from "@/services/db/Schedule";
 
 export const createSchedules = createManyFactory(
   Schedule,
