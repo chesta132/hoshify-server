@@ -1,18 +1,16 @@
 import { Response, Request, NextFunction } from "express";
 import passport from "passport";
-import { ErrorResponseType } from "../../services/respond/Respond";
-import handleError from "../../utils/handleError";
-import { normalizeCurrency, normalizeUserQuery } from "../../utils/manipulate/normalize";
-import { IUser, UserPopulateField } from "../../models/User";
-import { NormalizedData } from "../../types";
+import { normalizeUserQuery } from "../../utils/manipulate/normalize";
+import { TUser } from "@/services/db/User";
+import { ErrorResponseType } from "@/services/respond/types";
 
 export const signin = async (req: Request, { res }: Response, next: NextFunction) => {
   passport.authenticate(
     "local",
     { failureRedirect: "/signin", failureFlash: true, session: false },
-    (err: Error, user: NormalizedData<IUser & UserPopulateField>, info: ErrorResponseType | undefined) => {
+    (err: Error, user: TUser, info: ErrorResponseType | undefined) => {
       if (err) {
-        return handleError(err, res);
+        return next(err);
       }
       if (!user && info) {
         const { code, message, field, title } = info;
@@ -22,14 +20,19 @@ export const signin = async (req: Request, { res }: Response, next: NextFunction
 
       req.login(user, { session: false }, (err) => {
         const normalized = normalizeUserQuery(user);
-        (normalized.money as any) = normalizeCurrency(normalized.money, user.currency);
-        (normalized.transactions as any) = normalizeCurrency(normalized.transactions, user.currency);
         if (err) {
-          return handleError(err, res);
+          return next(err);
         }
         const rememberMe: boolean = req.body.rememberMe;
 
-        res.body({ success: normalized }).sendCookie({ template: "REFRESH_ACCESS", rememberMe }).ok();
+        res
+          .body({ success: normalized })
+          .sendCookie({
+            template: "REFRESH_ACCESS",
+            rememberMe,
+            user: normalized as any,
+          })
+          .ok();
       });
     }
   )(req, res, next);

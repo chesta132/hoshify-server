@@ -1,11 +1,9 @@
-import { Response, Request } from "express";
-import handleError from "../../utils/handleError";
-import { CLIENT_URL } from "../../app";
+import { Response, Request, NextFunction } from "express";
 import { verifyRefreshToken } from "../../utils/token";
-import { Revoked } from "../../models/Revoked";
-import db from "@/services/crud";
+import { Revoked } from "@/services/db/Revoked";
+import { CLIENT_URL } from "@/config";
 
-export const signout = async (req: Request, { res }: Response) => {
+export const signout = async (req: Request, { res }: Response, next: NextFunction) => {
   const clearAndRedirect = () => res.deleteCookies(["accessToken", "refreshToken"]).redirect(`${CLIENT_URL}/signin`);
   try {
     const user = req.user!;
@@ -17,10 +15,10 @@ export const signout = async (req: Request, { res }: Response) => {
     }
     const expIn = new Date(verifiedPayload.exp! * 1000);
 
-    await db.create(Revoked, { value: refreshToken, userId: user.id, deleteAt: expIn, type: "TOKEN" });
+    await Revoked.create({ data: { value: refreshToken, userId: user.id.toString(), deleteAt: expIn, type: "TOKEN" } });
 
     clearAndRedirect();
   } catch (error) {
-    handleError(error, res);
+    next(error);
   }
 };

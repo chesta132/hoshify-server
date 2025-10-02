@@ -1,15 +1,12 @@
-import { Request, Response } from "express";
-import handleError from "../../utils/handleError";
+import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { userProject } from "../../utils/manipulate/normalize";
 import { sendCredentialChanges } from "../../utils/email/send";
-import { Verify } from "../../models/Verify";
-import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
 import { AppError } from "@/services/error/Error";
-import db from "@/services/crud";
+import { Verify } from "@/services/db/Verify";
+import { omitCreds, User } from "@/services/db/User";
 
-export const resetPassword = async (req: Request, { res }: Response) => {
+export const resetPassword = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
     const user = req.user!;
     const token = req.query.token?.toString();
@@ -26,19 +23,22 @@ export const resetPassword = async (req: Request, { res }: Response) => {
 
     const password = await bcrypt.hash(newPassword, 10);
 
-    if (await bcrypt.compare(newPassword, user.password)) {
+    if (await bcrypt.compare(newPassword, user.password.toString())) {
       throw new AppError("CLIENT_FIELD", { field: "newPassword", message: "New password and old password can not same" });
     }
 
-    await db.getOne(Verify, { value: token, type: "RESET_PASSWORD_OTP", userId: user.id }, { error: { code: "INVALID_OTP" } });
+    const verif = await Verify.findFirst(
+      { where: { value: token, type: "RESET_PASSWORD_OTP", userId: user.id.toString() } },
+      { error: new AppError("INVALID_OTP") }
+    );
 
-    const updatedUser = await db.updateById(User, user.id, { password }, { project: userProject() });
+    const updatedUser = await User.updateById(user.id.toString(), { data: { password }, omit: omitCreds() });
 
-    await db.deleteOne(Verify, { value: token, type: "RESET_PASSWORD_OTP", userId: user.id }, { error: null });
-    await sendCredentialChanges(user.email, user.fullName);
+    await Verify.delete({ where: { id: verif.id } }, { error: null });
+    await sendCredentialChanges(user.email.toString(), user.fullName.toString());
 
     res.body({ success: updatedUser }).info("Successfully reset and update new password").ok();
   } catch (err) {
-    handleError(err, res);
+    next(err);
   }
 };

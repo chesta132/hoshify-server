@@ -1,22 +1,24 @@
-import { Request, Response } from "express";
-import handleError from "../../utils/handleError";
+import { NextFunction, Request, Response } from "express";
 import { sendVerificationEmail } from "../../utils/email/send";
 import { encrypt } from "../../utils/crypto";
-import { fiveMin, oneMin } from "../../utils/token";
-import { Verify } from "../../models/Verify";
-import { User } from "../../models/User";
-import { userProject } from "../../utils/manipulate/normalize";
 import { AppError } from "@/services/error/Error";
-import db from "@/services/crud";
+import { Verify } from "@/services/db/Verify";
+import { timeInMs } from "@/utils/manipulate/number";
+import { omitCreds, User } from "@/services/db/User";
 
 export const sendVerifyEmail = async (user: Express.User) => {
   const token = encrypt(`verify_${user.id}`);
-  await db.create(Verify, { userId: user.id, value: token, type: "VERIFY_EMAIL", deleteAt: new Date(Date.now() + fiveMin) });
-  await sendVerificationEmail(user.email!, token, user.fullName);
-  return await db.updateById(User, user.id, { timeToAllowSendEmail: new Date(Date.now() + oneMin * 2) }, { project: userProject() });
+  await Verify.create({
+    data: { userId: user.id.toString(), value: token, type: "VERIFY_EMAIL", deleteAt: new Date(Date.now() + timeInMs({ minute: 5 })) },
+  });
+  await sendVerificationEmail(user.email?.toString()!, token, user.fullName.toString());
+  return await User.updateById(user.id.toString(), {
+    data: { timeToAllowSendEmail: new Date(Date.now() + timeInMs({ minute: 2 })) },
+    omit: omitCreds(),
+  });
 };
 
-export const resendVerifyEmail = async (req: Request, { res }: Response) => {
+export const resendVerifyEmail = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
     const user = req.user!;
     if (!user.email) {
@@ -31,6 +33,6 @@ export const resendVerifyEmail = async (req: Request, { res }: Response) => {
     const updatedUser = await sendVerifyEmail(user);
     res.body({ success: updatedUser }).created();
   } catch (err) {
-    handleError(err, res);
+    next(err);
   }
 };
