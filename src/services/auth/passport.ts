@@ -2,18 +2,15 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import bcrypt from "bcrypt";
-import { ErrorResponseType } from "@/services/respond/Respond";
-import { buildUserPopulate, IUser, User, UserPopulateField } from "@/models/User";
-import { initialPopulateConfig } from "@/controllers/user/initiateUser";
-import { Money } from "@/models/Money";
-import { NormalizedData } from "@/types";
-import db from "../crud";
 import { normalizeCurrency } from "@/utils/manipulate/normalize";
+import { TUser, User } from "../db/User";
+import { ErrorResponseType } from "../respond/types";
+import { Money } from "../db/Money";
 
 passport.use(
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
     try {
-      const user = await User.findOne({ email: email.trim() }).populate(buildUserPopulate(initialPopulateConfig)).normalize();
+      const user = await User.findFirst({ where: { email: email.trim() } });
       if (!user || !user.password) {
         return done(null, false, { message: "Email not registered", code: "CLIENT_FIELD", field: "email" } as ErrorResponseType);
       }
@@ -23,7 +20,7 @@ passport.use(
         return done(null, false, { message: "Incorrect Password", code: "CLIENT_FIELD", field: "password" } as ErrorResponseType);
       }
 
-      done(null, user);
+      done(null, user as TUser);
     } catch (err) {
       console.error(err);
       done(err);
@@ -41,38 +38,38 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const user = await User.findOne({
-          $or: [{ googleId: profile.id }, { email: profile.emails![0].value }],
-        }).normalize();
+        const user = await User.findFirst({
+          where: {
+            OR: [{ googleId: profile.id }, { email: profile.emails![0].value }],
+          },
+        });
 
         if (user?.googleId === profile.id) {
-          return done(null, user);
+          return done(null, user as TUser);
         }
 
         if (user?.email === profile.emails![0].value) {
-          const updatedUser = await User.findByIdAndUpdate(user.id, {
-            googleId: profile.id,
-            gmail: profile.emails![0].value,
-          }).normalize();
-          return done(null, updatedUser!);
+          const updatedUser = await User.updateById(user.id, {
+            data: {
+              googleId: profile.id,
+              gmail: profile.emails![0].value,
+            },
+          });
+          return done(null, updatedUser as TUser);
         }
 
-        const createdUser = (
-          await User.create({
+        const createdUser = await User.create({
+          data: {
             googleId: profile.id,
             gmail: profile.emails![0]?.value,
             fullName: profile.displayName,
-          })
-        ).normalize();
-        await Money.create({ userId: createdUser.id });
+          },
+        });
+        await Money.create({ data: { userId: createdUser.id } });
 
-        const newUser = (await db.getById(User, createdUser.id, { populate: buildUserPopulate(initialPopulateConfig) })) as NormalizedData<
-          IUser & UserPopulateField
-        >;
-        (newUser.money as any) = normalizeCurrency(newUser.money, createdUser.currency);
-        (newUser.transactions as any) = normalizeCurrency(newUser.transactions, createdUser.currency);
+        const newUser = await User.findById(createdUser.id);
 
-        done(null, newUser);
+        done(null, newUser as TUser);
       } catch (err) {
         console.error(err);
         done(err);
@@ -93,12 +90,16 @@ passport.use(
     async (req, accessToken, refreshToken, profile, done) => {
       try {
         const user = req.user!;
-        const updatedUser = await User.findByIdAndUpdate(user.id, {
-          googleId: profile.id,
-          gmail: profile.emails![0].value,
-        })
-          .populate(buildUserPopulate(initialPopulateConfig))
-          .normalize();
+        const updatedUser = await User.updateById(
+          user.id.toString(),
+          {
+            data: {
+              googleId: profile.id,
+              gmail: profile.emails![0].value,
+            },
+          },
+          { error: null }
+        );
         if (!updatedUser) {
           return done(null, false, {
             title: "User not found",
@@ -106,7 +107,7 @@ passport.use(
             code: "NOT_FOUND",
           } as ErrorResponseType);
         }
-        return done(null, updatedUser);
+        return done(null, updatedUser as TUser);
       } catch (err) {
         console.error(err);
         done(err);
@@ -121,13 +122,13 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (userId, done) => {
   try {
-    const user = await User.findOne({ id: userId as string }).normalize();
+    const user = await User.findById(userId as string);
 
     if (!user) {
       return done(new Error("User not found"));
     }
 
-    done(null, user);
+    done(null, user as TUser);
   } catch (error) {
     done(error);
   }

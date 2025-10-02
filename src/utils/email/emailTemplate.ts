@@ -1,4 +1,4 @@
-import { HOSHIFY_ICON } from "@/app";
+import { HOSHIFY_ICON } from "@/config";
 import { capitalEach } from "../manipulate/string";
 
 export function emailTemplate(props: {

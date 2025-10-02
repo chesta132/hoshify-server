@@ -3,7 +3,7 @@ import { verifyAccessToken, verifyRefreshToken } from "../utils/token";
 import { Respond } from "@/services/respond/Respond";
 import { AppError } from "@/services/error/Error";
 import { Revoked } from "@/services/db/Revoked";
-import { User } from "@/services/db/User";
+import { TUser, User } from "@/services/db/User";
 import { UserRole } from "@prisma/client";
 
 const isRefreshSafe = async (refreshToken: string) => {
@@ -32,7 +32,7 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
       // Set new access token in cookie
       res.sendCookie({ template: "ACCESS", user });
 
-      req.user = user;
+      req.user = user as TUser;
       response.res = undefined as any;
       response.res = new Respond(req, response);
       return next();
@@ -49,7 +49,7 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
       res.sendCookie({ template: "REFRESH_ACCESS", rememberMe: true, user });
     }
 
-    req.user = user;
+    req.user = user as TUser;
     response.res = undefined as any;
     response.res = new Respond(req, response);
     next();

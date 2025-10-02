@@ -67,8 +67,10 @@ type Requiring<M extends DefaultModelDelegate> = Required<{
 }>;
 
 export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M["update"]> = never> = Requiring<M> &
-  Partial<Pick<Requiring<M>, O>>;
-
+  Partial<Pick<Requiring<M>, O>>
+// export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M["update"]> = never> = Infer<M["update"]> extends infer F
+//   ? Required<Omit<F, O>> & Partial<Pick<F, O>>
+//   : never;
 export type InferByModel<M extends Model, O extends keyof Infer<M["prisma"]["update"]> = never> = InferByDelegate<M["prisma"], O>;
 
 export type ServiceError = AppError<any, any> | null;

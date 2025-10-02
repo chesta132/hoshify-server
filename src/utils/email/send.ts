@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
-import { CLIENT_URL } from "@/app";
+import { CLIENT_URL } from "@/config";
 import { emailTemplate } from "./emailTemplate";
-import { UserRole } from "@/models/User";
+import { UserRole } from "@prisma/client";
 import { capital, capitalEach } from "../manipulate/string";
 
 export const transporter = nodemailer.createTransport({

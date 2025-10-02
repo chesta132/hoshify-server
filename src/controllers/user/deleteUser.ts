@@ -32,7 +32,7 @@ export const deleteUser = async (req: Request, { res }: Response, next: NextFunc
     const user = await User.findById(userId);
 
     if (!user.verified && !user.googleId) {
-      await deletes(user);
+      await deletes(user as TUser);
       resSuccess();
       return;
     }
@@ -40,11 +40,11 @@ export const deleteUser = async (req: Request, { res }: Response, next: NextFunc
       throw new AppError("CLIENT_FIELD", { field: "token", message: "Invalid token" });
     }
 
-    const otp = await Verify.findFirst(
+    await Verify.findFirst(
       { where: { value: token.toString(), type: "DELETE_ACCOUNT_OTP", userId: user.id.toString() } },
       { error: new AppError("INVALID_OTP") }
     );
-    await deletes(user);
+    await deletes(user as TUser);
     resSuccess();
   } catch (err) {
     next(err);

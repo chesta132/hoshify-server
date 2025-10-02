@@ -60,7 +60,7 @@ app.use(resMiddleware);
 
 app.use("/api", router);
 
-app.use("*", (req) => {
+app.use((req) => {
   throw new AppError("NOT_FOUND", { item: `Can not ${req.method} ${req.url}` });
 });
 

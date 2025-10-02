@@ -2,7 +2,7 @@ import { Response, Request, NextFunction } from "express";
 import passport from "passport";
 import { normalizeUserQuery } from "../../utils/manipulate/normalize";
 import { TUser } from "@/services/db/User";
-import { ErrorResponseType } from "@/services/respond/types";
+import { CookieUserBase, ErrorResponseType } from "@/services/respond/types";
 
 export const signin = async (req: Request, { res }: Response, next: NextFunction) => {
   passport.authenticate(
@@ -30,7 +30,7 @@ export const signin = async (req: Request, { res }: Response, next: NextFunction
           .sendCookie({
             template: "REFRESH_ACCESS",
             rememberMe,
-            user: normalized as any,
+            user: normalized as CookieUserBase,
           })
           .ok();
       });

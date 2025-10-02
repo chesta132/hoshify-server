@@ -20,7 +20,7 @@ export const restoreManyFactory = <
       const updatedData = await model.restoreMany({
         ...query,
         where: { id: { in: ids }, userId: req.user!.id, isRecycled: true, ...(query as any)?.where },
-      });
+      } as any);
 
       if (funcBeforeRes) await funcBeforeRes(updatedData as any, req, res);
 
