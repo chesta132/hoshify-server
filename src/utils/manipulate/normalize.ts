@@ -1,5 +1,5 @@
 import { omit } from "./object";
-import { NormalizedUser, RequireAtLeastOne } from "@/types";
+import { NormalizedQuery, NormalizedUser, RequireAtLeastOne } from "@/types";
 import { currencyFields, CurrencyFields, formatCurrency, ModifiedCurrency } from "../money";
 import { TUser, UserCred, UserCreds } from "@/services/db/User";
 
@@ -10,7 +10,7 @@ const shouldProcess = (data: any): boolean => {
 export const normalizable = ["dummy"] as const;
 export type NormalizeFields = (typeof normalizable)[number];
 
-const normalize = <T extends object | object[]>(data: T): IsArray<T, Omit<ExtractArray<T>, NormalizeFields>[], Omit<T, NormalizeFields>> => {
+const normalize = <T extends object | object[]>(data: T): IsArray<T, NormalizedQuery<ExtractArray<T>>[], NormalizedQuery<T>> => {
   if (!shouldProcess(data)) {
     return data as any;
   }
@@ -23,6 +23,8 @@ const normalize = <T extends object | object[]>(data: T): IsArray<T, Omit<Extrac
   for (const key in processedData) {
     if (processedData?.hasOwnProperty(key)) {
       processedData[key] = normalize(processedData[key]);
+    } else if (processedData[key].toString) {
+      processedData[key] = processedData[key].toString();
     }
   }
 
@@ -39,7 +41,7 @@ export const normalizeQuery = <T extends Record<string, any> | Record<string, an
   }
 };
 
-export const normalizeUserQuery = <T extends Partial<TUser>, G extends boolean>(queryData: T, options?: { isGuest?: G }) => {
+export const normalizeUserQuery = <T extends Partial<TUser>, G extends boolean = false>(queryData: T, options?: { isGuest?: G }) => {
   let data = omit(queryData, UserCreds);
   if (options?.isGuest) {
     delete data.gmail;
@@ -47,7 +49,7 @@ export const normalizeUserQuery = <T extends Partial<TUser>, G extends boolean>(
     delete data.verified;
     delete data.createdAt;
   }
-  return data as G extends true ? Omit<T, UserCred | "gmail" | "email" | "verified" | "createdAt"> : Omit<T, UserCred>;
+  return data as NormalizedUser<T, G>;
 };
 
 export type NormalizeCurrecyData = RequireAtLeastOne<Record<CurrencyFields, number>>;

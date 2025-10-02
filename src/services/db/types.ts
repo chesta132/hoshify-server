@@ -1,4 +1,3 @@
-import { BaseService } from "@/services/db/Base";
 import { ModelLink } from "@/services/db/Link";
 import { ModelMoney } from "@/services/db/Money";
 import { ModelNote } from "@/services/db/Note";
@@ -56,9 +55,20 @@ export type ExtendPlugins<M extends DefaultModelDelegate, N extends ModelNames, 
 >;
 
 type Infer<F extends Func> = ArgsOf<F>["data"];
-export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M["update"]> = never> = Infer<M["update"]> extends infer F
-  ? Required<Omit<F, O>> & Partial<Pick<F, O>>
-  : never;
+
+type Requiring<M extends DefaultModelDelegate> = Required<{
+  [K in keyof Infer<M["update"]>]: Infer<M["update"]>[K] extends Prisma.NullableBoolFieldUpdateOperationsInput
+    ? null | Infer<M["update"]>[K]
+    : Infer<M["update"]>[K] extends Prisma.NullableDateTimeFieldUpdateOperationsInput
+    ? null | Infer<M["update"]>[K]
+    : Infer<M["update"]>[K] extends Prisma.NullableStringFieldUpdateOperationsInput
+    ? null | Infer<M["update"]>[K]
+    : Infer<M["update"]>[K];
+}>;
+
+export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M["update"]> = never> = Requiring<M> &
+  Partial<Pick<Requiring<M>, O>>;
+
 export type InferByModel<M extends Model, O extends keyof Infer<M["prisma"]["update"]> = never> = InferByDelegate<M["prisma"], O>;
 
 export type ServiceError = AppError<any, any> | null;
