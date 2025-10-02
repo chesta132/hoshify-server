@@ -39,9 +39,6 @@ Object.compare = function <T extends object>(...objectsProp: T[]) {
 console.debug = function (message?: "NO_TRACE" | (string & {}), ...data: any[]) {
   if (NODE_ENV === "production") return;
   const noTrace = message === "NO_TRACE";
-  if (message === "[vite]") {
-    return this.log(message, ...data);
-  }
 
   if (noTrace) {
     this.groupCollapsed(...data);
