@@ -7,8 +7,7 @@ export const updateUser = async (req: Request, { res }: Response, next: NextFunc
     const user = req.user!;
     const { fullName } = req.body;
     if (!fullName) {
-      res.tempMissingFields("full name").error();
-      return;
+      throw new AppError("MISSING_FIELDS", { fields: "Full name" });
     }
     if (fullName.trim() === user.fullName.toString().trim()) {
       throw new AppError("CLIENT_FIELD", { field: "newFullName", message: "New full name can not same as old full name" });

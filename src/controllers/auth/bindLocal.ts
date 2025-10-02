@@ -1,13 +1,10 @@
-import { Request, Response } from "express";
-import handleError from "../../utils/handleError";
-import { userProject } from "../../utils/manipulate/normalize";
+import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { User } from "../../models/User";
 import { validateRequires } from "@/utils/validate";
-import { updateById } from "@/services/crud/update";
 import { AppError } from "@/services/error/Error";
+import { omitCreds, User } from "@/services/db/User";
 
-export const bindLocal = async (req: Request, { res }: Response) => {
+export const bindLocal = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
     const user = req.user!;
     const { email, password } = req.body;
@@ -17,9 +14,9 @@ export const bindLocal = async (req: Request, { res }: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const updatedUser = await updateById(User, user.id, { email, password: hashedPassword }, { project: userProject() });
+    const updatedUser = await User.updateById(user.id.toString(), { data: { email, password: hashedPassword }, omit: omitCreds() });
     res.info("Successfully link to local account").body({ success: updatedUser }).ok();
   } catch (err) {
-    handleError(err, res);
+    next(err);
   }
 };

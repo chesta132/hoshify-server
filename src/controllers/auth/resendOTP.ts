@@ -1,28 +1,29 @@
-import { Request, Response } from "express";
-import handleError from "../../utils/handleError";
+import { NextFunction, Request, Response } from "express";
 import { generateOTP, sendOTPEmail } from "../../utils/email/send";
-import { oneMin } from "../../utils/token";
-import { IVerify, Verify } from "../../models/Verify";
-import { User } from "../../models/User";
-import { userProject } from "../../utils/manipulate/normalize";
 import { AppError } from "@/services/error/Error";
-import db from "@/services/crud";
+import { Verify } from "@/services/db/Verify";
+import { VerifyType } from "@prisma/client";
+import { omitCreds, User } from "@/services/db/User";
+import { timeInMs } from "@/utils/manipulate/number";
 
 type TypeOTP = "CHANGE_EMAIL" | "CHANGE_PASSWORD" | "DELETE_ACCOUNT";
 
-export const resendOTP = async (req: Request, { res }: Response) => {
+export const resendOTP = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
     const user = req.user!;
     const { type }: { type?: TypeOTP } = req.query;
     const otp = generateOTP();
 
-    const createAndSend = async (type: IVerify["type"]) => {
-      if (typeof user.timeToAllowSendEmail === "object" && (user.timeToAllowSendEmail as Date) > new Date()) {
+    const createAndSend = async (type: VerifyType) => {
+      if (typeof user.timeToAllowSendEmail === "object" && user.timeToAllowSendEmail > new Date()) {
         throw new AppError("EMAIL_LIMIT");
       }
-      db.create(Verify, { value: otp, type, userId: user.id, deleteAt: new Date(Date.now() + oneMin * 2) });
-      await sendOTPEmail(user.email || user.gmail!, otp, user.fullName);
-      const updatedUser = db.updateById(User, user.id, { timeToAllowSendEmail: new Date(Date.now() + 1000 * 60 * 2) }, { project: userProject() });
+      Verify.create({ data: { value: otp, type, userId: user.id.toString(), deleteAt: new Date(Date.now() + timeInMs({ minute: 2 })) } });
+      await sendOTPEmail(user.email?.toString() || user.gmail?.toString()!, otp, user.fullName.toString());
+      const updatedUser = User.updateById(user.id.toString(), {
+        data: { timeToAllowSendEmail: new Date(Date.now() + timeInMs({ minute: 2 })) },
+        omit: omitCreds(),
+      });
       res.body({ success: updatedUser }).respond();
     };
 
@@ -40,6 +41,6 @@ export const resendOTP = async (req: Request, { res }: Response) => {
         throw new AppError("CLIENT_TYPE", { fields: "otp type", details: "Invalid OTP type. Please send a valid type" });
     }
   } catch (err) {
-    handleError(err, res);
+    next(err);
   }
 };

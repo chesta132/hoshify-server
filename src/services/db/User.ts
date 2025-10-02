@@ -1,7 +1,7 @@
 import { prisma } from "@/services/db";
-import { Prisma } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
 import { BaseService } from "./Base";
-import { InternalArgs } from "@prisma/client/runtime/library";
+import { DefaultArgs, InternalArgs } from "@prisma/client/runtime/library";
 import { InferByDelegate } from "@/services/db/types";
 import { TTodo } from "./Todo";
 import { TNote } from "./Note";
@@ -30,4 +30,5 @@ export type TUser = InferByDelegate<typeof prisma.user, keyof UserRelations>;
 
 export type UserCred = "password" | "googleId";
 export const UserCreds: UserCred[] = ["password", "googleId"];
-const t = User.findFirst({});
+export const omitCreds = () => Object.fromEntries(UserCreds.map((c) => [c, false]));
+export const userRole: UserRole[] = ["DEVELOPER", "OWNER", "USER"];

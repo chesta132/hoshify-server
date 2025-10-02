@@ -1,15 +1,13 @@
-import { Request, Response } from "express";
-import handleError from "@/utils/handleError";
-import { User, UserRole, userRole } from "@/models/User";
-import { Verify } from "@/models/Verify";
+import { NextFunction, Request, Response } from "express";
 import { encrypt } from "@/utils/crypto";
 import { sendRequestRole } from "@/utils/email/send";
-import { oneMin } from "@/utils/token";
-import { userProject } from "@/utils/manipulate/normalize";
 import { AppError } from "@/services/error/Error";
-import db from "@/services/crud";
+import { UserRole } from "@prisma/client";
+import { omitCreds, User, userRole } from "@/services/db/User";
+import { Verify } from "@/services/db/Verify";
+import { timeInMs } from "@/utils/manipulate/number";
 
-export const requestRole = async (req: Request, { res }: Response) => {
+export const requestRole = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
     const user = req.user!;
     let { role }: { role?: UserRole } = req.query;
@@ -20,18 +18,23 @@ export const requestRole = async (req: Request, { res }: Response) => {
 
     const token = encrypt(`requestRole_${user.id}_role_${role}`);
 
-    await db.create(Verify, {
-      userId: user.id,
-      value: token,
-      type: "REQUEST_ROLE",
-      deleteAt: new Date(Date.now() + oneMin * 30),
+    await Verify.create({
+      data: {
+        userId: user.id.toString(),
+        value: token,
+        type: "REQUEST_ROLE",
+        deleteAt: new Date(Date.now() + timeInMs({ minute: 30 })),
+      },
     });
 
-    await sendRequestRole(role, token, user.fullName);
-    const updatedUser = await db.updateById(User, user.id, { timeToAllowSendEmail: new Date(Date.now() + oneMin * 2) }, { project: userProject() });
+    await sendRequestRole(role, token, user.fullName.toString());
+    const updatedUser = await User.updateById(user.id.toString(), {
+      data: { timeToAllowSendEmail: new Date(Date.now() + timeInMs({ minute: 2 })) },
+      omit: omitCreds(),
+    });
 
     res.body({ success: updatedUser }).respond();
   } catch (err) {
-    handleError(err, res);
+    next(err);
   }
 };
