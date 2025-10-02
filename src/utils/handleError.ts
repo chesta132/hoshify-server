@@ -6,7 +6,7 @@ import { NextFunction, Response, Request } from "express";
 export const handleError = (err: unknown, req: Request, response: Response, next: NextFunction) => {
   const res = new Respond(req, response);
   if (err instanceof AppError) {
-    new AppError(err, res).exec();
+    new AppError(err).exec(res);
     return;
   } else if (err instanceof Prisma.PrismaClientValidationError) {
     res

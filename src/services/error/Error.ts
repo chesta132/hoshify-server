@@ -30,15 +30,14 @@ export type AppErrorCode = AppErrorConfig["code"];
 type Config<C> = Extract<AppErrorConfig, { code: C }>;
 type DepsOf<C extends AppErrorCode> = Config<C>["deps"];
 
-export class AppError<C extends AppErrorCode, R extends Respond | undefined = undefined> {
+export class AppError<C extends AppErrorCode> {
   code: C;
   deps: DepsOf<C>;
-  private res?: R;
 
   constructor(code: C, ...deps: DepsOf<C>);
-  constructor(error: AppError<C>, res: R);
+  constructor(error: AppError<C>);
 
-  constructor(codeOrError: C | AppError<C>, ...depsOrRes: DepsOf<C> | [R]) {
+  constructor(codeOrError: C | AppError<C>, ...depsOrRes: DepsOf<C> | [undefined]) {
     if (codeOrError instanceof AppError) {
       this.code = codeOrError.code;
       this.deps = codeOrError.deps;
@@ -48,9 +47,7 @@ export class AppError<C extends AppErrorCode, R extends Respond | undefined = un
     }
   }
 
-  exec: R extends undefined ? never : () => void = (() => {
-    const { res } = this;
-    if (!res) throw new Error("res not inserted");
+  exec(res: Respond) {
     const { deps, code } = { code: this.code, deps: this.deps } as AppErrorConfig;
 
     switch (code) {
@@ -251,5 +248,5 @@ export class AppError<C extends AppErrorCode, R extends Respond | undefined = un
         res.body({ error: { ...deps[0], code: "SERVER_ERROR" } }).error();
         break;
     }
-  }) as any;
+  }
 }
