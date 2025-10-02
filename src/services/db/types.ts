@@ -54,7 +54,7 @@ export type ExtendPlugins<M extends DefaultModelDelegate, N extends ModelNames, 
   AvailablePlugins<M, N>[P]
 >;
 
-type Infer<F extends DefaultModelDelegate> = ArgsOf<F["update"]>["data"];
+type Infer<F extends DefaultModelDelegate> = ArgsOf<F["create"]>["data"];
 
 type Requiring<M extends DefaultModelDelegate> = Required<{
   [K in keyof Infer<M>]: Infer<M>[K] extends Prisma.NullableBoolFieldUpdateOperationsInput
@@ -66,7 +66,9 @@ type Requiring<M extends DefaultModelDelegate> = Required<{
     : Infer<M>[K];
 }>;
 
-export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M> = never> = Requiring<M> & Partial<Pick<Requiring<M>, O>>;
+export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M> = never> = [O] extends [never]
+  ? Requiring<M>
+  : Omit<Requiring<M>, O> & Partial<Pick<Requiring<M>, O>>;
 
 export type InferByModel<M extends Model, O extends keyof Infer<M["prisma"]> = never> = InferByDelegate<M["prisma"], O>;
 

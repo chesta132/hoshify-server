@@ -1,10 +1,10 @@
-import { TUser } from "@/services/db/User";
+import { TUser, UserRelations } from "@/services/db/User";
 import { Respond } from "../services/respond/Respond";
 import { $Enums } from "@prisma/client";
 
 declare global {
   namespace Express {
-    interface User extends TUser {}
+    interface User extends Omit<TUser, keyof UserRelations> {}
     interface Response {
       res: Respond;
     }

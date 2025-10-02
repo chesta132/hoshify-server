@@ -32,7 +32,7 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
       // Set new access token in cookie
       res.sendCookie({ template: "ACCESS", user });
 
-      req.user = user as TUser;
+      req.user = user;
       response.res = undefined as any;
       response.res = new Respond(req, response);
       return next();
@@ -45,7 +45,7 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
       res.sendCookie({ template: "REFRESH_ACCESS", rememberMe: true, user });
     }
 
-    req.user = user as TUser;
+    req.user = user;
     response.res = undefined as any;
     response.res = new Respond(req, response);
     next();
