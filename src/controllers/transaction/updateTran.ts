@@ -1,19 +1,14 @@
-import { Request, Response } from "express";
-import handleError from "@/utils/handleError";
-import { Transaction, transactionType } from "@/models/Transaction";
-import { isValidObjectId } from "mongoose";
-import { getTotal, Money } from "@/models/Money";
+import { NextFunction, Request, Response } from "express";
 import { AppError } from "@/services/error/Error";
-import db from "@/services/crud";
+import { Transaction, transactionType } from "@/services/db/Transaction";
+import { Money } from "@/services/db/Money";
 
-export const updateTran = async (req: Request, { res }: Response) => {
+export const updateTran = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
     const user = req.user!;
     const { id } = req.params;
     let { title, details, type, amount } = req.body;
-    if (!isValidObjectId(id)) {
-      throw new AppError("CLIENT_TYPE", { fields: "Object ID" });
-    }
+
     if (!transactionType.includes(type)) {
       throw new AppError("CLIENT_TYPE", { fields: "type", details: `invalid type enum, please select between ${transactionType.join(" or ")}` });
     }
@@ -22,36 +17,39 @@ export const updateTran = async (req: Request, { res }: Response) => {
       amount = Math.abs(amount);
     }
 
-    const tran = await db.updateById(
-      Transaction,
-      id,
-      {
+    const oldTran = await Transaction.findUnique({
+      where: { id },
+    });
+
+    const tran = await Transaction.updateById(id, {
+      data: {
         title,
         details,
         type,
         amount,
       },
-      { options: { runValidators: true } }
-    );
+    });
 
-    const { amount: tranAmount } = tran;
-    const tranType = tran.type.toLowerCase() as "income" | "outcome";
-    const typeField = type.toLowerCase() as "income" | "outcome";
-    const dataToUpdate = { [tranType]: -tranAmount, total: -getTotal(tran) + getTotal({ type, amount }) };
+    if (oldTran.amount !== amount || oldTran.type !== type) {
+      const oldTypeField = oldTran.type.toLowerCase();
+      const newTypeField = type.toLowerCase();
 
-    if (tran.amount !== amount || tran.type !== type) {
-      dataToUpdate[typeField] = (-dataToUpdate[typeField] || 0) + amount;
+      const updateData: { [x: string]: { decrement?: number; increment?: number }; total: { decrement?: number; increment?: number } } = {
+        [oldTypeField]: { decrement: oldTran.amount },
+        total: { decrement: Money.getTotal({ type: oldTran.type, amount: oldTran.amount }) },
+      };
 
-      await Money.updateOne({ userId: user.id }, { $inc: dataToUpdate });
+      updateData[newTypeField] = { increment: amount };
+      updateData.total = { increment: Money.getTotal({ type, amount }) };
+
+      await Money.update({
+        where: { userId: user.id.toString() },
+        data: updateData,
+      });
     }
 
-    if (!title) title = tran.title;
-    if (!details) details = tran.details;
-    if (!type) type = tran.type;
-    amount = amount ?? tran.amount;
-
-    res.body({ success: { ...tran, amount, type, details, title } }).respond();
+    res.body({ success: tran }).respond();
   } catch (err) {
-    handleError(err, res);
+    next(err);
   }
 };
