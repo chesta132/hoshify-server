@@ -8,6 +8,9 @@ import { softDeleteManyFactory } from "../factory/softDeleteMany";
 import { NormalizeCurrecyData, normalizeCurrency } from "@/utils/manipulate/normalize";
 import { Request } from "express";
 import { Transaction, transactionType, TTransaction } from "@/services/db/Transaction";
+import { Money } from "@/services/db/Money";
+import { createOneFactory } from "../factory/createOne";
+import { AppError } from "@/services/error/Error";
 
 const isLowerThanZero = (data: any) => {
   const { amount, type } = data;
@@ -26,11 +29,10 @@ export const createTrans = createManyFactory(
   Transaction,
   { neededField: ["type", "title", "amount"], acceptableField: ["details"] },
   {
-    funcInitiator(req, res) {
+    funcInitiator(req) {
       const body = req.body as any[];
       if (!body.every((body) => transactionType.includes(body.type))) {
-        res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
-        return "stop";
+        throw new AppError("CLIENT_FIELD", { field: "type", message: `invalid type enum, please select between ${transactionType.join(" or ")}` });
       }
       body.forEach((data) => {
         const { amount, type } = data;
@@ -38,7 +40,7 @@ export const createTrans = createManyFactory(
       });
     },
     async funcBeforeRes(data, req) {
-      await updateMoneyMany(data, data[0].userId.toString());
+      await Money.updateMoneyMany(data, data[0].userId.toString());
       data.forEach((data) => {
         amountToCurrency(data, req);
       });
@@ -62,14 +64,14 @@ export const getTran = getOneFactory(Transaction, {
 
 export const restoreTran = restoreOneFactory(Transaction, {
   async funcBeforeRes(data, req) {
-    await updateMoney(data);
+    await Money.updateMoney(data);
     amountToCurrency(data, req);
   },
 });
 
 export const restoreTrans = restoreManyFactory(Transaction, {
   async funcBeforeRes(data, req) {
-    await updateMoneyMany(data, data[0].userId.toString());
+    await Money.updateMoneyMany(data, data[0].userId.toString());
     data.forEach((data) => {
       amountToCurrency(data, req);
     });
@@ -78,14 +80,14 @@ export const restoreTrans = restoreManyFactory(Transaction, {
 
 export const deleteTran = softDeleteOneFactory(Transaction, {
   async funcBeforeRes(data, req) {
-    await updateMoney({ ...data, reverse: true });
+    await Money.updateMoney({ ...data, reverse: true });
     amountToCurrency(data, req);
   },
 });
 
 export const deleteTrans = softDeleteManyFactory(Transaction, {
   async funcBeforeRes(data, req) {
-    if (data[0]) await updateMoneyMany(data, data[0].userId.toString(), true);
+    if (data[0]) await Money.updateMoneyMany(data, data[0].userId.toString(), true);
     data.forEach((data) => {
       amountToCurrency(data, req);
     });
@@ -96,16 +98,15 @@ export const createTran = createOneFactory(
   Transaction,
   { neededField: ["type", "title", "amount"], acceptableField: ["details"] },
   {
-    funcInitiator(req, res) {
+    funcInitiator(req) {
       const { type, amount } = req.body;
       if (!transactionType.includes(type)) {
-        res.tempClientField("type", `invalid type enum, please select between ${transactionType.join(" or ")}`).respond();
-        return "stop";
+        throw new AppError("CLIENT_FIELD", { field: "type", message: `invalid type enum, please select between ${transactionType.join(" or ")}` });
       }
       if (amount !== 0 && type) isLowerThanZero(req.body);
     },
     async funcBeforeRes(data, req) {
-      await updateMoney(data);
+      await Money.updateMoney(data);
       amountToCurrency(data, req);
     },
   }
