@@ -1,13 +1,12 @@
-import { Response, Request } from "express";
-import handleError from "../../utils/handleError";
+import { Response, Request, NextFunction } from "express";
 import { normalizeUserQuery } from "../../utils/manipulate/normalize";
 
-export const getUser = async (req: Request, { res }: Response) => {
+export const getUser = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
     const user = req.user!;
     const normalized = normalizeUserQuery(user);
     res.body({ success: normalized }).ok();
   } catch (err) {
-    handleError(err, res);
+    next(err);
   }
 };

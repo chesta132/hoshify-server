@@ -1,9 +1,8 @@
-import { Request, Response } from "express";
-import handleError from "../../utils/handleError";
-import { userProject } from "../../utils/manipulate/normalize";
-import { User } from "../../models/User";
+import { User } from "@/services/db/User";
+import { AppError } from "@/services/error/Error";
+import { NextFunction, Request, Response } from "express";
 
-export const updateUser = async (req: Request, { res }: Response) => {
+export const updateUser = async (req: Request, { res }: Response, next: NextFunction) => {
   try {
     const user = req.user!;
     const { fullName } = req.body;
@@ -11,21 +10,12 @@ export const updateUser = async (req: Request, { res }: Response) => {
       res.tempMissingFields("full name").error();
       return;
     }
-    if (fullName.trim() === user.fullName.trim()) {
-      res.tempClientField("newFullName", "New full name can not same as old full name").error();
-      return;
+    if (fullName.trim() === user.fullName.toString().trim()) {
+      throw new AppError("CLIENT_FIELD", { field: "newFullName", message: "New full name can not same as old full name" });
     }
-    const updatedUser = await User.findByIdAndUpdate(
-      user.id,
-      { fullName },
-      { new: true, runValidators: true, projection: userProject() }
-    ).normalize();
-    if (!updatedUser) {
-      res.tempNotFound("user").respond();
-      return;
-    }
+    const updatedUser = await User.updateById(user.id.toString(), { data: { fullName } });
     res.info("Your profile successfully updated").body({ success: updatedUser }).ok();
   } catch (err) {
-    handleError(err, res);
+    next(err);
   }
 };
