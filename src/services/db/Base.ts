@@ -119,12 +119,12 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
   }
 
   async updateManyAndReturn<E extends ServiceError>(
-    args: Omit<ArgsOf<ModelDelegate["findMany"]>, "take"> & ArgsOf<ModelDelegate["updateMany"]>,
+    args: ArgsOf<ModelDelegate["findMany"]> & ArgsOf<ModelDelegate["updateMany"]>,
     options?: ServiceOptions<E>
   ): Promise<ServiceResult<ModelDelegate["findMany"], E>> {
     try {
       await this.model.updateMany({ ...args });
-      return await this.model.findMany({ ...args, take: args.limit });
+      return await this.model.findMany({ take: args.limit, ...args });
     } catch (err) {
       if (options?.error === null) {
         return null as any;

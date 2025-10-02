@@ -1,6 +1,7 @@
-import { ArgsOf, DefaultModelDelegate, ModelNames, PromiseReturn, ServiceError, ServiceOptions, ServiceResult } from "@/services/db/types";
+import { ArgsOf, DefaultModelDelegate, ModelNames, ServiceError, ServiceOptions, ServiceResult } from "@/services/db/types";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
 import { timeInMs } from "@/utils/manipulate/number";
+import { ModelUser } from "../User";
 
 const deleteTTL = timeInMs({ week: 2 });
 export const getDeleteAt = () => new Date(Date.now() + deleteTTL);
@@ -44,12 +45,12 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
   }
 
   async softDeleteMany<E extends ServiceError>(
-    args: Omit<ArgsOf<ModelDelegate["updateMany"]>, "data"> & Omit<ArgsOf<ModelDelegate["findMany"]>, "take">,
+    args: Omit<ArgsOf<ModelDelegate["updateMany"]>, "data"> & ArgsOf<ModelDelegate["findMany"]>,
     options?: ServiceOptions<E>
   ): Promise<ServiceResult<ModelDelegate["findMany"], E>> {
     try {
       await this.SDModel.updateMany({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true } });
-      return await this.SDModel.findMany({ ...args, take: args.limit });
+      return await this.SDModel.findMany({ take: args.limit, ...args });
     } catch (err) {
       if (options?.error === null) {
         return null as any;
@@ -88,12 +89,12 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
   }
 
   async restoreMany<E extends ServiceError>(
-    args: Omit<ArgsOf<ModelDelegate["updateMany"]>, "data"> & Omit<ArgsOf<ModelDelegate["findMany"]>, "take">,
+    args: Omit<ArgsOf<ModelDelegate["updateMany"]>, "data"> & ArgsOf<ModelDelegate["findMany"]>,
     options?: ServiceOptions<E>
   ): Promise<ServiceResult<ModelDelegate["findMany"], E>> {
     try {
       await this.SDModel.updateMany({ ...args, data: { deleteAt: null, isRecycled: false } });
-      return await this.SDModel.findMany({ ...args, take: args.limit });
+      return await this.SDModel.findMany({ take: args.limit, ...args });
     } catch (err) {
       if (options?.error === null) {
         return null as any;

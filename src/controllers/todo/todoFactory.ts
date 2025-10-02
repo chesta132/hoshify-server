@@ -1,5 +1,4 @@
 import { createManyFactory } from "../factory/createMany";
-import { Todo } from "@/models/Todo";
 import { getManyFactory } from "../factory/getMany";
 import { getOneFactory } from "../factory/getOne";
 import { restoreOneFactory } from "../factory/restoreOne";
@@ -9,25 +8,26 @@ import { softDeleteOneFactory } from "../factory/softDeleteOne";
 import { updateManyFactory } from "../factory/updateMany";
 import { createOneFactory } from "../factory/createOne";
 import { updateOneFactory } from "../factory/updateOne";
+import { Todo } from "@/services/db/Todo";
 
 export const createTodos = createManyFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
-export const getTodos = getManyFactory(Todo, { settings: { sort: { dueDate: 1 } } });
+export const getTodos = getManyFactory(Todo, { query: { orderBy: { dueDate: "asc" } } });
 
 export const getTodo = getOneFactory(Todo);
 
 export const restoreTodo = restoreOneFactory(Todo);
 
-export const restoreTodos = restoreManyFactory(Todo, { settings: { sort: { dueDate: 1 } } });
+export const restoreTodos = restoreManyFactory(Todo, { query: { orderBy: { dueDate: "asc" } } });
 
 export const deleteTodo = softDeleteOneFactory(Todo);
 
-export const deleteTodos = softDeleteManyFactory(Todo, { settings: { sort: { dueDate: 1 } } });
+export const deleteTodos = softDeleteManyFactory(Todo, { query: { orderBy: { dueDate: "asc" } } });
 
 export const updateTodos = updateManyFactory(
   Todo,
   { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] },
-  { settings: { sort: { dueDate: 1 } } }
+  { query: { orderBy: { dueDate: "asc" } } }
 );
 
 export const createTodo = createOneFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
