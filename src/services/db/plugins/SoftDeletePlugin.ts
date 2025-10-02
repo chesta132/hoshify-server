@@ -44,11 +44,12 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
   }
 
   async softDeleteMany<E extends ServiceError>(
-    args: Omit<ArgsOf<ModelDelegate["updateManyAndReturn"]>, "data">,
+    args: Omit<ArgsOf<ModelDelegate["updateMany"]>, "data"> & Omit<ArgsOf<ModelDelegate["findMany"]>, "take">,
     options?: ServiceOptions<E>
-  ): Promise<ServiceResult<ModelDelegate["updateManyAndReturn"], E>> {
+  ): Promise<ServiceResult<ModelDelegate["findMany"], E>> {
     try {
-      return await this.SDModel.updateManyAndReturn({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true } });
+      await this.SDModel.updateMany({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true } });
+      return await this.SDModel.findMany({ ...args, take: args.limit });
     } catch (err) {
       if (options?.error === null) {
         return null as any;
@@ -87,11 +88,12 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
   }
 
   async restoreMany<E extends ServiceError>(
-    args: Omit<ArgsOf<ModelDelegate["updateManyAndReturn"]>, "data">,
+    args: Omit<ArgsOf<ModelDelegate["updateMany"]>, "data"> & Omit<ArgsOf<ModelDelegate["findMany"]>, "take">,
     options?: ServiceOptions<E>
-  ): Promise<ServiceResult<ModelDelegate["updateManyAndReturn"], E>> {
+  ): Promise<ServiceResult<ModelDelegate["findMany"], E>> {
     try {
-      return await this.SDModel.updateManyAndReturn({ ...args, data: { deleteAt: null, isRecycled: false } });
+      await this.SDModel.updateMany({ ...args, data: { deleteAt: null, isRecycled: false } });
+      return await this.SDModel.findMany({ ...args, take: args.limit });
     } catch (err) {
       if (options?.error === null) {
         return null as any;

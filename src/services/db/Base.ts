@@ -1,13 +1,6 @@
-import {
-  ArgsOf,
-  ArgsOfById,
-  DefaultModelDelegate,
-  ModelNames,
-  ServiceError,
-  ServiceOptions,
-  ServiceResult,
-} from "@/services/db/types";
+import { ArgsOf, ArgsOfById, DefaultModelDelegate, ModelNames, ServiceError, ServiceOptions, ServiceResult } from "@/services/db/types";
 import { handlePrismaError } from "@/utils/db/handlePrismaError";
+import { prisma } from ".";
 
 export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, ModelName extends ModelNames> {
   private model: ModelDelegate;
@@ -126,11 +119,12 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
   }
 
   async updateManyAndReturn<E extends ServiceError>(
-    args: ArgsOf<ModelDelegate["updateManyAndReturn"]>,
+    args: Omit<ArgsOf<ModelDelegate["findMany"]>, "take"> & ArgsOf<ModelDelegate["updateMany"]>,
     options?: ServiceOptions<E>
-  ): Promise<ServiceResult<ModelDelegate["updateManyAndReturn"], E>> {
+  ): Promise<ServiceResult<ModelDelegate["findMany"], E>> {
     try {
-      return await this.model.updateManyAndReturn(args);
+      await this.model.updateMany({ ...args });
+      return await this.model.findMany({ ...args, take: args.limit });
     } catch (err) {
       if (options?.error === null) {
         return null as any;

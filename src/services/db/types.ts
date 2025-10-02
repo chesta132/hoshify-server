@@ -32,6 +32,7 @@ export type Model<K extends keyof Models = keyof Models> = Models[K];
 export type ModelNames = Lowercase<Prisma.ModelName>;
 
 type Func = (...args: any) => any;
+
 export type DefaultModelDelegate = {
   findFirstOrThrow: Func;
   findUniqueOrThrow: Func;
@@ -40,7 +41,6 @@ export type DefaultModelDelegate = {
   delete: Func;
   findMany: Func;
   updateMany: Func;
-  updateManyAndReturn: Func;
   deleteMany: Func;
   createMany: Func;
   createManyAndReturn: Func;
