@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { decrypt } from "@/utils/crypto";
 import { sendRoleGranted } from "@/utils/email/send";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { normalizeUserQuery } from "@/utils/manipulate/normalize";
 import { omitCreds, User } from "@/services/db/User";
 import { UserRole } from "@prisma/client";

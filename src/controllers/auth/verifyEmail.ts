@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { decrypt } from "../../utils/crypto";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { omitCreds, User } from "@/services/db/User";
 import { Verify } from "@/services/db/Verify";
 

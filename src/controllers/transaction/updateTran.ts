@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { Transaction, transactionType } from "@/services/db/Transaction";
 import { Money } from "@/services/db/Money";
 

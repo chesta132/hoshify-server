@@ -11,7 +11,7 @@ import { ModelUser } from "@/services/db/User";
 import { ModelVerify } from "@/services/db/Verify";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { UnionToInter } from "../../types";
-import { AppError } from "../error/Error";
+import { AppError } from "../error/AppError";
 
 export type PrismaModels = Omit<PrismaClient, `$${string}`>;
 export type PrismaModel = PrismaModels[keyof PrismaModels];

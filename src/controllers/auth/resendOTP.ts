@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { generateOTP, sendOTPEmail } from "../../utils/email/send";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { Verify } from "@/services/db/Verify";
 import { VerifyType } from "@prisma/client";
 import { omitCreds, User } from "@/services/db/User";

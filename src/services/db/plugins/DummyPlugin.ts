@@ -1,4 +1,4 @@
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { NODE_ENV } from "@/config";
 import { OneFieldOnly } from "@/types";
 import { DefaultModelDelegate, InferByDelegate, ModelNames, PromiseReturn } from "@/services/db/types";

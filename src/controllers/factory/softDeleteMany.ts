@@ -18,7 +18,7 @@ export const softDeleteManyFactory = <
 
       const updatedData = await model.softDeleteMany({
         ...query,
-        where: { id: { in: ids }, userId: req.user!.id as string, ...(query as any).where },
+        where: { id: { in: ids }, userId: req.user!.id as string, ...(query as any)?.where },
       } as any);
       if (funcBeforeRes) await funcBeforeRes(updatedData as any, req, res);
 

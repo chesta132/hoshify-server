@@ -10,7 +10,7 @@ import { Request } from "express";
 import { Transaction, transactionType, TTransaction } from "@/services/db/Transaction";
 import { Money } from "@/services/db/Money";
 import { createOneFactory } from "../factory/createOne";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 
 const isLowerThanZero = (data: any) => {
   const { amount, type } = data;

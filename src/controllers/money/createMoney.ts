@@ -1,5 +1,5 @@
 import { Money } from "@/services/db/Money";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { normalizeCurrency } from "@/utils/manipulate/normalize";
 import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";

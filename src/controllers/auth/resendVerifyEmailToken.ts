@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { sendVerificationEmail } from "../../utils/email/send";
 import { encrypt } from "../../utils/crypto";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { Verify } from "@/services/db/Verify";
 import { timeInMs } from "@/utils/manipulate/number";
 import { omitCreds, User } from "@/services/db/User";

@@ -17,7 +17,7 @@ export const getOneFactory = <
 
       const data = (await model.findFirst({
         ...query,
-        where: { id, ...(query as any).where },
+        where: { id, ...(query as any)?.where },
       })) as any;
 
       if (funcBeforeRes) await funcBeforeRes(data, req, res);

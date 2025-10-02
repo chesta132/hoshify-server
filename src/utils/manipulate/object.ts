@@ -74,14 +74,22 @@ export const record = <T extends Record<string, any>, Z>(data: T, recordType: Z)
  * }
  * ```
  */
-export const proxy = <T extends object, Z extends object>(target: T, bindTarget: Z) => {
+export const proxy = <T extends object, Z extends object>(target: T, plugin: Z) => {
   return new Proxy(target, {
     get(obj, key, receiver) {
-      const prop = Reflect.get(obj, key, receiver);
-      if (typeof prop === "function") {
-        return prop.bind(bindTarget);
+      if (key in plugin) {
+        const pluginProp = Reflect.get(plugin, key, plugin);
+        if (typeof pluginProp === "function") {
+          return pluginProp.bind(plugin);
+        }
+        return pluginProp;
       }
-      return prop;
+
+      const targetProp = Reflect.get(obj, key, receiver);
+      if (typeof targetProp === "function") {
+        return targetProp.bind(obj);
+      }
+      return targetProp;
     },
   });
 };

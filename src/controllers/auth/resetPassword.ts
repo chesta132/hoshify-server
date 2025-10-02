@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { sendCredentialChanges } from "../../utils/email/send";
 import { validateRequires } from "@/utils/validate";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { Verify } from "@/services/db/Verify";
 import { omitCreds, User } from "@/services/db/User";
 

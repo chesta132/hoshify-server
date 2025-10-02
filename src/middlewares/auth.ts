@@ -1,7 +1,7 @@
 import { Response, Request, NextFunction } from "express";
 import { verifyAccessToken, verifyRefreshToken } from "../utils/token";
 import { Respond } from "@/services/respond/Respond";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { Revoked } from "@/services/db/Revoked";
 import { TUser, User } from "@/services/db/User";
 import { UserRole } from "@prisma/client";

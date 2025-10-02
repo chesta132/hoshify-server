@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ControllerConfig, ControllerOptions } from "../types";
 import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 import { validateRequires } from "@/utils/validate";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { prisma } from "@/services/db";
 import { omit, pick } from "@/utils/manipulate/object";
 import { unEditableField } from "@/services/db/Base";

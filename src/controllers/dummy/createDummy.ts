@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { NODE_ENV } from "@/config";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { Model, ModelDummyable } from "@/services/db/types";
 import pluralize from "pluralize";
 

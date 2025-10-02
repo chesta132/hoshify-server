@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { sendCredentialChanges } from "../../utils/email/send";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { omitCreds, User } from "@/services/db/User";
 import { Verify } from "@/services/db/Verify";
 

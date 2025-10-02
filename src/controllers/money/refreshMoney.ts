@@ -1,5 +1,5 @@
 import { Money } from "@/services/db/Money";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { NextFunction, Request, Response } from "express";
 
 const refreshConfig = ["income", "outcome", "total"] as const;

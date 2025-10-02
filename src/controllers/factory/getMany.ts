@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ControllerOptions } from "../types";
 import { ArgsOf, InferByModel, Model } from "@/services/db/types";
+import { prisma } from "@/services/db";
 
 export const getManyFactory = <
   M extends Model,
@@ -20,7 +21,7 @@ export const getManyFactory = <
 
       const data = (await model.findMany({
         ...query,
-        where: { userId: user.id as string, ...(query as any).where },
+        where: { userId: user.id as string, ...(query as any)?.where },
       })) as unknown as InferByModel<M>[];
       if (funcBeforeRes) {
         await funcBeforeRes(data, req, res);

@@ -7,7 +7,7 @@ import { Todo } from "@/services/db/Todo";
 import { Transaction } from "@/services/db/Transaction";
 import { TUser, User } from "@/services/db/User";
 import { Verify } from "@/services/db/Verify";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { Response, Request, NextFunction } from "express";
 
 const deletes = async (user: TUser) => {

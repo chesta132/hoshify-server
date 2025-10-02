@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { validateRequires } from "@/utils/validate";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { omitCreds, User } from "@/services/db/User";
 
 export const bindLocal = async (req: Request, { res }: Response, next: NextFunction) => {

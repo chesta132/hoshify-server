@@ -16,7 +16,7 @@ export const softDeleteOneFactory = <
       const { id } = req.params;
       if (funcInitiator) if ((await funcInitiator(req, res)) === "stop") return;
 
-      const data = (await model.softDelete({ ...query, where: { id, userId: req.user!.id, isRecycled: false, ...(query as any).where } })) as any;
+      const data = (await model.softDelete({ ...query, where: { id, userId: req.user!.id, isRecycled: false, ...(query as any)?.where } })) as any;
 
       if (funcBeforeRes) await funcBeforeRes(data, req, res);
 

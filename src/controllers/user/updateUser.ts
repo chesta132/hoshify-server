@@ -1,5 +1,5 @@
 import { User } from "@/services/db/User";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { NextFunction, Request, Response } from "express";
 
 export const updateUser = async (req: Request, { res }: Response, next: NextFunction) => {

@@ -1,7 +1,7 @@
 import { Response, Request, NextFunction } from "express";
 import bcrypt from "bcrypt";
 import { validateRequires } from "@/utils/validate";
-import { AppError } from "@/services/error/Error";
+import { AppError } from "@/services/error/AppError";
 import { User } from "@/services/db/User";
 import { Money } from "@/services/db/Money";
 
