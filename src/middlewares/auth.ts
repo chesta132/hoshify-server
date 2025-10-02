@@ -38,11 +38,7 @@ export const authMiddleware = async (req: Request, response: Response, next: Nex
       return next();
     }
 
-    const user = await User.findById(
-      payload.userId,
-      {},
-      { error: new AppError("NOT_FOUND", { item: "user", desc: "Please back to dashboard or sign in page" }) }
-    );
+    const user = await User.findById(payload.userId, {}, { error: new AppError("NOT_FOUND", { item: "user", desc: "Please sign up first" }) });
 
     // refresh token if payload is expires
     if (new Date(refreshPayload.expires) <= new Date()) {

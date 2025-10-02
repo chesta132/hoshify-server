@@ -28,7 +28,7 @@ export const updateOneFactory = <
 
       res
         .body({ success: data })
-        .info(`${(data as any).title || model.modelName}`)
+        .info(`${data?.title || model.modelName}`)
         .respond();
     } catch (err) {
       next(err);

@@ -3,12 +3,12 @@ import { CookieOptions, Response, Request } from "express";
 import { createAccessToken, createRefreshToken, resAccessToken, resRefreshToken, resRefreshTokenSessionOnly } from "../../utils/token";
 import { ACCESS_TOKEN_EXPIRY, NODE_ENV, REFRESH_TOKEN_EXPIRY } from "@/config";
 import { normalizeCurrency, normalizable, normalizeQuery, normalizeUserQuery } from "@/utils/manipulate/normalize";
-import { capital } from "@/utils/manipulate/string";
 import { currencyFields } from "@/utils/money";
 import { UserCred, UserCreds } from "@/services/db/User";
 import { timeInMs } from "@/utils/manipulate/number";
 import { DataToResponse, CookieUserBase, ErrorResponseType, ResType, RespondOptions, RestError } from "./types";
 import { CodeError } from "../error/types";
+import { omit } from "@/utils/manipulate/object";
 
 const defaultBody = <T>(): DataToResponse<T> => ({ data: {} as T, meta: { status: "ERROR" } });
 
@@ -82,7 +82,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
       }
     }
     this._jsonBody.meta.status = success ? "SUCCESS" : "ERROR";
-    this._jsonBody.data = success ? this._body : this._errorBody;
+    this._jsonBody.data = success ? this._body : omit(this._errorBody, ["status"]);
     return this as unknown as S extends true ? Respond<SuccessType, true, false> : Respond<unknown, false, true>;
   }
 

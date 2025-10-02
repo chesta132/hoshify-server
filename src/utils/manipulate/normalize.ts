@@ -63,7 +63,7 @@ export const normalizeCurrency = <T extends NormalizeCurrecyData | NormalizeCurr
 
   let data = { ...queryData };
   for (const [key, value] of Object.entries(data) as [string, number][]) {
-    if (currencyFields.includes(key as any)) (data as any)[key] = formatCurrency(value, currency);
+    if (currencyFields.includes(key as CurrencyFields)) (data as any)[key] = formatCurrency(value, currency);
   }
   return data as ModifiedCurrency<ExtractArray<T>>;
 };

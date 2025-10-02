@@ -54,22 +54,21 @@ export type ExtendPlugins<M extends DefaultModelDelegate, N extends ModelNames, 
   AvailablePlugins<M, N>[P]
 >;
 
-type Infer<F extends Func> = ArgsOf<F>["data"];
+type Infer<F extends DefaultModelDelegate> = ArgsOf<F["update"]>["data"];
 
 type Requiring<M extends DefaultModelDelegate> = Required<{
-  [K in keyof Infer<M["update"]>]: Infer<M["update"]>[K] extends Prisma.NullableBoolFieldUpdateOperationsInput
-    ? null | Infer<M["update"]>[K]
-    : Infer<M["update"]>[K] extends Prisma.NullableDateTimeFieldUpdateOperationsInput
-    ? null | Infer<M["update"]>[K]
-    : Infer<M["update"]>[K] extends Prisma.NullableStringFieldUpdateOperationsInput
-    ? null | Infer<M["update"]>[K]
-    : Infer<M["update"]>[K];
+  [K in keyof Infer<M>]: Infer<M>[K] extends Prisma.NullableBoolFieldUpdateOperationsInput
+    ? null | Infer<M>[K]
+    : Infer<M>[K] extends Prisma.NullableDateTimeFieldUpdateOperationsInput
+    ? null | Infer<M>[K]
+    : Infer<M>[K] extends Prisma.NullableStringFieldUpdateOperationsInput
+    ? null | Infer<M>[K]
+    : Infer<M>[K];
 }>;
 
-export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M["update"]> = never> = Requiring<M> &
-  Partial<Pick<Requiring<M>, O>>;
+export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M> = never> = Requiring<M> & Partial<Pick<Requiring<M>, O>>;
 
-export type InferByModel<M extends Model, O extends keyof Infer<M["prisma"]["update"]> = never> = InferByDelegate<M["prisma"], O>;
+export type InferByModel<M extends Model, O extends keyof Infer<M["prisma"]> = never> = InferByDelegate<M["prisma"], O>;
 
 export type ServiceError = AppError<any> | null;
 export type ServiceOptions<E extends ServiceError> = {
