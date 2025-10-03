@@ -57,13 +57,7 @@ export type ExtendPlugins<M extends DefaultModelDelegate, N extends ModelNames, 
 type Infer<F extends DefaultModelDelegate> = ArgsOf<F["create"]>["data"];
 
 type Requiring<M extends DefaultModelDelegate> = Required<{
-  [K in keyof Infer<M>]: Infer<M>[K] extends Prisma.NullableBoolFieldUpdateOperationsInput
-    ? null | Infer<M>[K]
-    : Infer<M>[K] extends Prisma.NullableDateTimeFieldUpdateOperationsInput
-    ? null | Infer<M>[K]
-    : Infer<M>[K] extends Prisma.NullableStringFieldUpdateOperationsInput
-    ? null | Infer<M>[K]
-    : Infer<M>[K];
+  [K in keyof Infer<M>]: Infer<M>[K];
 }>;
 
 export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M> = never> = [O] extends [never]

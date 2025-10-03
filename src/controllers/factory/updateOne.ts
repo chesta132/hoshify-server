@@ -18,11 +18,11 @@ export const updateOneFactory = <
     try {
       const { id } = req.params;
       if (neededField) validateRequires(neededField as string[], req.body);
-      req.body = pick(omit(req.body, unEditableField) as any, [...(neededField || []), ...(acceptableField || [])]);
+      const updateData = pick(omit(req.body, unEditableField) as any, [...(neededField || []), ...(acceptableField || [])]);
 
       if (funcInitiator) if ((await funcInitiator(req, res)) === "stop") return;
 
-      const data = await (model.update as Function)({ ...query, where: { id, userId: req.user!.id, ...query?.where } });
+      const data = await(model.update as Function)({ ...query, where: { id, userId: req.user!.id, ...query?.where }, data: updateData });
 
       if (funcBeforeRes) await funcBeforeRes(data, req, res);
 

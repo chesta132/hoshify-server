@@ -55,8 +55,6 @@ export const handleError = (err: unknown, req: Request, response: Response, next
       return;
     }
   } else {
-    console.error("Server Error Found");
-    console.dir(err as Error);
     res.body({ error: { message: "Internal Server Error", code: "SERVER_ERROR", details: (err as Error).message } }).error();
   }
 };

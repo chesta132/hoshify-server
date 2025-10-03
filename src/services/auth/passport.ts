@@ -6,11 +6,12 @@ import { normalizeCurrency } from "@/utils/manipulate/normalize";
 import { TUser, User } from "../db/User";
 import { ErrorResponseType } from "../respond/types";
 import { Money } from "../db/Money";
+import { AppError } from "../error/AppError";
 
 passport.use(
   new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
     try {
-      const user = await User.findFirst({ where: { email: email.trim() } });
+      const user = await User.findFirst({ where: { email: email.trim() } }, { error: null });
       if (!user || !user.password) {
         return done(null, false, { message: "Email not registered", code: "CLIENT_FIELD", field: "email" } as ErrorResponseType);
       }
@@ -38,11 +39,14 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const user = await User.findFirst({
-          where: {
-            OR: [{ googleId: profile.id }, { email: profile.emails![0].value }],
+        const user = await User.findFirst(
+          {
+            where: {
+              OR: [{ googleId: profile.id }, { email: profile.emails![0].value }],
+            },
           },
-        });
+          { error: null }
+        );
 
         if (user?.googleId === profile.id) {
           return done(null, user as TUser);
@@ -67,9 +71,7 @@ passport.use(
         });
         await Money.create({ data: { userId: createdUser.id } });
 
-        const newUser = await User.findById(createdUser.id);
-
-        done(null, newUser as TUser);
+        done(null, createdUser as TUser);
       } catch (err) {
         console.error(err);
         done(err);
@@ -122,10 +124,10 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (userId, done) => {
   try {
-    const user = await User.findById(userId as string);
+    const user = await User.findById(userId as string, {}, { error: null });
 
     if (!user) {
-      return done(new Error("User not found"));
+      return done(new AppError("NOT_FOUND", { item: "User" }));
     }
 
     done(null, user as TUser);

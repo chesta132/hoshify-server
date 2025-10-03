@@ -12,7 +12,7 @@ export const createLinks = createManyFactory(
   { neededField: ["title", "link"], acceptableField: ["position"] },
   {
     async funcInitiator(req) {
-      const lastLink = await Link.findFirst({ where: { userId: req.user?.id.toString() }, orderBy: { position: "desc" } });
+      const lastLink = await Link.findFirst({ where: { userId: req.user?.id.toString() }, orderBy: { position: "desc" } }, { error: null });
       let position = (lastLink?.position || 0) + 1;
       (req.body as any[]).forEach((data) => {
         data.position = position++;
@@ -26,7 +26,7 @@ export const createLink = createOneFactory(
   { neededField: ["title", "link"], acceptableField: ["position"] },
   {
     async funcInitiator(req) {
-      const lastLink = await Link.findFirst({ where: { userId: req.user!.id.toString() }, orderBy: { position: "desc" } })
+      const lastLink = await Link.findFirst({ where: { userId: req.user!.id.toString() }, orderBy: { position: "desc" } }, { error: null });
       const position = (lastLink?.position || 0) + 1;
       req.body.position = position;
     },
