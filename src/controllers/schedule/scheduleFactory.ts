@@ -22,7 +22,7 @@ export const createSchedules = createManyFactory(
   }
 );
 
-export const getSchedules = getManyFactory(Schedule);
+export const getSchedules = getManyFactory(Schedule, { query: { where: { isRecycled: false } } });
 
 export const getSchedule = getOneFactory(Schedule);
 

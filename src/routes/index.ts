@@ -8,6 +8,7 @@ import { tranRoutes } from "./tranRoutes";
 import { scheduleRoutes } from "./scheduleRoutes";
 import { linkRoutes } from "./linkRoutes";
 import { moneyRoutes } from "./moneyRoutes";
+import { noteRoutes } from "./noteRoutes";
 
 const router = Router();
 
@@ -19,6 +20,7 @@ router.use("/todos", todoRoutes);
 router.use("/transactions", tranRoutes);
 router.use("/schedules", scheduleRoutes);
 router.use("/links", linkRoutes);
+router.use("/notes", noteRoutes);
 router.use("/money", moneyRoutes);
 
 router.use(requireRole(["DEVELOPER", "OWNER"]));

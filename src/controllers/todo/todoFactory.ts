@@ -12,7 +12,7 @@ import { Todo } from "@/services/db/Todo";
 
 export const createTodos = createManyFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
-export const getTodos = getManyFactory(Todo, { query: { orderBy: { dueDate: "asc" } } });
+export const getTodos = getManyFactory(Todo, { query: { orderBy: { dueDate: "asc" }, where: { isRecycled: false } } });
 
 export const getTodo = getOneFactory(Todo);
 

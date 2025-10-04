@@ -143,7 +143,7 @@ export class Respond<SuccessType = unknown, SuccessReady extends boolean = false
    * @param paginateMeta Pagination options (limit, offset)
    * @returns this
    */
-  paginate: IsTruthy<SuccessType extends any[] ? true : false, (paginateMeta: RespondOptions["paginateMeta"]) => this> = ((
+  paginate: IsArray<SuccessType, (paginateMeta: RespondOptions["paginateMeta"]) => this> = ((
     paginateMeta: RespondOptions["paginateMeta"]
   ) => {
     if (Array.isArray(this._body)) {

@@ -12,7 +12,7 @@ import { Note } from "@/services/db/Note";
 
 export const createNotes = createManyFactory(Note, { neededField: ["title", "details"] });
 
-export const getNotes = getManyFactory(Note);
+export const getNotes = getManyFactory(Note, { query: { where: { isRecycled: false } } });
 
 export const getNote = getOneFactory(Note);
 

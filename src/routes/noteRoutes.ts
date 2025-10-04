@@ -23,4 +23,4 @@ noteRoutes.put("/", updateNotes);
 noteRoutes.delete("/:id", deleteNote);
 noteRoutes.delete("/", deleteNotes);
 noteRoutes.patch("/restores", restoreNotes);
-noteRoutes.patch("restores/:id", restoreNote);
+noteRoutes.patch("/restores/:id", restoreNote);

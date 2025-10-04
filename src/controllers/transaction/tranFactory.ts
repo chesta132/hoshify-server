@@ -54,6 +54,7 @@ export const getTrans = getManyFactory(Transaction, {
       amountToCurrency(data, req);
     });
   },
+  query: { where: { isRecycled: false } },
 });
 
 export const getTran = getOneFactory(Transaction, {
