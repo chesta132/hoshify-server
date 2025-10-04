@@ -70,26 +70,32 @@ model Todo {
   isRecycled Boolean    @default(false)
   deleteAt   DateTime?
   dummy      Boolean?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
 }
 
 model Money {
-  id      String @id @default(cuid())
-  total   Int    @default(0)
-  income  Int    @default(0)
-  outcome Int    @default(0)
+  id        String   @id @default(cuid())
+  total     Int      @default(0)
+  income    Int      @default(0)
+  outcome   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 }
 
 model Link {
-  id       String @id @default(cuid())
-  link     String
-  title    String @db.VarChar(100)
-  position Int
+  id        String   @id @default(cuid())
+  link      String
+  title     String   @db.VarChar(100)
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -102,6 +108,8 @@ model Note {
   isRecycled Boolean   @default(false)
   deleteAt   DateTime?
   dummy      Boolean?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -116,6 +124,8 @@ model Transaction {
   isRecycled Boolean         @default(false)
   deleteAt   DateTime?
   dummy      Boolean?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -130,6 +140,8 @@ model Schedule {
   isRecycled Boolean   @default(false)
   deleteAt   DateTime?
   dummy      Boolean?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -140,8 +152,7 @@ model Revoked {
   value    String
   type     RevokeType
   deleteAt DateTime
-
-  userId String
+  userId   String
 }
 
 model Verify {
@@ -149,6 +160,5 @@ model Verify {
   value    String
   type     VerifyType
   deleteAt DateTime
-
-  userId String
+  userId   String
 }
