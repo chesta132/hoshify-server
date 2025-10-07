@@ -9,6 +9,7 @@ import { updateManyFactory } from "../factory/updateMany";
 import { createOneFactory } from "../factory/createOne";
 import { updateOneFactory } from "../factory/updateOne";
 import { Todo } from "@/services/db/Todo";
+import { searchFactory } from "../factory/search";
 
 export const createTodos = createManyFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
@@ -33,3 +34,7 @@ export const updateTodos = updateManyFactory(
 export const createTodo = createOneFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
 export const updateTodo = updateOneFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
+
+export const searchTodos = searchFactory(Todo, {
+  query: { where: { isRecycled: false }, orderBy: { dueDate: "asc" } },
+});

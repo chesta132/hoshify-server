@@ -9,6 +9,7 @@ import {
   getSchedules,
   restoreSchedule,
   restoreSchedules,
+  searchSchedules,
 } from "@/controllers/schedule/scheduleFactory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
@@ -17,6 +18,7 @@ export const scheduleRoutes = Router();
 
 scheduleRoutes.post("/", polyBody(createSchedule, createSchedules));
 scheduleRoutes.get("/", getSchedules);
+scheduleRoutes.get("/search", searchSchedules);
 scheduleRoutes.get("/:id", getSchedule);
 scheduleRoutes.put("/:id", updateSchedule);
 scheduleRoutes.put("/", updateSchedules);

@@ -3,7 +3,7 @@ import { ControllerOptions } from "../types";
 import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 
 export const getOneFactory = <
-  M extends Model,
+  M extends Exclude<Model, Model<"user">>,
   NF extends keyof InferByModel<M>,
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(

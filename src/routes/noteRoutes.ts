@@ -9,6 +9,7 @@ import {
   getNotes,
   restoreNote,
   restoreNotes,
+  searchNotes,
 } from "@/controllers/note/noteFactory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
@@ -17,6 +18,7 @@ export const noteRoutes = Router();
 
 noteRoutes.post("/", polyBody(createNote, createNotes));
 noteRoutes.get("/", getNotes);
+noteRoutes.get("/search", searchNotes);
 noteRoutes.get("/:id", getNote);
 noteRoutes.put("/:id", updateNote);
 noteRoutes.put("/", updateNotes);

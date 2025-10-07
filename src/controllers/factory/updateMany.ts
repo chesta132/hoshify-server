@@ -9,7 +9,7 @@ import { unEditableField } from "@/services/db/Base";
 import pluralize from "pluralize";
 
 export const updateManyFactory = <
-  M extends Model,
+  M extends Exclude<Model, Model<"user">>,
   NF extends keyof InferByModel<M>,
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(

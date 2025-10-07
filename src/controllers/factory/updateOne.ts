@@ -6,7 +6,7 @@ import { omit, pick } from "@/utils/manipulate/object";
 import { unEditableField } from "@/services/db/Base";
 
 export const updateOneFactory = <
-  M extends Model,
+  M extends Exclude<Model, Model<"user">>,
   NF extends keyof InferByModel<M>,
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(

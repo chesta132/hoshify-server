@@ -9,6 +9,7 @@ import { updateManyFactory } from "../factory/updateMany";
 import { createOneFactory } from "../factory/createOne";
 import { updateOneFactory } from "../factory/updateOne";
 import { Schedule } from "@/services/db/Schedule";
+import { searchFactory } from "../factory/search";
 
 export const createSchedules = createManyFactory(
   Schedule,
@@ -22,19 +23,23 @@ export const createSchedules = createManyFactory(
   }
 );
 
-export const getSchedules = getManyFactory(Schedule, { query: { where: { isRecycled: false } } });
+export const getSchedules = getManyFactory(Schedule, { query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } } });
 
 export const getSchedule = getOneFactory(Schedule);
 
 export const restoreSchedule = restoreOneFactory(Schedule);
 
-export const restoreSchedules = restoreManyFactory(Schedule);
+export const restoreSchedules = restoreManyFactory(Schedule, { query: { orderBy: { updatedAt: "desc" } } });
 
 export const deleteSchedule = softDeleteOneFactory(Schedule);
 
-export const deleteSchedules = softDeleteManyFactory(Schedule);
+export const deleteSchedules = softDeleteManyFactory(Schedule, { query: { orderBy: { updatedAt: "desc" } } });
 
-export const updateSchedules = updateManyFactory(Schedule, { neededField: ["title", "details"], acceptableField: ["start", "end"] });
+export const updateSchedules = updateManyFactory(
+  Schedule,
+  { neededField: ["title", "details"], acceptableField: ["start", "end"] },
+  { query: { orderBy: { updatedAt: "desc" } } }
+);
 
 export const createSchedule = createOneFactory(
   Schedule,
@@ -48,3 +53,7 @@ export const createSchedule = createOneFactory(
 );
 
 export const updateSchedule = updateOneFactory(Schedule, { neededField: ["title", "details"], acceptableField: ["start", "end"] });
+
+export const searchSchedules = searchFactory(Schedule, {
+  query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } },
+});

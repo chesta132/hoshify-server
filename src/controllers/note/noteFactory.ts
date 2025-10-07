@@ -9,6 +9,7 @@ import { updateManyFactory } from "../factory/updateMany";
 import { createOneFactory } from "../factory/createOne";
 import { updateOneFactory } from "../factory/updateOne";
 import { Note } from "@/services/db/Note";
+import { searchFactory } from "../factory/search";
 
 export const createNotes = createManyFactory(Note, { neededField: ["title", "details"] });
 
@@ -29,3 +30,7 @@ export const updateNotes = updateManyFactory(Note, { neededField: ["title", "det
 export const createNote = createOneFactory(Note, { neededField: ["title", "details"] });
 
 export const updateNote = updateOneFactory(Note, { neededField: ["title", "details"] });
+
+export const searchNotes = searchFactory(Note, {
+  query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } },
+});

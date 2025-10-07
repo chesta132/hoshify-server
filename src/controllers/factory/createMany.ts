@@ -6,7 +6,7 @@ import { ControllerConfig, ControllerOptions } from "../types";
 import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 
 export const createManyFactory = <
-  M extends Model,
+  M extends Exclude<Model, Model<"user">>,
   NF extends keyof InferByModel<M>,
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(

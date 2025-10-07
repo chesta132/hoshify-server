@@ -6,7 +6,7 @@ import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 import { ellipsis } from "@/utils/manipulate/string";
 
 export const createOneFactory = <
-  M extends Model,
+  M extends Exclude<Model, Model<"user">>,
   NF extends keyof InferByModel<M>,
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(
