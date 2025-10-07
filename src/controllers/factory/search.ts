@@ -27,7 +27,7 @@ export const searchFactory = <
 
       const datas = (await model.findMany({
         ...query,
-        where: { title: { contains: q }, userId: user.id, ...(query as any)?.where },
+        where: { title: { contains: q, mode: "insensitive" }, userId: user.id, ...(query as any)?.where },
         take: limit,
         skip,
       })) as unknown as InferByModel<M>[];
