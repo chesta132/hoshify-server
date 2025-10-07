@@ -15,6 +15,8 @@ export const createNotes = createManyFactory(Note, { neededField: ["title", "det
 
 export const getNotes = getManyFactory(Note, { query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } } });
 
+export const getRecycledNotes = getManyFactory(Note, { query: { where: { isRecycled: true }, orderBy: { updatedAt: "desc" } } });
+
 export const getNote = getOneFactory(Note);
 
 export const restoreNote = restoreOneFactory(Note);

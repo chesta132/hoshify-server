@@ -10,6 +10,7 @@ import {
   restoreTodo,
   restoreTodos,
   searchTodos,
+  getRecycledTodos,
 } from "@/controllers/todo/todoFactory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
@@ -26,3 +27,4 @@ todoRoutes.delete("/", deleteTodos);
 todoRoutes.delete("/:id", deleteTodo);
 todoRoutes.patch("/restores/", restoreTodos);
 todoRoutes.patch("/restores/:id", restoreTodo);
+todoRoutes.get("/recycled", getRecycledTodos);

@@ -15,6 +15,8 @@ export const createTodos = createManyFactory(Todo, { neededField: ["title", "det
 
 export const getTodos = getManyFactory(Todo, { query: { orderBy: { dueDate: "asc" }, where: { isRecycled: false } } });
 
+export const getRecycledTodos = getManyFactory(Todo, { query: { orderBy: { dueDate: "asc" }, where: { isRecycled: true } } });
+
 export const getTodo = getOneFactory(Todo);
 
 export const restoreTodo = restoreOneFactory(Todo);

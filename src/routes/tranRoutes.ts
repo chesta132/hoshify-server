@@ -4,6 +4,7 @@ import {
   createTrans,
   deleteTran,
   deleteTrans,
+  getRecycledTrans,
   getTran,
   getTrans,
   restoreTran,
@@ -22,3 +23,4 @@ tranRoutes.delete("/", deleteTrans);
 tranRoutes.delete("/:id", deleteTran);
 tranRoutes.patch("/restores/", restoreTrans);
 tranRoutes.patch("/restores/:id", restoreTran);
+tranRoutes.get("/recycled", getRecycledTrans);

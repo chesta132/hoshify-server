@@ -57,6 +57,15 @@ export const getTrans = getManyFactory(Transaction, {
   query: { where: { isRecycled: false } },
 });
 
+export const getRecycledTrans = getManyFactory(Transaction, {
+  funcBeforeRes(data, req) {
+    data.forEach((data) => {
+      amountToCurrency(data, req);
+    });
+  },
+  query: { where: { isRecycled: true } },
+});
+
 export const getTran = getOneFactory(Transaction, {
   funcBeforeRes(data, req) {
     amountToCurrency(data, req);

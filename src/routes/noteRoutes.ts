@@ -10,6 +10,7 @@ import {
   restoreNote,
   restoreNotes,
   searchNotes,
+  getRecycledNotes,
 } from "@/controllers/note/noteFactory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
@@ -26,3 +27,4 @@ noteRoutes.delete("/:id", deleteNote);
 noteRoutes.delete("/", deleteNotes);
 noteRoutes.patch("/restores", restoreNotes);
 noteRoutes.patch("/restores/:id", restoreNote);
+noteRoutes.get("/recycled", getRecycledNotes);

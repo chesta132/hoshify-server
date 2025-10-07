@@ -10,6 +10,7 @@ import {
   restoreSchedule,
   restoreSchedules,
   searchSchedules,
+  getRecycledSchedules,
 } from "@/controllers/schedule/scheduleFactory";
 import { polyBody } from "@/utils/polyBody";
 import { Router } from "express";
@@ -26,3 +27,4 @@ scheduleRoutes.delete("/", deleteSchedules);
 scheduleRoutes.delete("/:id", deleteSchedule);
 scheduleRoutes.patch("/restores/", restoreSchedules);
 scheduleRoutes.patch("/restores/:id", restoreSchedule);
+scheduleRoutes.get("/recycled", getRecycledSchedules);

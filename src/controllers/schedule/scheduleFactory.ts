@@ -25,6 +25,8 @@ export const createSchedules = createManyFactory(
 
 export const getSchedules = getManyFactory(Schedule, { query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } } });
 
+export const getRecycledSchedules = getManyFactory(Schedule, { query: { where: { isRecycled: true }, orderBy: { updatedAt: "desc" } } });
+
 export const getSchedule = getOneFactory(Schedule);
 
 export const restoreSchedule = restoreOneFactory(Schedule);
