@@ -20,5 +20,5 @@ export type CreateConfig<T extends Model, NF extends keyof InferByModel<T>, AF e
 }>;
 
 export type SearchConfig<T extends Model> = {
-  searchFields: (keyof InferByModel<T>)[];
-}
+  searchFields: (keyof OmitByValue<PickByValue<InferByModel<T>, string>, Date>)[];
+};

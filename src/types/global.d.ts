@@ -128,11 +128,14 @@ declare global {
   /** Union type representing all base JS types. */
   type AllType = Function | string | number | boolean | object | symbol | bigint;
 
-  /**
-   * Utility type that removes all fields from `T` whose value type does not extend `Z`.
-   */
-  type OmitNon<T, Z> = {
-    [K in keyof T as T[K] extends Z ? K : never]: T[K];
+  /** Utility type that removes all fields from `T` whose value type extend `U`. */
+  type OmitByValue<T, U> = {
+    [K in keyof T as U extends T[K] ? never : K]: T[K];
+  };
+
+  /** Utility type that pick all fields from `T` whose value type extend `U`. */
+  type PickByValue<T, U> = {
+    [K in keyof T as U extends T[K] ? K : never]: T[K];
   };
 
   /** Type representing all falsy values. */
