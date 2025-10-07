@@ -12,19 +12,19 @@ import { Note } from "@/services/db/Note";
 
 export const createNotes = createManyFactory(Note, { neededField: ["title", "details"] });
 
-export const getNotes = getManyFactory(Note, { query: { where: { isRecycled: false } } });
+export const getNotes = getManyFactory(Note, { query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } } });
 
 export const getNote = getOneFactory(Note);
 
 export const restoreNote = restoreOneFactory(Note);
 
-export const restoreNotes = restoreManyFactory(Note);
+export const restoreNotes = restoreManyFactory(Note, { query: { orderBy: { updatedAt: "desc" } } });
 
 export const deleteNote = softDeleteOneFactory(Note);
 
 export const deleteNotes = softDeleteManyFactory(Note);
 
-export const updateNotes = updateManyFactory(Note, { neededField: ["title", "details"] });
+export const updateNotes = updateManyFactory(Note, { neededField: ["title", "details"] }, { query: { orderBy: { updatedAt: "desc" } } });
 
 export const createNote = createOneFactory(Note, { neededField: ["title", "details"] });
 
