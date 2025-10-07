@@ -10,7 +10,7 @@ import { ModelTransaction } from "@/services/db/Transaction";
 import { ModelUser } from "@/services/db/User";
 import { ModelVerify } from "@/services/db/Verify";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { UnionToInter } from "../../types";
+import { MergeUnion } from "../../types";
 import { AppError } from "../error/AppError";
 
 export type PrismaModels = Omit<PrismaClient, `$${string}`>;
@@ -50,12 +50,11 @@ export type ArgsOfById<F extends Func> = Omit<ArgsOf<F>, "where">;
 export type PromiseReturn<F extends Func> = Awaited<ReturnType<F>>;
 
 export type AvailablePlugins<M extends DefaultModelDelegate, N extends ModelNames> = { softDelete: SoftDeletePlugin<M, N>; dummy: DummyPlugin<M, N> };
-export type ExtendPlugins<M extends DefaultModelDelegate, N extends ModelNames, P extends keyof AvailablePlugins<M, N>> = UnionToInter<
+export type ExtendPlugins<M extends DefaultModelDelegate, N extends ModelNames, P extends keyof AvailablePlugins<M, N>> = MergeUnion<
   AvailablePlugins<M, N>[P]
 >;
 
 type Infer<F extends DefaultModelDelegate> = ArgsOf<F["create"]>["data"];
-
 type Requiring<M extends DefaultModelDelegate> = Required<{
   [K in keyof Infer<M>]: Infer<M>[K];
 }>;
@@ -63,15 +62,20 @@ type Requiring<M extends DefaultModelDelegate> = Required<{
 export type InferByDelegate<M extends DefaultModelDelegate, O extends keyof Infer<M> = never> = [O] extends [never]
   ? Requiring<M>
   : Omit<Requiring<M>, O> & Partial<Pick<Requiring<M>, O>>;
-
 export type InferByModel<M extends Model, O extends keyof Infer<M["prisma"]> = never> = InferByDelegate<M["prisma"], O>;
 
-export type ServiceError = AppError<any> | null;
+export type ServiceConditionalError = { notFound?: AppError<any> | null; exists?: AppError<any> | null };
+export type ServiceError = AppError<any> | null | ServiceConditionalError | (() => AppError<any>);
+
 export type ServiceOptions<E extends ServiceError> = {
   error?: E;
 };
 
-export type ServiceResult<F extends Func, E extends ServiceError> = [E] extends [null] ? PromiseReturn<F> | null : PromiseReturn<F>;
+export type ServiceResult<F extends Func, E extends ServiceError> = [E] extends [null]
+  ? PromiseReturn<F> | null
+  : [null] extends [E[keyof E]]
+  ? PromiseReturn<F> | null
+  : PromiseReturn<F>;
 
 export type ModelSoftDeletable = "note" | "transaction" | "todo" | "schedule";
 export type ModelDummyable = "note" | "transaction" | "todo" | "schedule";

@@ -19,7 +19,7 @@ export type EitherWithKeys<Keys extends object, Others extends object> =
   | (Keys & { [K in keyof Others]?: undefined })
   | (Others & { [K in keyof Keys]?: never });
 
-export type UnionToInter<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+export type MergeUnion<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 
 export type NormalizedQuery<T> = Omit<T, NormalizeFields> & {
   [K in keyof T]: { toUpdate: Function } extends T[K] ? string : T[K];

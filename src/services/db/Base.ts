@@ -1,5 +1,5 @@
 import { ArgsOf, ArgsOfById, DefaultModelDelegate, ModelNames, ServiceError, ServiceOptions, ServiceResult } from "@/services/db/types";
-import { handlePrismaError } from "@/utils/db/handlePrismaError";
+import { handleDBServiceError } from "@/utils/db/handleDBServiceError";
 
 export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, ModelName extends ModelNames> {
   private model: ModelDelegate;
@@ -19,10 +19,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     try {
       return await this.model.findFirstOrThrow(args);
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -33,10 +32,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     try {
       return await this.model.findUniqueOrThrow(args);
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -47,10 +45,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     try {
       return await this.model.findMany(args);
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -70,10 +67,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
         return await this.model.create(args);
       }
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -84,10 +80,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     try {
       return await this.model.createManyAndReturn(args);
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -110,10 +105,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
         return await this.model.update(args);
       }
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -125,10 +119,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
       await this.model.updateMany({ ...args });
       return await this.model.findMany({ take: args.limit, ...args });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -139,10 +132,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     try {
       return await this.model.delete(args);
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -153,10 +145,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     try {
       return await this.model.deleteMany(args);
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -168,10 +159,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     try {
       return await this.model.findUniqueOrThrow({ where: { id }, ...args });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -183,10 +173,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     try {
       return this.model.findMany({ where: { id: { in: ids } }, ...args });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -198,10 +187,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
     try {
       return this.model.update({ where: { id }, ...args });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -216,10 +204,9 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
         ...args,
       });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.modelName, options?.error);
+      const handled = handleDBServiceError(err, this.modelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 }

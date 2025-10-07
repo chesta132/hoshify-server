@@ -2,7 +2,7 @@ import { AppError } from "@/services/error/AppError";
 import { NODE_ENV } from "@/config";
 import { OneFieldOnly } from "@/types";
 import { DefaultModelDelegate, InferByDelegate, ModelNames, PromiseReturn } from "@/services/db/types";
-import { handlePrismaError } from "@/utils/db/handlePrismaError";
+import { handleDBServiceError } from "@/utils/db/handleDBServiceError";
 import { timeInMs } from "@/utils/manipulate/number";
 import { randomDate, randomNumber, shortId } from "@/utils/random";
 
@@ -70,16 +70,16 @@ export class DummyPlugin<ModelDelegate extends DefaultModelDelegate, ModelName e
 
       return await this.DModel.createManyAndReturn({ data: dummys });
     } catch (err) {
-      throw handlePrismaError(err, this.DModelName);
+      throw handleDBServiceError(err, this.DModelName);
     }
   }
 
   async deleteDummy(userId: string, length: number | "all"): Promise<PromiseReturn<ModelDelegate["deleteMany"]>> {
     try {
       if (NODE_ENV !== "development") throw new AppError("FORBIDDEN", { message: "Can not delete dummy data right now." });
-      return await this.DModel.deleteMany({ where: { dummy: true }, limit: length === "all" ? undefined : length });
+      return await this.DModel.deleteMany({ where: { dummy: true, userId }, limit: length === "all" ? undefined : length });
     } catch (err) {
-      throw handlePrismaError(err, this.DModelName);
+      throw handleDBServiceError(err, this.DModelName);
     }
   }
 }

@@ -1,7 +1,6 @@
 import { ArgsOf, DefaultModelDelegate, ModelNames, ServiceError, ServiceOptions, ServiceResult } from "@/services/db/types";
-import { handlePrismaError } from "@/utils/db/handlePrismaError";
+import { handleDBServiceError } from "@/utils/db/handleDBServiceError";
 import { timeInMs } from "@/utils/manipulate/number";
-import { ModelUser } from "../User";
 
 const deleteTTL = timeInMs({ week: 2 });
 export const getDeleteAt = () => new Date(Date.now() + deleteTTL);
@@ -22,10 +21,9 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true } });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.SDModelName, options?.error);
+      const handled = handleDBServiceError(err, this.SDModelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -37,10 +35,9 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true }, where: { id } });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.SDModelName, options?.error);
+      const handled = handleDBServiceError(err, this.SDModelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -52,10 +49,9 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
       await this.SDModel.updateMany({ ...args, data: { deleteAt: getDeleteAt(), isRecycled: true } });
       return await this.SDModel.findMany({ take: args.limit, ...args });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.SDModelName, options?.error);
+      const handled = handleDBServiceError(err, this.SDModelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -66,10 +62,9 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: null, isRecycled: false } });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.SDModelName, options?.error);
+      const handled = handleDBServiceError(err, this.SDModelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -81,10 +76,9 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
     try {
       return await this.SDModel.update({ ...args, data: { deleteAt: null, isRecycled: false }, where: { id } });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.SDModelName, options?.error);
+      const handled = handleDBServiceError(err, this.SDModelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 
@@ -96,10 +90,9 @@ export class SoftDeletePlugin<ModelDelegate extends DefaultModelDelegate, ModelN
       await this.SDModel.updateMany({ ...args, data: { deleteAt: null, isRecycled: false } });
       return await this.SDModel.findMany({ take: args.limit, ...args });
     } catch (err) {
-      if (options?.error === null) {
-        return null as any;
-      }
-      throw handlePrismaError(err, this.SDModelName, options?.error);
+      const handled = handleDBServiceError(err, this.SDModelName, options?.error);
+      if (handled === null) return null as any;
+      throw handled;
     }
   }
 }
