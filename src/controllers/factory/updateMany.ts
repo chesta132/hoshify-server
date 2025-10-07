@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ControllerConfig, ControllerOptions } from "../types";
+import { CreateConfig, ControllerOptions } from "../types";
 import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 import { validateRequires } from "@/utils/validate";
 import { AppError } from "@/services/error/AppError";
@@ -14,7 +14,7 @@ export const updateManyFactory = <
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(
   model: M,
-  { neededField, acceptableField }: ControllerConfig<M, NF, AF>,
+  { neededField, acceptableField }: CreateConfig<M, NF, AF>,
   { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>[], ArgsOf<M["update"]> & ArgsOf<M["findMany"]>, NF, AF> = {}
 ) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {

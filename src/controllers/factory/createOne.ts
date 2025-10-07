@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { validateRequires } from "@/utils/validate";
 import { pick } from "@/utils/manipulate/object";
-import { ControllerConfig, ControllerOptions } from "../types";
+import { CreateConfig, ControllerOptions } from "../types";
 import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 import { ellipsis } from "@/utils/manipulate/string";
 
@@ -11,7 +11,7 @@ export const createOneFactory = <
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(
   model: M,
-  { neededField, acceptableField }: ControllerConfig<M, NF, AF>,
+  { neededField, acceptableField }: CreateConfig<M, NF, AF>,
   { query, funcBeforeRes, funcInitiator, transformData }: ControllerOptions<InferByModel<M>, ArgsOf<M["create"]>, NF, AF, "transformData"> = {}
 ) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {

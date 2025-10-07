@@ -35,6 +35,10 @@ export const createTodo = createOneFactory(Todo, { neededField: ["title", "detai
 
 export const updateTodo = updateOneFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
-export const searchTodos = searchFactory(Todo, {
-  query: { where: { isRecycled: false }, orderBy: { dueDate: "asc" } },
-});
+export const searchTodos = searchFactory(
+  Todo,
+  { searchFields: ["title"] },
+  {
+    query: { where: { isRecycled: false }, orderBy: { dueDate: "asc" } },
+  }
+);

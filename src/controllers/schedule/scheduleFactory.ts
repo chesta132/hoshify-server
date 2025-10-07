@@ -54,6 +54,10 @@ export const createSchedule = createOneFactory(
 
 export const updateSchedule = updateOneFactory(Schedule, { neededField: ["title", "details"], acceptableField: ["start", "end"] });
 
-export const searchSchedules = searchFactory(Schedule, {
-  query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } },
-});
+export const searchSchedules = searchFactory(
+  Schedule,
+  { searchFields: ["title"] },
+  {
+    query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } },
+  }
+);

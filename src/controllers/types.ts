@@ -14,7 +14,11 @@ export type ControllerOptions<T, Q, NF, AF, A extends keyof AdditionalOptions<an
   funcInitiator?: (req: Request, res: Respond) => Promise<"stop"> | "stop" | Promise<void> | void;
 } & Pick<AdditionalOptions<T, NF, AF>, A>;
 
-export type ControllerConfig<T extends Model, NF extends keyof InferByModel<T>, AF extends Exclude<keyof InferByModel<T>, NF>> = RequireAtLeastOne<{
+export type CreateConfig<T extends Model, NF extends keyof InferByModel<T>, AF extends Exclude<keyof InferByModel<T>, NF>> = RequireAtLeastOne<{
   neededField: NF[];
   acceptableField: AF[];
 }>;
+
+export type SearchConfig<T extends Model> = {
+  searchFields: (keyof InferByModel<T>)[];
+}

@@ -31,6 +31,10 @@ export const createNote = createOneFactory(Note, { neededField: ["title", "detai
 
 export const updateNote = updateOneFactory(Note, { neededField: ["title", "details"] });
 
-export const searchNotes = searchFactory(Note, {
-  query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } },
-});
+export const searchNotes = searchFactory(
+  Note,
+  { searchFields: ["title"] },
+  {
+    query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } },
+  }
+);

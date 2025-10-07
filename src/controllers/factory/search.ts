@@ -1,6 +1,6 @@
 import { AppError } from "@/services/error/AppError";
 import { Request, Response, NextFunction } from "express";
-import { ControllerOptions } from "../types";
+import { ControllerOptions, SearchConfig } from "../types";
 import { ArgsOf, InferByModel, Model } from "@/services/db/types";
 import { PAGINATION_LIMIT } from "@/config";
 
@@ -10,6 +10,7 @@ export const searchFactory = <
   AF extends Exclude<keyof InferByModel<M>, NF> = Exclude<keyof InferByModel<M>, NF>
 >(
   model: M,
+  { searchFields }: SearchConfig<M>,
   { query, funcBeforeRes, funcInitiator }: ControllerOptions<InferByModel<M>[], ArgsOf<M["findMany"]>, NF, AF> = {}
 ) => {
   return async (req: Request, { res }: Response, next: NextFunction) => {
@@ -25,9 +26,13 @@ export const searchFactory = <
       }
       if (funcInitiator) if ((await funcInitiator(req, res)) === "stop") return;
 
+      const searchField = {
+        ...(searchFields.length > 0 ? { OR: searchFields.map((field) => ({ [field]: { contains: q, mode: "insensitive" } })) } : {}),
+      };
+
       const datas = (await model.findMany({
         ...query,
-        where: { title: { contains: q, mode: "insensitive" }, userId: user.id, ...(query as any)?.where },
+        where: { ...searchField, userId: user.id, ...(query as any)?.where },
         take: limit,
         skip,
       })) as unknown as InferByModel<M>[];
