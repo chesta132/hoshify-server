@@ -7,11 +7,9 @@ import { applyPlugins } from "@/utils/manipulate/object";
 import { ExtendPlugins, InferByDelegate } from "@/services/db/types";
 import { DummyPlugin } from "./plugins/DummyPlugin";
 import { timeInMs } from "@/utils/manipulate/number";
+import { GetSearchableFields } from "@/controllers/types";
 
-export class ScheduleService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<
-  Prisma.ScheduleDelegate<ExtArgs, ClientOptions>,
-  "schedule"
-> {
+export class ScheduleService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<Prisma.ScheduleDelegate<ExtArgs, ClientOptions>, "schedule"> {
   constructor(model: Prisma.ScheduleDelegate<ExtArgs, ClientOptions>) {
     super(model, "schedule");
 
@@ -28,6 +26,9 @@ export class ScheduleService<ExtArgs extends InternalArgs, ClientOptions> extend
 
     return applyPlugins(this, ...plugins);
   }
+
+  readonly searchFields: GetSearchableFields<InferByDelegate<Prisma.ScheduleDelegate<ExtArgs, ClientOptions>>>[] = ["title"];
+  readonly sortQuery: Prisma.ScheduleOrderByWithRelationInput = { updatedAt: "desc" };
 }
 
 export interface ScheduleService<ExtArgs extends InternalArgs, ClientOptions>

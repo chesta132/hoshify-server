@@ -12,10 +12,10 @@ import session from "express-session";
 import { timeInMs } from "./utils/manipulate/number";
 import { CLIENT_URL, NODE_ENV } from "./config";
 import { AppError } from "./services/error/AppError";
-import "./services/auth/passport";
-import "./services/db/index";
-import "./utils/extends";
 import { handleError } from "./services/error/handleError";
+import "./services/auth/passport";
+import "./services/db";
+import "./utils/extends";
 
 const app = express();
 app.set("trust proxy", ["loopback", "linklocal"]);

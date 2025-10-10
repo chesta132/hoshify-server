@@ -7,6 +7,7 @@ import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
 import { ExtendPlugins, InferByDelegate } from "@/services/db/types";
 import { DummyPlugin } from "./plugins/DummyPlugin";
 import { timeInMs } from "@/utils/manipulate/number";
+import { GetSearchableFields } from "@/controllers/types";
 
 export const todoStatus: $Enums.TodoStatus[] = ["ACTIVE", "CANCELED", "COMPLETED", "PENDING"];
 
@@ -26,6 +27,9 @@ export class TodoService<ExtArgs extends InternalArgs, ClientOptions> extends Ba
     ];
     return applyPlugins(this, ...plugins);
   }
+
+  readonly searchFields: GetSearchableFields<InferByDelegate<Prisma.TodoDelegate<ExtArgs, ClientOptions>>>[] = ["title"];
+  readonly sortQuery: Prisma.TodoOrderByWithRelationInput = { dueDate: "asc" };
 }
 
 export interface TodoService<ExtArgs extends InternalArgs, ClientOptions>

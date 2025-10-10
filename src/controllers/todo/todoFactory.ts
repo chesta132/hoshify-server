@@ -13,24 +13,24 @@ import { searchFactory } from "../factory/search";
 
 export const createTodos = createManyFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
 
-export const getTodos = getManyFactory(Todo, { query: { orderBy: { dueDate: "asc" }, where: { isRecycled: false } } });
+export const getTodos = getManyFactory(Todo, { query: { orderBy: Todo.sortQuery, where: { isRecycled: false } } });
 
-export const getRecycledTodos = getManyFactory(Todo, { query: { orderBy: { dueDate: "asc" }, where: { isRecycled: true } } });
+export const getRecycledTodos = getManyFactory(Todo, { query: { orderBy: Todo.sortQuery, where: { isRecycled: true } } });
 
 export const getTodo = getOneFactory(Todo);
 
 export const restoreTodo = restoreOneFactory(Todo);
 
-export const restoreTodos = restoreManyFactory(Todo, { query: { orderBy: { dueDate: "asc" } } });
+export const restoreTodos = restoreManyFactory(Todo, { query: { orderBy: Todo.sortQuery } });
 
 export const deleteTodo = softDeleteOneFactory(Todo);
 
-export const deleteTodos = softDeleteManyFactory(Todo, { query: { orderBy: { dueDate: "asc" } } });
+export const deleteTodos = softDeleteManyFactory(Todo, { query: { orderBy: Todo.sortQuery } });
 
 export const updateTodos = updateManyFactory(
   Todo,
   { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] },
-  { query: { orderBy: { dueDate: "asc" } } }
+  { query: { orderBy: Todo.sortQuery } }
 );
 
 export const createTodo = createOneFactory(Todo, { neededField: ["title", "details", "dueDate"], acceptableField: ["status"] });
@@ -39,8 +39,8 @@ export const updateTodo = updateOneFactory(Todo, { neededField: ["title", "detai
 
 export const searchTodos = searchFactory(
   Todo,
-  { searchFields: ["title"] },
+  { searchFields: Todo.searchFields },
   {
-    query: { where: { isRecycled: false }, orderBy: { dueDate: "asc" } },
+    query: { where: { isRecycled: false }, orderBy: Todo.sortQuery },
   }
 );

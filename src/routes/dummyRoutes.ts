@@ -1,5 +1,6 @@
 import { createDummy } from "@/controllers/dummy/createDummy";
 import { deleteDummy } from "@/controllers/dummy/deleteDummy";
+import { requireRole } from "@/middlewares/auth";
 import { Note } from "@/services/db/Note";
 import { Schedule } from "@/services/db/Schedule";
 import { Todo } from "@/services/db/Todo";
@@ -10,6 +11,8 @@ import { Router } from "express";
 export const dummyRoutes = Router();
 
 const supportDummy: Model<ModelDummyable>[] = [Note, Todo, Schedule, Transaction];
+
+dummyRoutes.use(requireRole(["DEVELOPER", "OWNER"]));
 
 supportDummy.forEach((model) => {
   dummyRoutes.post(`/${model.modelName}`, createDummy(model));

@@ -112,12 +112,11 @@ export abstract class BaseService<ModelDelegate extends DefaultModelDelegate, Mo
   }
 
   async updateManyAndReturn<E extends ServiceError>(
-    args: ArgsOf<ModelDelegate["findMany"]> & ArgsOf<ModelDelegate["updateMany"]>,
+    args: ArgsOf<ModelDelegate["updateManyAndReturn"]>,
     options?: ServiceOptions<E>
-  ): Promise<ServiceResult<ModelDelegate["findMany"], E>> {
+  ): Promise<ServiceResult<ModelDelegate["updateManyAndReturn"], E>> {
     try {
-      await this.model.updateMany({ ...args });
-      return await this.model.findMany({ take: args.limit, ...args });
+      return await this.model.updateManyAndReturn(args);
     } catch (err) {
       const handled = handleDBServiceError(err, this.modelName, options?.error);
       if (handled === null) return null as any;

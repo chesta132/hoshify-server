@@ -17,7 +17,7 @@ export const searchFactory = <
     try {
       const user = req.user!;
       const q = req.query.query?.toString().trim();
-      const { offset } = req.query;
+      const { offset, sort, sortBy } = req.query;
       const limit = PAGINATION_LIMIT;
       const skip = Number(offset?.toString()) || 0;
 
@@ -27,7 +27,9 @@ export const searchFactory = <
       if (funcInitiator) if ((await funcInitiator(req, res)) === "stop") return;
 
       const searchField = {
-        ...(searchFields.length > 0 ? { OR: searchFields.map((field) => ({ [field]: { contains: q, mode: "insensitive" } })) } : {}),
+        ...(searchFields.length > 0
+          ? { OR: searchFields.map((field) => ({ [field]: { contains: q, mode: "insensitive" } })) }
+          : { title: { contains: q, mode: "insensitive" } }),
       };
 
       const datas = (await model.findMany({
@@ -35,6 +37,7 @@ export const searchFactory = <
         where: { ...searchField, userId: user.id, ...(query as any)?.where },
         take: limit,
         skip,
+        orderBy: sortBy && (sort === "asc" || sort === "desc") ? { [sortBy.toString()]: sort } : (query as any)?.orderBy,
       })) as unknown as InferByModel<M>[];
 
       if (funcBeforeRes) {

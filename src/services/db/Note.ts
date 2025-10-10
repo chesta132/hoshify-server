@@ -6,6 +6,7 @@ import { SoftDeletePlugin } from "./plugins/SoftDeletePlugin";
 import { InternalArgs } from "@prisma/client/runtime/library";
 import { ExtendPlugins, InferByDelegate } from "@/services/db/types";
 import { DummyPlugin } from "./plugins/DummyPlugin";
+import { GetSearchableFields } from "@/controllers/types";
 
 export class NoteService<ExtArgs extends InternalArgs, ClientOptions> extends BaseService<Prisma.NoteDelegate<ExtArgs, ClientOptions>, "note"> {
   constructor(model: Prisma.NoteDelegate<ExtArgs, ClientOptions>) {
@@ -16,6 +17,9 @@ export class NoteService<ExtArgs extends InternalArgs, ClientOptions> extends Ba
     ];
     return applyPlugins(this, ...plugins);
   }
+
+  readonly searchFields: GetSearchableFields<InferByDelegate<Prisma.NoteDelegate<ExtArgs, ClientOptions>>>[] = ["title"];
+  readonly sortQuery: Prisma.NoteOrderByWithRelationInput = { updatedAt: "desc" };
 }
 
 export interface NoteService<ExtArgs extends InternalArgs, ClientOptions>

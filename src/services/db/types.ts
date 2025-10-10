@@ -43,6 +43,7 @@ export type DefaultModelDelegate = {
   deleteMany: Func;
   createMany: Func;
   createManyAndReturn: Func;
+  updateManyAndReturn: Func;
 };
 
 export type ArgsOf<F extends Func> = Parameters<F>[0];
@@ -79,3 +80,4 @@ export type ServiceResult<F extends Func, E extends ServiceError> = [E] extends 
 
 export type ModelSoftDeletable = "note" | "transaction" | "todo" | "schedule";
 export type ModelDummyable = "note" | "transaction" | "todo" | "schedule";
+export type ModelSearchable = "note" | "todo" | "schedule";

@@ -13,21 +13,21 @@ import { searchFactory } from "../factory/search";
 
 export const createNotes = createManyFactory(Note, { neededField: ["title", "details"] });
 
-export const getNotes = getManyFactory(Note, { query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } } });
+export const getNotes = getManyFactory(Note, { query: { where: { isRecycled: false }, orderBy: Note.sortQuery } });
 
-export const getRecycledNotes = getManyFactory(Note, { query: { where: { isRecycled: true }, orderBy: { updatedAt: "desc" } } });
+export const getRecycledNotes = getManyFactory(Note, { query: { where: { isRecycled: true }, orderBy: Note.sortQuery } });
 
 export const getNote = getOneFactory(Note);
 
 export const restoreNote = restoreOneFactory(Note);
 
-export const restoreNotes = restoreManyFactory(Note, { query: { orderBy: { updatedAt: "desc" } } });
+export const restoreNotes = restoreManyFactory(Note, { query: { orderBy: Note.sortQuery } });
 
 export const deleteNote = softDeleteOneFactory(Note);
 
 export const deleteNotes = softDeleteManyFactory(Note);
 
-export const updateNotes = updateManyFactory(Note, { neededField: ["title", "details"] }, { query: { orderBy: { updatedAt: "desc" } } });
+export const updateNotes = updateManyFactory(Note, { neededField: ["title", "details"] }, { query: { orderBy: Note.sortQuery } });
 
 export const createNote = createOneFactory(Note, { neededField: ["title", "details"] });
 
@@ -37,6 +37,6 @@ export const searchNotes = searchFactory(
   Note,
   { searchFields: ["title"] },
   {
-    query: { where: { isRecycled: false }, orderBy: { updatedAt: "desc" } },
+    query: { where: { isRecycled: false }, orderBy: Note.sortQuery },
   }
 );
